@@ -26,7 +26,7 @@ def count_tags(filename):
 
 
 def test():
-    tags = count_tags('example.osm')
+    tags = count_tags('mapparser.osm')
     pprint.pprint(tags)
     assert tags == {'bounds': 1,
                     'member': 3,

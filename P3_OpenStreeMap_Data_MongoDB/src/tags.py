@@ -33,8 +33,15 @@ problemchars = re.compile(r'[=\+/&<>;\'"\?%#$@\,\. \t\r\n]')
 
 def key_type(element, keys):
     if element.tag == "tag":
-        pprint.pprint('hello world')
-    pass
+        # search returns matchObject which is always true or None when 'false'
+        if lower.search(element.attrib['k']):
+            keys["lower"] += 1
+        elif lower_colon.search(element.attrib['k']):
+            keys["lower_colon"] += 1
+        elif problemchars.search(element.attrib['k']):
+            keys["problemchars"] += 1
+        else:
+            keys["other"] += 1
 
     return keys
 
@@ -52,7 +59,7 @@ def test():
     # Note that the assertion below will be incorrect then.
     # Note as well that the test function here is only used in the Test Run;
     # when you submit, your code will be checked against a different dataset.
-    keys = process_map('example.osm')
+    keys = process_map('tags.osm')
     pprint.pprint(keys)
     assert keys == {'lower': 5, 'lower_colon': 0, 'other': 1, 'problemchars': 1}
 
