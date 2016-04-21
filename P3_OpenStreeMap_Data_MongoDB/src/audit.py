@@ -21,9 +21,9 @@ street_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
 expected = ["Street", "Avenue", "Boulevard", "Drive", "Court", "Place", "Square", "Lane", "Road",
             "Trail", "Parkway", "Commons"]
 
-# UPDATE THIS VARIABLE
-mapping = { "St": "Street",
-            "St.": "Street"
+mapping = { "Ave": "Avenue",
+            "St.": "Street",
+            "Rd.": "Road"
             }
 
 
@@ -53,8 +53,9 @@ def audit(osmfile):
 
 
 def update_name(name, mapping):
-
-    # YOUR CODE HERE
+    for key in mapping.iterkeys():
+        if re.search(key, name):
+            name = re.sub(key, mapping[key], name)
 
     return name
 
