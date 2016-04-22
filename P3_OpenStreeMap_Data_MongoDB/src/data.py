@@ -5,6 +5,7 @@ import pprint
 import re
 import codecs
 import json
+
 """
 Your task is to wrangle the data and transform the shape of the data
 into the model we mentioned earlier. The output should be a list of dictionaries
@@ -86,25 +87,72 @@ should be turned into
 "node_refs": ["305896090", "1719825889"]
 """
 
-
 lower = re.compile(r'^([a-z]|_)*$')
 lower_colon = re.compile(r'^([a-z]|_)*:([a-z]|_)*$')
 problemchars = re.compile(r'[=\+/&<>;\'"\?%#$@\,\. \t\r\n]')
 
-CREATED = [ "version", "changeset", "timestamp", "user", "uid"]
+CREATED = ["version", "changeset", "timestamp", "user", "uid"]
+ATTRIB = ["id", "visible", "amenity", "cuisine", "name", "phone"]
+
+mapping = {"Ave": "Avenue",
+           "St.": "Street",
+           "Rd.": "Road"
+           }
 
 
 def shape_element(element):
     node = {}
-    if element.tag == "node" or element.tag == "way" :
-        # YOUR CODE HERE
+    if element.tag == 'node' or element.tag == 'way':
 
-        return node
-    else:
-        return None
+        # Add empty created dictionary and k/v = type: node/way
+        node = {'created': {}, 'type': element.tag}
+
+        # Deal with node and way attributes
+        for k in element.attrib:
+
+            if k == 'lat' or k == 'lon':
+                continue
+            if k in CREATED:
+                node['created'][k] = element.attrib[k]
+            else:
+                # Add direct key/value items of node/way
+                node[k] = element.attrib[k]
+
+        # Update pos array with lat and lon
+        node['pos'] = [element.attrib['lat'], element.attrib['lon']]
+
+        # Deal with second level tag items
+        for tag in element.iter('tag'):
+            # Search for problem characters in 'k' and ignore
+            if problemchars.search(tag.attrib['k']):
+                # Add to array to print out later
+                continue
+
+            # split 'k' and if isn't 'addr' make into k/v entry (without the [0] of split)
+            # for 'addr:' add to node['address'][[1] = tag.attrib['v']
+            node[tag.attrib['k']] = tag.attrib['v']
+
+            # Use to clean up street name
+            # for key in mapping.iterkeys():
+            #     if re.search(key, name):
+            #         name = re.sub(key, mapping[key], name)
+
+        # Add key/value node ref from way
+        node_refs = []
+        for nd in element.iter('way'):
+            node_refs.append(nd.attrib['ref'])
+
+        if len(node_refs) > 0:
+            node['node_refs'] = node_refs
+
+        pprint.pprint(node)
+
+        #     return node
+        # else:
+        #     return None
 
 
-def process_map(file_in, pretty = False):
+def process_map(file_in, pretty=False):
     # You do not need to change this file
     file_out = "{0}.json".format(file_in)
     data = []
@@ -114,17 +162,18 @@ def process_map(file_in, pretty = False):
             if el:
                 data.append(el)
                 if pretty:
-                    fo.write(json.dumps(el, indent=2)+"\n")
+                    fo.write(json.dumps(el, indent=2) + "\n")
                 else:
                     fo.write(json.dumps(el) + "\n")
     return data
+
 
 def test():
     # NOTE: if you are running this code on your computer, with a larger dataset,
     # call the process_map procedure with pretty=False. The pretty=True option adds
     # additional spaces to the output, making it significantly larger.
     data = process_map('data.osm', True)
-    #pprint.pprint(data)
+    # pprint.pprint(data)
 
     correct_first_elem = {
         "id": "261114295",
@@ -141,11 +190,12 @@ def test():
     }
     assert data[0] == correct_first_elem
     assert data[-1]["address"] == {
-                                    "street": "West Lexington St.",
-                                    "housenumber": "1412"
-                                      }
-    assert data[-1]["node_refs"] == [ "2199822281", "2199822390",  "2199822392", "2199822369",
-                                    "2199822370", "2199822284", "2199822281"]
+        "street": "West Lexington St.",
+        "housenumber": "1412"
+    }
+    assert data[-1]["node_refs"] == ["2199822281", "2199822390", "2199822392", "2199822369",
+                                     "2199822370", "2199822284", "2199822281"]
+
 
 if __name__ == "__main__":
     test()
