@@ -28,9 +28,10 @@ def process_map(filename):
 
 
 def test():
-    users = process_map('users.osm')
-    pprint.pprint(users)
-    assert len(users) == 6
+    users = process_map('sample.osm')
+    # pprint.pprint(users)
+    print 'Number of unique contributors:', len(users)
+    # assert len(users) == 6
 
 
 if __name__ == "__main__":

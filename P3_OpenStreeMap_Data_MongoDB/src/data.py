@@ -178,29 +178,29 @@ def test():
     # NOTE: if you are running this code on your computer, with a larger dataset,
     # call the process_map procedure with pretty=False. The pretty=True option adds
     # additional spaces to the output, making it significantly larger.
-    data = process_map('data.osm', True)
+    data = process_map('sample.osm', True)
     # pprint.pprint(data)
 
-    correct_first_elem = {
-        "id": "261114295",
-        "visible": "true",
-        "type": "node",
-        "pos": [41.9730791, -87.6866303],
-        "created": {
-            "changeset": "11129782",
-            "user": "bbmiller",
-            "version": "7",
-            "uid": "451048",
-            "timestamp": "2012-03-28T18:31:23Z"
-        }
-    }
-    assert data[0] == correct_first_elem
-    assert data[-1]["address"] == {
-        "street": "West Lexington St.",
-        "housenumber": "1412"
-    }
-    assert data[-1]["node_refs"] == ["2199822281", "2199822390", "2199822392", "2199822369",
-                                     "2199822370", "2199822284", "2199822281"]
+    # correct_first_elem = {
+    #     "id": "261114295",
+    #     "visible": "true",
+    #     "type": "node",
+    #     "pos": [41.9730791, -87.6866303],
+    #     "created": {
+    #         "changeset": "11129782",
+    #         "user": "bbmiller",
+    #         "version": "7",
+    #         "uid": "451048",
+    #         "timestamp": "2012-03-28T18:31:23Z"
+    #     }
+    # }
+    # assert data[0] == correct_first_elem
+    # assert data[-1]["address"] == {
+    #     "street": "West Lexington St.",
+    #     "housenumber": "1412"
+    # }
+    # assert data[-1]["node_refs"] == ["2199822281", "2199822390", "2199822392", "2199822369",
+    #                                  "2199822370", "2199822284", "2199822281"]
 
 
 if __name__ == "__main__":
