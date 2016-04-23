@@ -101,11 +101,15 @@ mapping = {"Ave": "Avenue",
 
 
 def shape_element(element):
-    node = {}
+
     if element.tag == 'node' or element.tag == 'way':
 
         # Add empty created dictionary and k/v = type: node/way
         node = {'created': {}, 'type': element.tag}
+
+        # Update pos array with lat and lon
+        if 'lat' in element.attrib and 'lon' in element.attrib:
+            node['pos'] = [float(element.attrib['lat']), float(element.attrib['lon'])]
 
         # Deal with node and way attributes
         for k in element.attrib:
@@ -118,19 +122,23 @@ def shape_element(element):
                 # Add direct key/value items of node/way
                 node[k] = element.attrib[k]
 
-        # Update pos array with lat and lon
-        node['pos'] = [element.attrib['lat'], element.attrib['lon']]
-
         # Deal with second level tag items
         for tag in element.iter('tag'):
-            # Search for problem characters in 'k' and ignore
-            if problemchars.search(tag.attrib['k']):
+            k = tag.attrib['k']
+            v = tag.attrib['v']
+
+            # Search for problem characters in 'k' and ignore them
+            if problemchars.search(k):
                 # Add to array to print out later
                 continue
-
-            # split 'k' and if isn't 'addr' make into k/v entry (without the [0] of split)
-            # for 'addr:' add to node['address'][[1] = tag.attrib['v']
-            node[tag.attrib['k']] = tag.attrib['v']
+            elif k.startswith('addr:'):
+                address = k.split(':')
+                if len(address) == 2:
+                    if 'address' not in node:
+                        node['address'] = {}
+                    node['address'][address[1]] = v
+            else:
+                node[k] = v
 
             # Use to clean up street name
             # for key in mapping.iterkeys():
@@ -139,17 +147,15 @@ def shape_element(element):
 
         # Add key/value node ref from way
         node_refs = []
-        for nd in element.iter('way'):
+        for nd in element.iter('nd'):
             node_refs.append(nd.attrib['ref'])
 
         if len(node_refs) > 0:
             node['node_refs'] = node_refs
 
-        pprint.pprint(node)
-
-        #     return node
-        # else:
-        #     return None
+        return node
+    else:
+        return None
 
 
 def process_map(file_in, pretty=False):
