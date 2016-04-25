@@ -1,4 +1,4 @@
 .idea/ 
 .ipynb_checkpoints/
-.mongodb/
-.data/
+.P3_OpenStreeMap_Data_MongoDB/mongodb/
+.P3_OpenStreeMap_Data_MongoDB/data/
