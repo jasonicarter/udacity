@@ -64,13 +64,21 @@ The output should be a list of dictionaries in for following format:
 lower = re.compile(r'^([a-z]|_)*$')
 lower_colon = re.compile(r'^([a-z]|_)*:([a-z]|_)*$')
 problemchars = re.compile(r'[=\+/&<>;\'"\?%#$@\,\. \t\r\n]')
+postal_codes = re.compile(r'^[ABCEGHJKLMNPRSTVXY]{1}\d{1}[A-Z]{1} *\d{1}[A-Z]{1}\d{1}$')
 
 CREATED = ["version", "changeset", "timestamp", "user", "uid"]
 ATTRIB = ["id", "visible", "amenity", "cuisine", "name", "phone"]
 
+expected = ["Street", "Avenue", "Boulevard", "Drive", "Court", "Place", "Square", "Lane", "Road",
+            "Trail", "Parkway", "Commons", "Crescent", "West", "South", "East", "North", "Vista",
+            "Gardens", "Circle", "Gate", "Heights", "Park", "Way", "Mews", "Keep", "Westway", "Glenway",
+            "Queensway", "Wood", "Path"]
+
 mapping = {"Ave": "Avenue",
            "St.": "Street",
-           "Rd.": "Road"
+           "Rd.": "Road",
+           "StreetE": "Street East",
+           "Robertoway": "Roberto Way"
            }
 
 
