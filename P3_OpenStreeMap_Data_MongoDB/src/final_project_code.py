@@ -74,6 +74,9 @@ mapping = {"Ave": "Avenue",
            }
 
 
+# TODO: refactor shape_element
+
+
 def shape_element(element):
 
     if element.tag == 'node' or element.tag == 'way':
@@ -114,10 +117,14 @@ def shape_element(element):
             else:
                 node[k] = v
 
+            # TODO: update street names and fix postal codes
             # Use to clean up street name
             # for key in mapping.iterkeys():
             #     if re.search(key, name):
             #         name = re.sub(key, mapping[key], name)
+
+            # Deal with Postal Code as well
+            # Add to array and print out bad ones
 
         # Add key/value node ref from way
         node_refs = []
