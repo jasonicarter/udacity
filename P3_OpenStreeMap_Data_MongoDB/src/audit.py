@@ -14,7 +14,7 @@ from collections import defaultdict
 import re
 import pprint
 
-OSMFILE = "sample.osm"
+OSMFILE = "audit.osm"
 street_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
 
 expected = ["Street", "Avenue", "Boulevard", "Drive", "Court", "Place", "Square", "Lane", "Road",
