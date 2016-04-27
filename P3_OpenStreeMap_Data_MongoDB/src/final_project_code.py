@@ -5,6 +5,7 @@ import pprint
 import re
 import codecs
 import json
+from collections import defaultdict
 
 """
 The output should be a list of dictionaries in for following format:
@@ -65,6 +66,7 @@ lower = re.compile(r'^([a-z]|_)*$')
 lower_colon = re.compile(r'^([a-z]|_)*:([a-z]|_)*$')
 problemchars = re.compile(r'[=\+/&<>;\'"\?%#$@\,\. \t\r\n]')
 postal_codes = re.compile(r'^[ABCEGHJKLMNPRSTVXY]{1}\d{1}[A-Z]{1} *\d{1}[A-Z]{1}\d{1}$')
+street_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
 
 CREATED = ["version", "changeset", "timestamp", "user", "uid"]
 ATTRIB = ["id", "visible", "amenity", "cuisine", "name", "phone"]
@@ -74,7 +76,7 @@ expected = ["Street", "Avenue", "Boulevard", "Drive", "Court", "Place", "Square"
             "Gardens", "Circle", "Gate", "Heights", "Park", "Way", "Mews", "Keep", "Westway", "Glenway",
             "Queensway", "Wood", "Path"]
 
-mapping = {"Ave": "Avenue",
+street_mapping = {"Ave": "Avenue",
            "St.": "Street",
            "Rd.": "Road",
            "StreetE": "Street East",
@@ -83,6 +85,49 @@ mapping = {"Ave": "Avenue",
 
 
 # TODO: refactor shape_element
+
+
+def audit_street_type(street_name):
+    m = street_type_re.search(street_name)
+    if m:
+        street_type = m.group()
+        if street_type not in expected:
+            # street_types[street_type].add(street_name)
+            return update_name(street_name, street_mapping)
+    else:
+        None
+
+# for st_type, ways in st_types.iteritems():
+#     for name in ways:
+#         better_name = update_name(name, mapping)
+#         print name, "=>", better_name
+
+
+def update_name(name, mapping):
+    for key in mapping.iterkeys():
+        if re.search(key, name):
+            name = re.sub(key, mapping[key], name)
+
+    return name
+
+
+def is_street_name(address_key):
+    return address_key == 'addr:street'
+
+
+def audit_postal_type(postal_types, postal_code):
+    m = postal_codes.search(postal_code)
+    if m:
+        postal_code = m.group()
+        if postal_code not in expected:
+            # TODO: create new or have mapping as null just need new string
+            return update_name(postal_code, street_mapping)
+        else:
+            None
+
+
+def is_postal_code(address_key):
+    return address_key == 'addr:postalcode'
 
 
 def shape_element(element):
@@ -116,23 +161,15 @@ def shape_element(element):
             if problemchars.search(k):
                 # Add to array to print out later
                 continue
-            elif k.startswith('addr:'):
-                address = k.split(':')
-                if len(address) == 2:
-                    if 'address' not in node:
-                        node['address'] = {}
-                    node['address'][address[1]] = v
-            else:
+            elif is_street_name(k):
+                v = audit_street_type(v)
+            elif is_postal_code(k):
+                v = audit_postal_code(v)
+
+            if v is not None:
                 node[k] = v
 
-            # TODO: update street names and fix postal codes
-            # Use to clean up street name
-            # for key in mapping.iterkeys():
-            #     if re.search(key, name):
-            #         name = re.sub(key, mapping[key], name)
-
-            # Deal with Postal Code as well
-            # Add to array and print out bad ones
+        # TODO: Update audited information here OR do it one item at a time within audit_x_type
 
         # Add key/value node ref from way
         node_refs = []
