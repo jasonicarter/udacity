@@ -94,9 +94,9 @@ bad_postal_codes = []
 
 
 def audit_street_type(street_name):
-    m = street_types.search(street_name)
-    if m:
-        street_type = m.group()
+    match = street_types.search(street_name)
+    if match:
+        street_type = match.group()
         if street_type not in expected:
             return update_street_name(street_name, street_mapping)
 
@@ -213,7 +213,7 @@ def process_map(file_in, pretty=False):
 def test():
     # call the process_map procedure with pretty=False. The pretty=True option adds
     # additional spaces to the output, making it significantly larger.
-    data = process_map('old_toronto_canada.osm', False)
+    data = process_map('/Users/jasoncarter/Downloads/old_toronto_canada.osm', False)
     # pprint.pprint(data)
 
 
