@@ -74,19 +74,20 @@ ATTRIB = ["id", "visible", "amenity", "cuisine", "name", "phone"]
 expected = ["Street", "Avenue", "Boulevard", "Drive", "Court", "Place", "Square", "Lane", "Road",
             "Trail", "Parkway", "Commons", "Crescent", "West", "South", "East", "North", "Vista",
             "Gardens", "Circle", "Gate", "Heights", "Park", "Way", "Mews", "Keep", "Westway", "Glenway",
-            "Queensway", "Wood", "Path"]
+            "Queensway", "Wood", "Path", "Terrace", "Appleway"]
 
-street_mapping = {"Ave": "Avenue",
+street_mapping = {"Ave ": "Avenue",
                    "St.": "Street",
                    "Rd.": "Road",
                    "StreetE": "Street East",
+                   "AvenueE": "Avenue East",
+                   "W.": "West",
+                   "StreetW": "Street West",
                    "Robertoway": "Roberto Way"
                    }
 
 fixed_street_names = []
 bad_postal_codes = []
-
-# TODO: refactor shape_element
 
 
 def audit_street_type(street_name):
@@ -112,7 +113,7 @@ def update_street_name(name, mapping):
 def is_street_name(address_key):
     return address_key == 'addr:street'
 
-
+# TODO: regex needs to handle optional spaces
 def audit_postal_code(postal_code):
     postal_code = postal_code.upper()
     if postal_codes.match(postal_code):
@@ -208,7 +209,7 @@ def process_map(file_in, pretty=False):
 def test():
     # call the process_map procedure with pretty=False. The pretty=True option adds
     # additional spaces to the output, making it significantly larger.
-    data = process_map('sample.osm', True)
+    data = process_map('old_toronto_canada.osm', False)
     # pprint.pprint(data)
 
 
