@@ -65,8 +65,8 @@ The output should be a list of dictionaries in for following format:
 lower = re.compile(r'^([a-z]|_)*$')
 lower_colon = re.compile(r'^([a-z]|_)*:([a-z]|_)*$')
 problemchars = re.compile(r'[=\+/&<>;\'"\?%#$@\,\. \t\r\n]')
-postal_codes = re.compile(r'^[ABCEGHJKLMNPRSTVXY]{1}\d{1}[A-Z]{1} *\d{1}[A-Z]{1}\d{1}$')
-street_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
+postal_codes = re.compile(r'^[ABCEGHJKLMNPRSTVXY][0-9][ABCEGHJKLMNPRSTVWXYZ][\s][0-9][ABCEGHJKLMNPRSTVWXYZ][0-9]')
+street_types = re.compile(r'\b\S+\.?$', re.IGNORECASE)
 
 CREATED = ["version", "changeset", "timestamp", "user", "uid"]
 ATTRIB = ["id", "visible", "amenity", "cuisine", "name", "phone"]
@@ -77,36 +77,34 @@ expected = ["Street", "Avenue", "Boulevard", "Drive", "Court", "Place", "Square"
             "Queensway", "Wood", "Path"]
 
 street_mapping = {"Ave": "Avenue",
-           "St.": "Street",
-           "Rd.": "Road",
-           "StreetE": "Street East",
-           "Robertoway": "Roberto Way"
-           }
+                   "St.": "Street",
+                   "Rd.": "Road",
+                   "StreetE": "Street East",
+                   "Robertoway": "Roberto Way"
+                   }
 
+fixed_street_names = []
+bad_postal_codes = []
 
 # TODO: refactor shape_element
 
 
 def audit_street_type(street_name):
-    m = street_type_re.search(street_name)
+    m = street_types.search(street_name)
     if m:
         street_type = m.group()
         if street_type not in expected:
-            # street_types[street_type].add(street_name)
-            return update_name(street_name, street_mapping)
-    else:
-        None
+            return update_street_name(street_name, street_mapping)
 
-# for st_type, ways in st_types.iteritems():
-#     for name in ways:
-#         better_name = update_name(name, mapping)
-#         print name, "=>", better_name
+    # TODO: rather None/null or a bad street name?
+    return street_name
 
 
-def update_name(name, mapping):
+def update_street_name(name, mapping):
     for key in mapping.iterkeys():
         if re.search(key, name):
             name = re.sub(key, mapping[key], name)
+            fixed_street_names.append(name)
 
     return name
 
@@ -115,26 +113,24 @@ def is_street_name(address_key):
     return address_key == 'addr:street'
 
 
-def audit_postal_type(postal_types, postal_code):
-    m = postal_codes.search(postal_code)
-    if m:
-        postal_code = m.group()
-        if postal_code not in expected:
-            # TODO: create new or have mapping as null just need new string
-            return update_name(postal_code, street_mapping)
-        else:
-            None
+def audit_postal_code(postal_code):
+    postal_code = postal_code.upper()
+    if postal_codes.match(postal_code):
+        return postal_code
+
+    bad_postal_codes.append(postal_code)
+    return postal_code
 
 
 def is_postal_code(address_key):
-    return address_key == 'addr:postalcode'
+    return address_key == 'addr:postcode'
 
 
 def shape_element(element):
 
     if element.tag == 'node' or element.tag == 'way':
 
-        # Add empty created dictionary and k/v = type: node/way
+        # Add empty tags - created (dictionary) and type (key/value )
         node = {'created': {}, 'type': element.tag}
 
         # Update pos array with lat and lon
@@ -149,7 +145,7 @@ def shape_element(element):
             if k in CREATED:
                 node['created'][k] = element.attrib[k]
             else:
-                # Add direct key/value items of node/way
+                # Add everything else directly as key/value items of node and way
                 node[k] = element.attrib[k]
 
         # Deal with second level tag items
@@ -161,21 +157,25 @@ def shape_element(element):
             if problemchars.search(k):
                 # Add to array to print out later
                 continue
-            elif is_street_name(k):
-                v = audit_street_type(v)
-            elif is_postal_code(k):
-                v = audit_postal_code(v)
-
-            if v is not None:
+            elif k.startswith('addr:'):
+                address = k.split(':')
+                if len(address) == 2:
+                    if 'address' not in node:
+                        node['address'] = {}
+                    if is_street_name(k):
+                        v = audit_street_type(v)
+                    if is_postal_code(k):
+                        v = audit_postal_code(v)
+                    node['address'][address[1]] = v
+            else:
                 node[k] = v
 
-        # TODO: Update audited information here OR do it one item at a time within audit_x_type
-
-        # Add key/value node ref from way
+        # Add nd ref as key/value pair from way
         node_refs = []
         for nd in element.iter('nd'):
             node_refs.append(nd.attrib['ref'])
 
+        # Only add node_refs array to node if exists
         if len(node_refs) > 0:
             node['node_refs'] = node_refs
 
@@ -197,14 +197,19 @@ def process_map(file_in, pretty=False):
                     fo.write(json.dumps(el, indent=2) + "\n")
                 else:
                     fo.write(json.dumps(el) + "\n")
+
+        # Keep track of things
+        print 'Fixed street names:', fixed_street_names
+        print 'Bad postal code:', bad_postal_codes
+
     return data
 
 
 def test():
     # call the process_map procedure with pretty=False. The pretty=True option adds
     # additional spaces to the output, making it significantly larger.
-    data = process_map('sample.osm', False)
-    pprint.pprint(data)
+    data = process_map('sample.osm', True)
+    # pprint.pprint(data)
 
 
 if __name__ == "__main__":
