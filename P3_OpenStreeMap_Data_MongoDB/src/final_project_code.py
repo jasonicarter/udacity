@@ -65,7 +65,7 @@ The output should be a list of dictionaries in for following format:
 lower = re.compile(r'^([a-z]|_)*$')
 lower_colon = re.compile(r'^([a-z]|_)*:([a-z]|_)*$')
 problemchars = re.compile(r'[=\+/&<>;\'"\?%#$@\,\. \t\r\n]')
-postal_codes = re.compile(r'^[ABCEGHJKLMNPRSTVXY][0-9][ABCEGHJKLMNPRSTVWXYZ][\s][0-9][ABCEGHJKLMNPRSTVWXYZ][0-9]')
+postal_codes = re.compile(r'^[ABCEGHJKLMNPRSTVXY][0-9][ABCEGHJKLMNPRSTVWXYZ][\s]?[0-9][ABCEGHJKLMNPRSTVWXYZ][0-9]')
 street_types = re.compile(r'\b\S+\.?$', re.IGNORECASE)
 
 CREATED = ["version", "changeset", "timestamp", "user", "uid"]
@@ -77,12 +77,15 @@ expected = ["Street", "Avenue", "Boulevard", "Drive", "Court", "Place", "Square"
             "Queensway", "Wood", "Path", "Terrace", "Appleway"]
 
 street_mapping = {"Ave ": "Avenue",
-                   "St.": "Street",
+                   "St. ": "Street",
                    "Rd.": "Road",
                    "StreetE": "Street East",
                    "AvenueE": "Avenue East",
-                   "W.": "West",
+                   "W. ": "West",
+                   "E. ": "East",
                    "StreetW": "Street West",
+                   "StreetW.": "Street West",
+                   "StreetE.": "Street East",
                    "Robertoway": "Roberto Way"
                    }
 
@@ -113,12 +116,13 @@ def update_street_name(name, mapping):
 def is_street_name(address_key):
     return address_key == 'addr:street'
 
-# TODO: regex needs to handle optional spaces
+
 def audit_postal_code(postal_code):
     postal_code = postal_code.upper()
     if postal_codes.match(postal_code):
         return postal_code
 
+    # TODO: rather None/null or a bad postal code?
     bad_postal_codes.append(postal_code)
     return postal_code
 
