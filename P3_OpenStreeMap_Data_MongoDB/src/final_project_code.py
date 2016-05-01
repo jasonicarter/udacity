@@ -94,6 +94,7 @@ bad_postal_codes = []
 
 
 def audit_street_type(street_name):
+    """Return the fixed street name or return untouched street name if expected."""
     match = street_types.search(street_name)
     if match:
         street_type = match.group()
@@ -105,6 +106,7 @@ def audit_street_type(street_name):
 
 
 def update_street_name(name, mapping):
+    """Replace and return new name from street name mapping."""
     for key in mapping.iterkeys():
         if re.search(key, name):
             name = re.sub(key, mapping[key], name)
@@ -118,6 +120,7 @@ def is_street_name(address_key):
 
 
 def audit_postal_code(postal_code):
+    """Return matched postal code and add bad ones to list."""
     postal_code = postal_code.upper()
     if postal_codes.match(postal_code):
         return postal_code
@@ -132,7 +135,13 @@ def is_postal_code(address_key):
 
 
 def shape_element(element):
+    """
+    Parse, validate and format node and way xml elements.
+    Return list of dictionaries
 
+    Keyword arguments:
+    element -- element object from xml element tree iterparse
+    """
     if element.tag == 'node' or element.tag == 'way':
 
         # Add empty tags - created (dictionary) and type (key/value )

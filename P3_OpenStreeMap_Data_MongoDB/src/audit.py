@@ -31,6 +31,7 @@ mapping = {"Ave": "Avenue",
 
 
 def audit_street_type(street_types, street_name):
+    """Update dictionary of street names and mapping type"""
     m = street_type_re.search(street_name)
     if m:
         street_type = m.group()
@@ -56,6 +57,7 @@ def audit(osmfile):
 
 
 def update_name(name, mapping):
+    """Replace and return new name from street name mapping."""
     for key in mapping.iterkeys():
         if re.search(key, name):
             name = re.sub(key, mapping[key], name)

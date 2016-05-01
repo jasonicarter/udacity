@@ -101,7 +101,13 @@ mapping = {"Ave": "Avenue",
 
 
 def shape_element(element):
+    """
+    Parse, validate and format node and way xml elements.
+    Return list of dictionaries
 
+    Keyword arguments:
+    element -- element object from xml element tree iterparse
+    """
     if element.tag == 'node' or element.tag == 'way':
 
         # Add empty created dictionary and k/v = type: node/way

@@ -15,6 +15,7 @@ import pprint
 
 
 def count_tags(filename):
+    """Return dictionary of tags and totals."""
     tags = {}
     for _, elem in ET.iterparse(filename):
         tag = elem.tag

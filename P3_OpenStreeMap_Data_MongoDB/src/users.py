@@ -17,6 +17,7 @@ def get_user(element):
 
 
 def process_map(filename):
+    """Return count of unique users."""
     users = set()
     for _, element in ET.iterparse(filename):
         try:

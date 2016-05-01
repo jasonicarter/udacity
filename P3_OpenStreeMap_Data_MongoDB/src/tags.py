@@ -32,6 +32,7 @@ problemchars = re.compile(r'[=\+/&<>;\'"\?%#$@\,\. \t\r\n]')
 
 
 def key_type(element, keys):
+    """Validate tag attributes for formatting errors"""
     if element.tag == "tag":
         # search returns matchObject which is always true or None when 'false'
         if lower.search(element.attrib['k']):
