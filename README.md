@@ -25,16 +25,32 @@ Use descriptive statistics and a statistical test to analyze the Stroop effect,
 a classic result of experimental psychology. Give your readers a good intuition for the data
 and use statistical inference to draw a conclusion based on the results.
 
+> Well done by showing the key test statistics correctly step by step. Conclusion drawn is well aligned wit the test result.
+>
+> -- [Udacity Review](https://github.com/jasonicarter/udacity/blob/master/P1_StroopEffect/UdacityReview.pdf)
+
 ### [Investigate a Dataset](https://github.com/jasonicarter/udacity/tree/master/P2_Titanic_Data_Analysis)
 
 Choose one of Udacity's curated datasets and investigate it using NumPy and Pandas.
 Go through the entire data analysis process, starting by posing a question and finishing by sharing your findings.
+
+> You have postulated several meaningful questions and have provided a thoughtful investigation in turn. Asking the right questions is, arguably, the most important part in data analysis. Well done!
+>
+> Truly outstanding work on the visualizations. The plots are varied and intuitively make sense with the idea being portrayed.
+>
+> -- [Udacity Review](https://github.com/jasonicarter/udacity/blob/master/P2_Titanic_Data_Analysis/UdacityReview.pdf)
 
 ### [Wrangle OpenStreetMap Data](https://github.com/jasonicarter/udacity/tree/master/P3_OpenStreeMap_Data_MongoDB)
 
 Choose any area of the world in [OpenStreeMap](https://www.openstreetmap.org) and use data munging techniques,
 such as assessing the quality of the data for validity, accuracy, completeness, consistency and uniformity,
 to clean the OpenStreetMap data for a part of the world that you care about.
+
+> An outstanding work demonstrating a variety of auditing and cleaning procedures.
+>
+> I must say, terrific work on the formatting and presentation of this project. The information is concisely provided and presented in an aesthetically pleasing manner without overwhelming the reader with large blocks of code and unnecessary detail.
+>
+> -- [Udacity Review](https://github.com/jasonicarter/udacity/blob/master/P3_OpenStreeMap_Data_MongoDB/UdacityReviews.pdf)
 
 ### Explore and Summarize Data
 
