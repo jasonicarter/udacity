@@ -52,7 +52,7 @@ to clean the OpenStreetMap data for a part of the world that you care about.
 >
 > -- [Udacity Review](https://github.com/jasonicarter/udacity/blob/master/P3_OpenStreeMap_Data_MongoDB/UdacityReviews.pdf)
 
-### Explore and Summarize Data
+### [Explore and Summarize Data](https://github.com/jasonicarter/udacity/tree/master/P4_Prosper_Loan_Data_EDA_R)
 
 Use R and apply exploratory data analysis techniques to explore relationships in one variable to multiple variables
 and to explore a selected data set for distributions, outliers, and anomalies.
