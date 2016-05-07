@@ -1,6 +1,7 @@
-.idea/ 
+.idea/
 .ipynb_checkpoints/
 P3_OpenStreeMap_Data_MongoDB/mongodb/
 P3_OpenStreeMap_Data_MongoDB/data/
 P3_OpenStreeMap_Data_MongoDB/src/old_toronto_canada.osm.json
 P3_OpenStreeMap_Data_MongoDB/src/old_toronto_canada.osm
+P4_Prosper_Loan_Data_EDA_R/prosperLoanData.csv
