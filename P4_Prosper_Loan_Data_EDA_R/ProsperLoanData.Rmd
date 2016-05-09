@@ -1,0 +1,209 @@
+Exploring Prosper Peer-to-Peer Loan Data
+========================================================
+**by Jason Carter**
+
+----
+
+## Introduction
+Why Prosper data?
+
+## Data Overview
+From Udacity
+
+*This data set contains 113,937 loans with 81 variables on each loan, including loan amount, borrower rate (or interest rate), current loan status, borrower income, borrower employment status, borrower credit history, and the latest payment information.*
+
+-- **Last updated 03/11/2014**
+
+### Process
+Overall plan on data exploration
+
+1. load libraries
+2. load data
+3. summary look
+4. univariate plot+analysis
+5. bivariate plot+analysis
+5. multivariate plot+analysis
+6. final plots
+7. reflection
+
+With 81 variables, it would be useful to indicate which ones you'll send time looking at. 
+Performed an initial review of all [variables definitions](https://docs.google.com/spreadsheets/d/1gDyi_L4UvIrLTEC6Wri5nbaMmkGmLQBk-Yx3z0XDEtI/edit) and determined a list of 15-ish variables which will be required either directly or indirectly for the exploration.
+
+#### Main Features of Interest
+
+After reviewing the long list of variables, and thinking of all of the different paths of investigation, I've decided to narrow my focus of investigation around deliquencies and their correlations. To this end, the main features of interest are:
+
+* **Term**: The length of the loan expressed in months.
+* **LoanStatus**: The current status of the loan.
+    - Cancelled
+    - Chargedoff
+    - Completed
+    - Current
+    - Defaulted
+    - FinalPaymentInProgress
+    - PastDue (the PastDue status will be accompanied by a delinquency bucket)
+* **BorrowerState**: The two letter abbreviation of the state of the address of the borrower at the time the Listing was created.
+* **ListingCategory**: The category of the listing that the borrower selected when posting their listing.
+    - 0 - Not Available
+    - 1 - Debt Consolidation
+    - 2 - Home Improvement
+    - 3 - Business
+    - 4 - Personal Loan
+    - 5 - Student Use
+    - 6 - Auto
+    - 7- Other
+    - 8 - Baby&Adoption
+    - 9 - Boat
+    - 10 - Cosmetic Procedure
+    - 11 - Engagement Ring
+    - 12 - Green Loans
+    - 13 - Household Expenses
+    - 14 - Large Purchases
+    - 15 - Medical/Dental
+    - 16 - Motorcycle
+    - 17 - RV
+    - 18 - Taxes
+    - 19 - Vacation
+    - 20 - Wedding Loans
+* **CreditScoreRangeLower**: The lower value representing the range of the borrower's credit score as provided by a consumer credit rating agency.
+* **CreditScoreRangeHigher**: The upper value representing the range of the borrower's credit score as provided by a consumer credit rating agency. 
+* **BankcardUtilization**: The percentage of available revolving credit that is utilized at the time the credit profile was pulled.
+* **IncomeRange**: The income range of the borrower at the time the listing was created.
+* **TotalProsperLoans**: Number of Prosper loans the borrower at the time they created this listing. This value will be null if the borrower had no prior loans. 
+* **LoanOriginAmount**: The origination amount of the loan.
+* **PercentFunded**: Percent the listing was funded.
+* **InvestmentFromFriendsCount**: Number of recommendations the borrower had at the time the listing was created.
+* **InvestmentFromFriendsAmount**: Dollar amount of investments that were made by friends.
+* **Investors**: The number of investors that funded the loan.
+
+#### Supporting Features
+Supporting features...
+
+* **Occupation**: The Occupation selected by the Borrower at the time they created the listing.
+* **IsBorrowerHomeowner**: A Borrower will be classified as a homowner if they have a mortgage on their credit profile or provide documentation confirming they are a homeowner.
+* **BorrowerAPR**: The Borrower's Annual Percentage Rate (APR) for the loan.
+* **BorrowerRate**: The Borrower's interest rate for this loan. 
+* **Recommendations**: Number of recommendations the borrower had at the time the listing was created.
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+# Notice that the parameter "echo" was set to FALSE for this code chunk.
+# This prevents the code from displaying in the knitted HTML output.
+# You should set echo=FALSE for all code chunks in your file.
+
+library(ggplot2) # Used making plots
+```
+
+```{r echo=FALSE, Load_the_Data}
+# Load the Data
+# pld <- read.csv("prosperLoanData.csv")
+```
+
+### Dataset
+
+main features of interest
+talk about the fields you plan on investigating and others that may be useful
+
+1. plot out some basic univariate stuff to get a good understanding of the dataset
+2. any interesting distributions going on with the basics?
+
+## Exploratory Analysis
+### stuff 1 (univariate plot+analysis)
+plots and description
+
+```{r echo=FALSE}
+
+```
+
+
+### stuff 2 (bivariate plot+analysis)
+plots and description
+- borrowerState heatmap??? count vs money
+
+### stuff 3 (multivariate plot+analysis)
+plots and description
+
+
+## Final Plots
+### plot 1
+description
+
+### plot 2
+description
+
+### plot 3
+description
+
+## Reflection
+stuff
+
+### References
+* https://en.wikipedia.org/wiki/Charge-off
+* https://www.prosper.com/help/topics/how-to-read-a-loan-listing
+* http://www.investopedia.com/terms/c/credit-utilization-rate.asp
+
+----
+
+**Provided by template**
+
+Univariate Plots Section
+```{r echo=FALSE, Univariate_Plots}
+
+```
+
+Univariate Analysis
+
+- What is the structure of your dataset?
+- What is/are the main feature(s) of interest in your dataset?
+- What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
+- Did you create any new variables from existing variables in the dataset?
+- Of the features you investigated, were there any unusual distributions? 
+- Did you perform any operations on the data to tidy, adjust, or change the form of the data? If so, why did you do this?
+
+Bivariate Plots Section
+```{r echo=FALSE, Bivariate_Plots}
+
+```
+
+Bivariate Analysis
+
+- Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
+- Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
+- What was the strongest relationship you found?
+
+
+Multivariate Plots Section
+```{r echo=FALSE, Multivariate_Plots}
+
+```
+
+Multivariate Analysis
+
+- Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
+- Were there any interesting or surprising interactions between features?
+
+OPTIONAL: Did you create any models with your dataset? Discuss the strengths and limitations of your model.
+
+Final Plots and Summary
+
+- Plot One
+```{r echo=FALSE, Plot_One}
+
+```
+Description One
+
+
+- Plot Two
+```{r echo=FALSE, Plot_Two}
+
+```
+Description Two
+
+
+- Plot Three
+```{r echo=FALSE, Plot_Three}
+
+```
+Description Three
+
+Reflection
