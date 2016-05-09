@@ -118,13 +118,22 @@ $(document).ready(function () {
 </div>
 
 
-<div id="exploring-prosper-peer-to-peer-loan-data" class="section level1">
-<h1>Exploring Prosper Peer-to-Peer Loan Data</h1>
+<div id="delinquency-at-peer-to-peer-lender-prosper.com" class="section level1">
+<h1>Delinquency at Peer-to-Peer Lender Prosper.com</h1>
 <p><strong>by Jason Carter</strong></p>
 <hr />
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>Why Prosper data?</p>
+<p><strong>What is Prosper</strong></p>
+<p>Prosper, or Prosper Marketplace, is a leader in the online peer-to-peer lending industry. Borrowers create profiles and listings on <a href="https://prosper.com">Prosper.com</a> request personal loans and investors, either individuals or institutions, view the listing (borrower’s loan request) and decide how much to lend the borrower towards the loan.</p>
+<p>Interest rates are typically lower for the borrower than going to a financial institution, such as a bank. And multiple investors can contribute to one borrower’s loan request, limiting the overall risk impact of the borrower defaulting on the loan for any one investor.</p>
+<p><strong>Why Prosper Loan Data</strong></p>
+<p>I’ve personally never used peer-to-peer lending, as a borrower or investor, but I find the idea quite intriguing from a borrower and an investor standpoint. Lower interest rates and the ability to get a loan for “small” items is the obvious pro for borrowers. But for an investor portfolio diversification and higher or less risky investment only holds true if borrower’s don’t default on their loans. So what are the deliquincy rates? Is there any main contributing factor? Is there any coorelation between where someone lives, their income, the purpose of their loan and defaulting on their loan? Deliquincies and their coorelation at Prosper.com is what we’ll be exploring.</p>
+<blockquote>
+<p>Delinquent is the failure to accomplish what is required by law or duty, such as the failure to make a required payment or to perform a certain action.</p>
+<p>The term delinquent commonly refers to a situation where a borrower is late or overdue on a payment, such as income taxes, a mortgage, automobile loan or credit card account.</p>
+<p>– <a href="http://www.investopedia.com/terms/d/delinquent.asp">Investopedia</a></p>
+</blockquote>
 </div>
 <div id="data-overview" class="section level2">
 <h2>Data Overview</h2>
@@ -223,6 +232,10 @@ $(document).ready(function () {
 <div id="stuff-1-univariate-plotanalysis" class="section level3">
 <h3>stuff 1 (univariate plot+analysis)</h3>
 <p>plots and description</p>
+<p>First, I want to review some basics values and descriptive statistics of the dataset. This is for two reasons, 1) to verify some values put forward by Udacity, such as the 81 variables and 113,937 observations. And 2) to determine if there is anything “weird” or stands out about the data which I may want to dive deeper into. Although I have a general direction, i.e deliquencies and their correlations, if something as or more interesting pops up from the descriptive stats, I’ll take a peek in that direction as well.</p>
+<p>Walk and talk through the above as you add in the outputs below i.e</p>
+<p>Prosper loans dataframe dimensions</p>
+<pre class="r"><code># dim</code></pre>
 </div>
 <div id="stuff-2-bivariate-plotanalysis" class="section level3">
 <h3>stuff 2 (bivariate plot+analysis)</h3>
@@ -257,6 +270,7 @@ $(document).ready(function () {
 <li><a href="https://en.wikipedia.org/wiki/Charge-off" class="uri">https://en.wikipedia.org/wiki/Charge-off</a></li>
 <li><a href="https://www.prosper.com/help/topics/how-to-read-a-loan-listing" class="uri">https://www.prosper.com/help/topics/how-to-read-a-loan-listing</a></li>
 <li><a href="http://www.investopedia.com/terms/c/credit-utilization-rate.asp" class="uri">http://www.investopedia.com/terms/c/credit-utilization-rate.asp</a></li>
+<li><a href="http://www.investopedia.com/terms/d/delinquent.asp" class="uri">http://www.investopedia.com/terms/d/delinquent.asp</a></li>
 </ul>
 <hr />
 <p><strong>Provided by template</strong></p>

@@ -1,11 +1,27 @@
-Exploring Prosper Peer-to-Peer Loan Data
+Delinquency at Peer-to-Peer Lender Prosper.com
 ========================================================
 **by Jason Carter**
 
 ----
 
 ## Introduction
-Why Prosper data?
+
+**What is Prosper**
+
+Prosper, or Prosper Marketplace, is a leader in the online peer-to-peer lending industry. Borrowers create profiles and listings on [Prosper.com](https://prosper.com) request personal loans and investors, either individuals or institutions, view the listing (borrower's loan request) and decide how much to lend the borrower towards the loan. 
+
+Interest rates are typically lower for the borrower than going to a financial institution, such as a bank. And multiple investors can contribute to one borrower's loan request, limiting the overall risk impact of the borrower defaulting on the loan for any one investor.
+
+**Why Prosper Loan Data**
+
+I've personally never used peer-to-peer lending, as a borrower or investor, but I find the idea quite intriguing from a borrower and an investor standpoint. Lower interest rates and the ability to get a loan for "small" items is the obvious pro for borrowers. But for an investor portfolio diversification and higher or less risky investment only holds true if borrower's don't default on their loans. So what are the deliquincy rates? Is there any main contributing factor? Is there any coorelation between where someone lives, their income, the purpose of their loan and defaulting on their loan? Deliquincies and their coorelation at Prosper.com is what we'll be exploring.
+
+> Delinquent is the failure to accomplish what is required by law or duty, such as the failure to make a required payment or to perform a certain action.
+>
+> The term delinquent commonly refers to a situation where a borrower is late or overdue on a payment, such as income taxes, a mortgage, automobile loan or credit card account. 
+>
+> -- [Investopedia](http://www.investopedia.com/terms/d/delinquent.asp)
+
 
 ## Data Overview
 From Udacity
@@ -96,7 +112,7 @@ library(ggplot2) # Used making plots
 
 ```{r echo=FALSE, Load_the_Data}
 # Load the Data
-# pld <- read.csv("prosperLoanData.csv")
+# prosperloans <- read.csv("prosperLoanData.csv")
 ```
 
 ### Dataset
@@ -111,8 +127,23 @@ talk about the fields you plan on investigating and others that may be useful
 ### stuff 1 (univariate plot+analysis)
 plots and description
 
-```{r echo=FALSE}
+First, I want to review some basics values and descriptive statistics of the dataset. This is for two reasons, 1) to verify some values put forward by Udacity, such as the 81 variables and 113,937 observations. And 2) to determine if there is anything "weird" or stands out about the data which I may want to dive deeper into. Although I have a general direction, i.e deliquencies and their correlations, if something as or more interesting pops up from the descriptive stats, I'll take a peek in that direction as well. 
 
+```{r echo=FALSE}
+# dim <- dim(prosperloans) # Get dimensions of dataframe
+# head <- head(prosperloans, n=5) # Get the first 5 rows to examine
+# str <- str(prosperloans) # Get the column names, data types
+# there are some categorical variables, lets open that out to see all levels
+# levels(prosperloans$[col_name])
+# time to look at the summary of some interesting features
+# summary(prosperloans$[col_name])
+```
+
+Walk and talk through the above as you add in the outputs below i.e
+
+Prosper loans dataframe dimensions
+```{r}
+# dim
 ```
 
 
@@ -141,6 +172,7 @@ stuff
 * https://en.wikipedia.org/wiki/Charge-off
 * https://www.prosper.com/help/topics/how-to-read-a-loan-listing
 * http://www.investopedia.com/terms/c/credit-utilization-rate.asp
+* http://www.investopedia.com/terms/d/delinquent.asp
 
 ----
 
