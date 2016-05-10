@@ -144,7 +144,6 @@ colsToKeep <- c("Term","LoanStatus","BorrowerState","ListingCategory..numeric.",
                "TotalProsperLoans","LoanOriginalAmount","PercentFunded","InvestmentFromFriendsCount",
                "InvestmentFromFriendsAmount","Investors","ListingCreationDate","Occupation",
                "IsBorrowerHomeowner","BorrowerAPR","BorrowerRate","Recommendations")
-
 ```
 
 ```{r}
@@ -181,7 +180,11 @@ The average term appear to be **36 months (3 yrs)** with an original loan reques
 # filter out those who are >120, defaulted or chargedoff
 # layer them on top of each other good - green, deliquent - red
 # still univariate, against count, using layers
-ggplot(prosperloans,aes(Term)) + geom_bar() # change bucket size
+test <- factor(prosperloans$LoanStatus,levels = c("Defaulted","Chargedoff","Past Due (91-120 days)","Past Due (>120 days)"))
+ggplot(prosperloans,aes(Term, fill=LoanStatus)) + 
+  geom_histogram(binwidth = 12) +
+  scale_x_continuous(breaks = c(0,12,36,60))
+
 ggplot(prosperloans,aes(IncomeRange)) + geom_bar() # need to re-order and maybe drop off values
 ggplot(prosperloans,aes(BorrowerState)) + geom_bar() # remove states with 0? 
 
