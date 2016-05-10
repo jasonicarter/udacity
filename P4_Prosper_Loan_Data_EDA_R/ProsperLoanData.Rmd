@@ -24,6 +24,8 @@ I've personally never used peer-to-peer lending, as a borrower or investor, but 
 
 
 ## Data Overview
+The Prosper loan dataset was provided by Udacity as part of their [Data Set Options](https://docs.google.com/document/d/1qEcwltBMlRYZT-l699-71TzInWfk4W9q5rTCSvDVMpc/pub?embedded=true)
+
 From Udacity
 
 *This data set contains 113,937 loans with 81 variables on each loan, including loan amount, borrower rate (or interest rate), current loan status, borrower income, borrower employment status, borrower credit history, and the latest payment information.*
@@ -31,7 +33,7 @@ From Udacity
 -- **Last updated 03/11/2014**
 
 ### Process
-Overall plan on data exploration
+Overall plan on data exploration - say something here
 
 1. load libraries
 2. load data
@@ -82,11 +84,11 @@ After reviewing the long list of variables, and thinking of all of the different
     - 19 - Vacation
     - 20 - Wedding Loans
 * **CreditScoreRangeLower**: The lower value representing the range of the borrower's credit score as provided by a consumer credit rating agency.
-* **CreditScoreRangeHigher**: The upper value representing the range of the borrower's credit score as provided by a consumer credit rating agency. 
+* **CreditScoreRangeUpper**: The upper value representing the range of the borrower's credit score as provided by a consumer credit rating agency. 
 * **BankcardUtilization**: The percentage of available revolving credit that is utilized at the time the credit profile was pulled.
 * **IncomeRange**: The income range of the borrower at the time the listing was created.
 * **TotalProsperLoans**: Number of Prosper loans the borrower at the time they created this listing. This value will be null if the borrower had no prior loans. 
-* **LoanOriginAmount**: The origination amount of the loan.
+* **LoanOriginalAmount**: The origination amount of the loan.
 * **PercentFunded**: Percent the listing was funded.
 * **InvestmentFromFriendsCount**: Number of recommendations the borrower had at the time the listing was created.
 * **InvestmentFromFriendsAmount**: Dollar amount of investments that were made by friends.
@@ -95,6 +97,7 @@ After reviewing the long list of variables, and thinking of all of the different
 #### Supporting Features
 Supporting features...
 
+* **ListingCreationDate**: The date the listing was created.
 * **Occupation**: The Occupation selected by the Borrower at the time they created the listing.
 * **IsBorrowerHomeowner**: A Borrower will be classified as a homowner if they have a mortgage on their credit profile or provide documentation confirming they are a homeowner.
 * **BorrowerAPR**: The Borrower's Annual Percentage Rate (APR) for the loan.
@@ -112,46 +115,85 @@ library(ggplot2) # Used making plots
 
 ```{r echo=FALSE, Load_the_Data}
 # Load the Data
-# prosperloans <- read.csv("prosperLoanData.csv")
+pld <- read.csv("prosperLoanData.csv")
 ```
-
-### Dataset
-
-main features of interest
-talk about the fields you plan on investigating and others that may be useful
-
-1. plot out some basic univariate stuff to get a good understanding of the dataset
-2. any interesting distributions going on with the basics?
 
 ## Exploratory Analysis
-### stuff 1 (univariate plot+analysis)
-plots and description
-
+### Univariate analysis 
 First, I want to review some basics values and descriptive statistics of the dataset. This is for two reasons, 1) to verify some values put forward by Udacity, such as the 81 variables and 113,937 observations. And 2) to determine if there is anything "weird" or stands out about the data which I may want to dive deeper into. Although I have a general direction, i.e deliquencies and their correlations, if something as or more interesting pops up from the descriptive stats, I'll take a peek in that direction as well. 
 
+Lets take a look at the dataset and verify the dimensions
 ```{r echo=FALSE}
-# dim <- dim(prosperloans) # Get dimensions of dataframe
-# head <- head(prosperloans, n=5) # Get the first 5 rows to examine
-# str <- str(prosperloans) # Get the column names, data types
-# there are some categorical variables, lets open that out to see all levels
-# levels(prosperloans$[col_name])
-# time to look at the summary of some interesting features
-# summary(prosperloans$[col_name])
+# Take a look at dataset dimensions
+dim(pld)
 ```
 
-Walk and talk through the above as you add in the outputs below i.e
-
-Prosper loans dataframe dimensions
 ```{r}
-# dim
+# 113,930 observations with 81 variables
+# Taking a look at the column name, kept getting errror in subset()
+names(pld[17])
+```
+
+Column "ListingCategory" is actually labelled "ListingCategory..numeric." as its column value, numeric, is mapped to a string one word description.
+
+Now, I setup the new data frame by keeping only the main and support variables.
+
+```{r echo=FALSE}
+colsToKeep <- c("Term","LoanStatus","BorrowerState","ListingCategory..numeric.",
+               "CreditScoreRangeLower","CreditScoreRangeUpper","BankcardUtilization","IncomeRange",
+               "TotalProsperLoans","LoanOriginalAmount","PercentFunded","InvestmentFromFriendsCount",
+               "InvestmentFromFriendsAmount","Investors","ListingCreationDate","Occupation",
+               "IsBorrowerHomeowner","BorrowerAPR","BorrowerRate","Recommendations")
+
+```
+
+```{r}
+# Created vector with columns to keep
+# Select columns of main and supporting features
+prosperloans <- subset(pld, select=colsToKeep)
+str(prosperloans)
+```
+
+There are a few categorical features in the new dataset. At first glance, BorrowerState has **52 states** or levels and Occupation has 68 levels/categories for over 113k observations - it should be possible to group by occupations to see any trends.
+
+Example of categorical values in "LoanStatus"
+```{r echo=FALSE}
+# Review a LoanStatus and IsBorrowerHomeowner.
+levels(prosperloans$LoanStatus)
+```
+
+Some interesting summary variables to look at: Term, LoanOriginalAmount and Investors
+
+```{r echo=FALSE}
+summary(prosperloans$Term)
+summary(prosperloans$LoanOriginalAmount)
+summary(prosperloans$Investors)
+```
+
+The average term appear to be **36 months (3 yrs)** with an original loan request being **$8337**, ranging from $1000 to 35000. This seems to cover the full available range allowed by Prosper, although at the time of writting this analysis, Prosper has a minimum limit of $2000. And what seems like a surprising amount, on averager these loans have **80 investors**.
+
+```{r echo=FALSE}
+# histogram plot of 
+# Term (count)
+# LoanOriginalAmount(cound) - see if any trends in loan requests
+# IncomeRange???
+# BorrowerState 
+# filter out those who are >120, defaulted or chargedoff
+# layer them on top of each other good - green, deliquent - red
+# still univariate, against count, using layers
+ggplot(prosperloans,aes(Term)) + geom_bar() # change bucket size
+ggplot(prosperloans,aes(IncomeRange)) + geom_bar() # need to re-order and maybe drop off values
+ggplot(prosperloans,aes(BorrowerState)) + geom_bar() # remove states with 0? 
+
 ```
 
 
-### stuff 2 (bivariate plot+analysis)
+### Bivariate analysis
 plots and description
-- borrowerState heatmap??? count vs money
+- most defaulted term
+- borrowerState heatmap??? defaulted count
 
-### stuff 3 (multivariate plot+analysis)
+### Multivariate analysis
 plots and description
 
 
@@ -173,6 +215,7 @@ stuff
 * https://www.prosper.com/help/topics/how-to-read-a-loan-listing
 * http://www.investopedia.com/terms/c/credit-utilization-rate.asp
 * http://www.investopedia.com/terms/d/delinquent.asp
+* http://docs.ggplot2.org
 
 ----
 
