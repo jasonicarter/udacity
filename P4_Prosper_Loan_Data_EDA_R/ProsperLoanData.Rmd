@@ -30,7 +30,7 @@ From Udacity
 
 *This data set contains 113,937 loans with 81 variables on each loan, including loan amount, borrower rate (or interest rate), current loan status, borrower income, borrower employment status, borrower credit history, and the latest payment information.*
 
--- **Last updated 03/11/2014**
+Dataset was last updated 03/11/2014
 
 ### Process
 Overall plan on data exploration - say something here
@@ -113,7 +113,7 @@ Supporting features...
 library(ggplot2) # Used making plots
 ```
 
-```{r echo=FALSE, Load_the_Data}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Load_the_Data}
 # Load the Data
 pld <- read.csv("prosperLoanData.csv")
 ```
@@ -123,22 +123,21 @@ pld <- read.csv("prosperLoanData.csv")
 First, I want to review some basics values and descriptive statistics of the dataset. This is for two reasons, 1) to verify some values put forward by Udacity, such as the 81 variables and 113,937 observations. And 2) to determine if there is anything "weird" or stands out about the data which I may want to dive deeper into. Although I have a general direction, i.e deliquencies and their correlations, if something as or more interesting pops up from the descriptive stats, I'll take a peek in that direction as well. 
 
 Lets take a look at the dataset and verify the dimensions
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 # Take a look at dataset dimensions
 dim(pld)
 ```
 
-```{r}
-# 113,930 observations with 81 variables
-# Taking a look at the column name, kept getting errror in subset()
-names(pld[17])
-```
+Now, I setup the new data frame by keeping only the main and support variables.
 
 Column "ListingCategory" is actually labelled "ListingCategory..numeric." as its column value, numeric, is mapped to a string one word description.
 
-Now, I setup the new data frame by keeping only the main and support variables.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# 113,930 observations with 81 variables
+# Taking a look at the column name, kept getting errror in subset()
+names(pld[17])
 
-```{r echo=FALSE}
+# List of variables to keep
 colsToKeep <- c("Term","LoanStatus","BorrowerState","ListingCategory..numeric.",
                "CreditScoreRangeLower","CreditScoreRangeUpper","BankcardUtilization","IncomeRange",
                "TotalProsperLoans","LoanOriginalAmount","PercentFunded","InvestmentFromFriendsCount",
@@ -153,52 +152,101 @@ prosperloans <- subset(pld, select=colsToKeep)
 str(prosperloans)
 ```
 
-There are a few categorical features in the new dataset. At first glance, BorrowerState has **52 states** or levels and Occupation has 68 levels/categories for over 113k observations - it should be possible to group by occupations to see any trends.
+There are a few categorical features in the new dataset. At first glance, BorrowerState has 52 states or levels and Occupation has 68 levels/categories for over 113k observations - it should be possible to group by occupations to see any trends.
 
 Example of categorical values in "LoanStatus"
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 # Review a LoanStatus and IsBorrowerHomeowner.
 levels(prosperloans$LoanStatus)
 ```
 
-Some interesting summary variables to look at: Term, LoanOriginalAmount and Investors
+Some interesting initial features to look at in regards to delinquency are: Term, LoanStatus, LoanOriginalAmount, Income Rnage and Borrower's State.
 
-```{r echo=FALSE}
+**Term and Loan Status**
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# summary of loan terms
 summary(prosperloans$Term)
-summary(prosperloans$LoanOriginalAmount)
-summary(prosperloans$Investors)
-```
 
-The average term appear to be **36 months (3 yrs)** with an original loan request being **$8337**, ranging from $1000 to 35000. This seems to cover the full available range allowed by Prosper, although at the time of writting this analysis, Prosper has a minimum limit of $2000. And what seems like a surprising amount, on averager these loans have **80 investors**.
-
-```{r echo=FALSE}
-# histogram plot of 
-# Term (count)
-# LoanOriginalAmount(cound) - see if any trends in loan requests
-# IncomeRange???
-# BorrowerState 
-# filter out those who are >120, defaulted or chargedoff
-# layer them on top of each other good - green, deliquent - red
-# still univariate, against count, using layers
-test <- factor(prosperloans$LoanStatus,levels = c("Defaulted","Chargedoff","Past Due (91-120 days)","Past Due (>120 days)"))
-ggplot(prosperloans,aes(Term, fill=LoanStatus)) + 
-  geom_histogram(binwidth = 12) +
+# plot loan terms
+ggplot(prosperloans,aes(Term)) + 
+  geom_bar(width = 12) +
   scale_x_continuous(breaks = c(0,12,36,60))
 
-ggplot(prosperloans,aes(IncomeRange)) + geom_bar() # need to re-order and maybe drop off values
-ggplot(prosperloans,aes(BorrowerState)) + geom_bar() # remove states with 0? 
+# filter out those who are >120, defaulted or chargedoff
+pl.defaulted <- subset(prosperloans, 
+                        LoanStatus == "Defaulted" |
+                        LoanStatus == "Chargedoff" |
+                        LoanStatus == "Past Due (91-120 days)" |
+                        LoanStatus == "Past Due (>120 days)")
 
+# plot defaulted terms and their loan status distribution
+ggplot(pl.defaulted,aes(Term, fill = LoanStatus)) + 
+  geom_bar(width = 12) +
+  scale_x_continuous(breaks = c(0,12,36,60)) + 
+  scale_fill_brewer(palette = "Blues")
 ```
 
+From the summary breakdown, the average term appears to be 36 months (3 yrs) with an original loan request being $8337, ranging from $1000 to 35000. This seems to cover the full available range allowed by Prosper, although at the time of writting this analysis, Prosper has a minimum limit of $2000. And what seems like a surprising amount, on average these loans have 80 investors.
+
+It's also very clear that the majority of borrowers choose a 36 month term, where 60 and then 12 month terms are 2nd and 3rd most popular, respectively. And approximately 15% of the total borrowers are delinquent on their loans. And the distribution of delinquency is not surprisingly very similar to that of the total loan distribution across loan terms.
+
+**Original Loan Amount**
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# summary of loan terms
+summary(prosperloans$LoanOriginalAmount)
+
+# plot loan terms
+g <- ggplot(pl.defaulted,aes(LoanOriginalAmount))
+g + geom_histogram(binwidth = 500)
+```
+
+Summary data indicates mean and median quite far apart. This is visualized in the graph which is right skewed graph. As it the spikes of borrowers at $10,000, $15,000 and $25,000 are pulling the mean higher. Although, it's not particularly surprising that borrowers gravitate to these "nice" numbers. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# zoom in to get details with reduced binwidth and added breaks
+g + geom_histogram(binwidth = 100) + 
+  scale_x_continuous(limits = c(500, 12000), 
+                     breaks = c(1000,2000,3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000))
+```
+
+Zooming in to look at the details, specifically under $10,000, you can see multiple spikes at these "nice" numbers - 1000, 2000,...,8000, 9000, 10000 - dollars. Since most debt doesn't come in nice round numbers, we can assume borrowers are probably rounding up instead to requesting exact dollar values for their loans. For example, if a borrower is $4678.86 dollars in debt, she is probably requesting a loan of $5000.00. From the data provided, I don't believe there is in specific way to determine if this assumption is true, however, given that debt / money is a floating value with interest rate applied as floating value, it is quite unlikely that the majority of borrowers have debt divisible by 5.
+
+**Income Range**
+```{r}
+# plot out income range of delinquent borrowers
+# plot out income range of all borrowers
+
+# TODO: not working
+
+levels(prosperloans$IncomeRange) <- c("Not employed", "Not displayed", "$0", 
+                                      "$1-24,999", "$25,000-49,999", "$50,000-74,999",
+                                      "$75,000-99,999", "$100,000+")
+ggplot(prosperloans,aes(IncomeRange)) + 
+  geom_bar()
+```
+
+discuss
+
+```{r}
+ggplot(prosperloans,aes(BorrowerState)) + geom_bar() # transfrom y axis (log10 maybe?)
+```
+
+discuss
 
 ### Bivariate analysis
 plots and description
-- most defaulted term
-- borrowerState heatmap??? defaulted count
+* most defaulted term
+* borrowerState heatmap??? defaulted count
+* Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
+* Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
+* What was the strongest relationship you found?
 
-### Multivariate analysis
-plots and description
 
+### Multivariate Analysis
+
+* Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
+* Were there any interesting or surprising interactions between features?
+* OPTIONAL: Did you create any models with your dataset? Discuss the strengths and limitations of your model.
 
 ## Final Plots
 ### plot 1
@@ -219,69 +267,4 @@ stuff
 * http://www.investopedia.com/terms/c/credit-utilization-rate.asp
 * http://www.investopedia.com/terms/d/delinquent.asp
 * http://docs.ggplot2.org
-
-----
-
-**Provided by template**
-
-Univariate Plots Section
-```{r echo=FALSE, Univariate_Plots}
-
-```
-
-Univariate Analysis
-
-- What is the structure of your dataset?
-- What is/are the main feature(s) of interest in your dataset?
-- What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
-- Did you create any new variables from existing variables in the dataset?
-- Of the features you investigated, were there any unusual distributions? 
-- Did you perform any operations on the data to tidy, adjust, or change the form of the data? If so, why did you do this?
-
-Bivariate Plots Section
-```{r echo=FALSE, Bivariate_Plots}
-
-```
-
-Bivariate Analysis
-
-- Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
-- Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
-- What was the strongest relationship you found?
-
-
-Multivariate Plots Section
-```{r echo=FALSE, Multivariate_Plots}
-
-```
-
-Multivariate Analysis
-
-- Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
-- Were there any interesting or surprising interactions between features?
-
-OPTIONAL: Did you create any models with your dataset? Discuss the strengths and limitations of your model.
-
-Final Plots and Summary
-
-- Plot One
-```{r echo=FALSE, Plot_One}
-
-```
-Description One
-
-
-- Plot Two
-```{r echo=FALSE, Plot_Two}
-
-```
-Description Two
-
-
-- Plot Three
-```{r echo=FALSE, Plot_Three}
-
-```
-Description Three
-
-Reflection
+* http://zevross.com/blog/2014/08/04/beautiful-plotting-in-r-a-ggplot2-cheatsheet-3
