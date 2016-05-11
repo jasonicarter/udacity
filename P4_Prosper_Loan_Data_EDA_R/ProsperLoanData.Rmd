@@ -110,7 +110,8 @@ Supporting features...
 # This prevents the code from displaying in the knitted HTML output.
 # You should set echo=FALSE for all code chunks in your file.
 
-library(ggplot2) # Used making plots
+# Used making plots
+library(ggplot2) 
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Load_the_Data}
@@ -164,22 +165,22 @@ Some interesting initial features to look at in regards to delinquency are: Term
 
 **Term and Loan Status**
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-# summary of loan terms
+# Summary of loan terms
 summary(prosperloans$Term)
 
-# plot loan terms
+# Plot loan terms
 ggplot(prosperloans,aes(Term)) + 
   geom_bar(width = 12) +
   scale_x_continuous(breaks = c(0,12,36,60))
 
-# filter out those who are >120, defaulted or chargedoff
+# Filter out those who are >120, defaulted or chargedoff
 pl.defaulted <- subset(prosperloans, 
                         LoanStatus == "Defaulted" |
                         LoanStatus == "Chargedoff" |
                         LoanStatus == "Past Due (91-120 days)" |
                         LoanStatus == "Past Due (>120 days)")
 
-# plot defaulted terms and their loan status distribution
+# Plot defaulted terms and their loan status distribution
 ggplot(pl.defaulted,aes(Term, fill = LoanStatus)) + 
   geom_bar(width = 12) +
   scale_x_continuous(breaks = c(0,12,36,60)) + 
@@ -192,10 +193,10 @@ It's also very clear that the majority of borrowers choose a 36 month term, wher
 
 **Original Loan Amount**
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-# summary of loan terms
+# Summary of loan terms
 summary(prosperloans$LoanOriginalAmount)
 
-# plot loan terms
+# Plot loan terms
 g <- ggplot(pl.defaulted,aes(LoanOriginalAmount))
 g + geom_histogram(binwidth = 500)
 ```
@@ -203,7 +204,7 @@ g + geom_histogram(binwidth = 500)
 Summary data indicates mean and median quite far apart. This is visualized in the graph which is right skewed graph. As it the spikes of borrowers at $10,000, $15,000 and $25,000 are pulling the mean higher. Although, it's not particularly surprising that borrowers gravitate to these "nice" numbers. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-# zoom in to get details with reduced binwidth and added breaks
+# Zoom in to get details with reduced binwidth and added breaks
 g + geom_histogram(binwidth = 100) + 
   scale_x_continuous(limits = c(500, 12000), 
                      breaks = c(1000,2000,3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000))
@@ -213,10 +214,10 @@ Zooming in to look at the details, specifically under $10,000, you can see multi
 
 **Income Range**
 ```{r}
-# plot out income range of delinquent borrowers
-# plot out income range of all borrowers
+# Plot out income range of delinquent borrowers
+# Plot out income range of all borrowers
 
-# TODO: not working
+# TODO: not working as expected
 
 levels(prosperloans$IncomeRange) <- c("Not employed", "Not displayed", "$0", 
                                       "$1-24,999", "$25,000-49,999", "$50,000-74,999",
@@ -227,8 +228,14 @@ ggplot(prosperloans,aes(IncomeRange)) +
 
 discuss
 
+**Borrowers State**
 ```{r}
-ggplot(prosperloans,aes(BorrowerState)) + geom_bar() # transfrom y axis (log10 maybe?)
+ggplot(prosperloans,aes(BorrowerState)) +
+  geom_bar() +
+  scale_y_log10()
+
+# Look at the top 10 states and show factors from LoanStatus
+
 ```
 
 discuss
