@@ -230,15 +230,20 @@ discuss
 
 **Borrowers State**
 ```{r}
-ggplot(prosperloans,aes(BorrowerState)) +
+g <- ggplot(prosperloans,aes(BorrowerState)) +
   geom_bar() +
   scale_y_log10()
+g
 
 # Look at the top 10 states and show factors from LoanStatus
 
+library(dplyr)
+f <- group_by(prosperloans,BorrowerState)
+summarize(f,count=n()) 
+arrange(f, desc(count))
 ```
 
-discuss
+Borrowers state covers 52 states, this includes DC and Puerto Rico. Representation for California is skewing the graph, unable to distinguish smaller state count and differences among states. Given California is the most populous state in the US, having a much higher count in borrowers is probably not a good indicator of a trend. To fix this and to better view any trend a log10 transformation was applied to the y axis.
 
 ### Bivariate analysis
 plots and description
@@ -275,3 +280,5 @@ stuff
 * http://www.investopedia.com/terms/d/delinquent.asp
 * http://docs.ggplot2.org
 * http://zevross.com/blog/2014/08/04/beautiful-plotting-in-r-a-ggplot2-cheatsheet-3
+* https://en.wikipedia.org/wiki/List_of_states_and_territories_of_the_United_States
+
