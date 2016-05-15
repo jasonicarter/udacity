@@ -286,16 +286,41 @@ borrowers state count/heatmap overlaid on country map using pl.defaulted
 group borrowers state and summarize count by loan status
 
 ```{r}
-data("USArrests")
 
-#names(USArrests)
-#View(USArrests)
-
-#View(arr)
-#View(us)
+# Map 2 letter abbrievation to full name for map plot
+prosperloans$BorrowerStateFullName <- tolower(state.name[match(prosperloans$BorrowerState, state.abb)])
 
 us <- map_data("state")
 
+# need loanStatus to be their own varible with each region value totalled
+# group by stateName, loanStatus factors 
+grp_by_state <- prosperloans %>%
+  group_by(BorrowerStateFullName, BorrowerState, LoanStatus) %>%
+  summarise(count = n()) %>%
+  filter(LoanStatus == "Defaulted")
+
+
+gg <- ggplot()
+gg <- gg + geom_map(data=us, map=us,
+                    aes(x=long, y=lat, map_id=region),
+                    fill="#ffffff", color="#ffffff", size=0.15)
+gg <- gg + geom_map(data=grp_by_state, map=us,
+                    aes(fill=count, map_id=BorrowerStateFullName),
+                    color="#ffffff", size=0.15)
+gg <- gg + scale_fill_continuous(low='lightblue', high='darkblue', 
+                                 guide='colorbar')
+gg <- gg + labs(x=NULL, y=NULL)
+gg <- gg + coord_map("albers", lat0 = 39, lat1 = 45) 
+gg <- gg + theme(panel.border = element_blank())
+gg <- gg + theme(panel.background = element_blank())
+gg <- gg + theme(axis.ticks = element_blank())
+gg <- gg + theme(axis.text = element_blank())
+gg
+
+
+
+data("USArrests")
+us <- map_data("state")
 arr <- USArrests %>% 
   add_rownames("region") %>% 
   mutate(region=tolower(region))
