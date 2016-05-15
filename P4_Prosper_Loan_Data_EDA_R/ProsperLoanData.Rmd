@@ -106,11 +106,9 @@ Supporting features...
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
-# Notice that the parameter "echo" was set to FALSE for this code chunk.
-# This prevents the code from displaying in the knitted HTML output.
-# You should set echo=FALSE for all code chunks in your file.
+#TODO: include "install.packages???" 
 
-# Used making plots
+# Required for plots and manipulation
 library(ggplot2) 
 library(dplyr)
 ```
@@ -126,7 +124,7 @@ First, I want to review some basics values and descriptive statistics of the dat
 
 Lets take a look at the dataset and verify the dimensions
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-# Take a look at dataset dimensions
+# Investigate dataset dimensions
 dim(pld)
 ```
 
@@ -135,8 +133,7 @@ Now, I setup the new data frame by keeping only the main and support variables.
 Column "ListingCategory" is actually labelled "ListingCategory..numeric." as its column value, numeric, is mapped to a string one word description.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-# 113,930 observations with 81 variables
-# Taking a look at the column name, kept getting errror in subset()
+# Review column name to fix subset() issue
 names(pld[17])
 
 # List of variables to keep
@@ -147,10 +144,20 @@ colsToKeep <- c("Term","LoanStatus","BorrowerState","ListingCategory..numeric.",
                "IsBorrowerHomeowner","BorrowerAPR","BorrowerRate","Recommendations")
 ```
 
-```{r}
-# Created vector with columns to keep
-# Select columns of main and supporting features
+```{r Create_Dataframe_Subsets}
+# Keep only variables in colsToKeep (columns to keep)
 prosperloans <- subset(pld, select=colsToKeep)
+
+# Create new variable
+prosperloans$LoanCreationYear <- format(as.Date(prosperloans$ListingCreationDate), "%Y")
+
+# Filter out those who are > 120 days, defaulted or chargedoff to be considered delinquent
+pl_defaulted <- subset(prosperloans, 
+                        LoanStatus == "Defaulted" |
+                        LoanStatus == "Chargedoff" |
+                        LoanStatus == "Past Due (91-120 days)" |
+                        LoanStatus == "Past Due (>120 days)")
+
 str(prosperloans)
 ```
 
@@ -158,30 +165,33 @@ There are a few categorical features in the new dataset. At first glance, Borrow
 
 Example of categorical values in "LoanStatus"
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-# Review a LoanStatus and IsBorrowerHomeowner.
+# Review LoanStatus cateogories
 levels(prosperloans$LoanStatus)
 ```
 
 Before going too far, I was curious as to the creation date distribution of observations in the dataset. This is important as this could cause bias in further investigation, for example, if the majority of the data was observed during 2008-2009 (the financial crisis) this could skew the data towards having a majority of delinquency. To analysis this I'm going to explore the ListingCreationDate feature along with LoanStatus
 
 
-```{r}
-# ListingCreationDate
-# ListingCreationDate fill=loan status
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Investigate distribution of loan creation year
+ggplot(prosperloans, aes(prosperloans$LoanCreationYear)) + 
+  geom_bar()
 
-#strip out year from date 
-ggplot(head(prosperloans), aes(ListingCreationDate))
-
-
-# d <- as.Date('3/2/2015 19:09:29.263000','%m/%d/%Y')
-# format(d,"%Y")
-
-d <- head(prosperloans)
-qplot(ListingCreationDate, data=d)
+# Review only delinquent borrowers looking for trends
+ggplot(pl_defaulted, aes(pl_defaulted$LoanCreationYear, fill=pl_defaulted$LoanStatus)) + 
+  geom_bar() +
+  scale_fill_brewer(palette = "Blues")
 ```
 
+Discuss - drop in 2009 and a steady pick up following subsequent years. Financial crisis??? No investors??? Competitors entered??? Need to review further. 
 
-Time to further the analysis and some other interesting initial features to look at in regards to delinquency are: Term, LoanStatus, LoanOriginalAmount, Income Range and Borrower's State.
+Looking at only delinqunet borrowers, a possible lead up to the financial crisis - using the same scale, no issues 2004/5, with increase in volume of defaults and chargedoff leading up to 2007/8 almost half of all borrowers
+
+Remember - this is loan "creation" date, this is a good lesson in understanding the data and miss communication in visuals. This is not representing delinquent loans of 2007/8 but loans which went delinquent at some point in time that were created in 2007/8. I believe it can be assumed this is why you see a lead up to the financial crisis, i.e. borrowers took out loans at a "normal" rate from 2005-2008 but potentially after the financial crisis in 2008, borrowers can no longer pay and loans created 2006-2008 were the most succeptable to defaults. 
+
+This assumption also explains the dip in 2009 and gradual increase, less borrowers (1st graph) and much fewer delinquents in comparison to the level of loans in good standing.
+
+Time to further the analysis and some other interesting initial features to look at in regards to delinquency are: Term, LoanStatus, LoanOriginalAmount, Income Range, Borrower's State and Listing Category (the reason for a loan).
 
 **Term and Loan Status**
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
@@ -193,15 +203,8 @@ ggplot(prosperloans,aes(Term)) +
   geom_bar(width = 12) +
   scale_x_continuous(breaks = c(0,12,36,60))
 
-# Filter out those who are >120, defaulted or chargedoff
-pl.defaulted <- subset(prosperloans, 
-                        LoanStatus == "Defaulted" |
-                        LoanStatus == "Chargedoff" |
-                        LoanStatus == "Past Due (91-120 days)" |
-                        LoanStatus == "Past Due (>120 days)")
-
 # Plot defaulted terms and their loan status distribution
-ggplot(pl.defaulted,aes(Term, fill = LoanStatus)) + 
+ggplot(pl_defaulted,aes(Term, fill = LoanStatus)) + 
   geom_bar(width = 12) +
   scale_x_continuous(breaks = c(0,12,36,60)) + 
   scale_fill_brewer(palette = "Blues")
@@ -217,7 +220,7 @@ It's also very clear that the majority of borrowers choose a 36 month term, wher
 summary(prosperloans$LoanOriginalAmount)
 
 # Plot loan terms
-g <- ggplot(pl.defaulted,aes(LoanOriginalAmount))
+g <- ggplot(pl_defaulted,aes(LoanOriginalAmount))
 g + geom_histogram(binwidth = 500)
 ```
 
@@ -305,11 +308,17 @@ gg
 ```
 
 
+**Listing Category**
+ListingCategory..numeric.
+
 ### Bivariate analysis
 
-Continuing to look for trends in delinquency, I will investigate possible expected and unexpected relationships between features.
+Continuing to look for trends in delinquency, I will investigate possible expected and unexpected relationships between features with scatterplot and by measuring thier coorelation (pearson / spearman / rho).
 
 any relationship between...
+
+(?cor.test look for correlation)
+xlim(0, quantile(data$col_name, 0.95)) get 95% of data along x and y
 
 * listingCategory and loanOriginalAmount (need to map listing to values)
 * bankcardUtilization and loanStatus
