@@ -105,7 +105,7 @@ Supporting features...
 * **Recommendations**: Number of recommendations the borrower had at the time the listing was created.
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Packages}
 #TODO: include "install.packages???" 
 
 # Required for plots and manipulation
@@ -158,6 +158,9 @@ pl_defaulted <- subset(prosperloans,
                         LoanStatus == "Past Due (91-120 days)" |
                         LoanStatus == "Past Due (>120 days)")
 
+# TODO: Create a new varible indicating delinquent 
+# then i souldn't need pl_defaulted, just use new variable as flag??
+
 str(prosperloans)
 ```
 
@@ -181,6 +184,7 @@ ggplot(prosperloans, aes(prosperloans$LoanCreationYear)) +
 ggplot(pl_defaulted, aes(pl_defaulted$LoanCreationYear, fill=pl_defaulted$LoanStatus)) + 
   geom_bar() +
   scale_fill_brewer(palette = "Blues")
+
 ```
 
 Discuss - drop in 2009 and a steady pick up following subsequent years. Financial crisis??? No investors??? Competitors entered??? Need to review further. 
@@ -240,13 +244,21 @@ Zooming in to look at the details, specifically under $10,000, you can see multi
 # Plot out income range of delinquent borrowers
 # Plot out income range of all borrowers
 
-# TODO: not working as expected
+positions <- c("Not employed", "Not displayed", "$0", 
+                "$1-24,999", "$25,000-49,999", "$50,000-74,999",
+                "$75,000-99,999", "$100,000+")
 
-levels(prosperloans$IncomeRange) <- c("Not employed", "Not displayed", "$0", 
-                                      "$1-24,999", "$25,000-49,999", "$50,000-74,999",
-                                      "$75,000-99,999", "$100,000+")
-ggplot(prosperloans,aes(IncomeRange)) + 
+
+ggplot(prosperloans, aes(IncomeRange)) + 
+  scale_x_discrete(limits = positions) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   geom_bar()
+
+# TODO: Create a new varible indicating delinquent then use as fill = x for above plot
+#ggplot(pl_defaulted, aes(IncomeRange)) + 
+#  scale_x_discrete(limits = positions) +
+#  geom_bar()
+
 ```
 
 discuss
@@ -312,6 +324,25 @@ gg
 ListingCategory..numeric.
 
 ### Bivariate analysis
+```{r}
+library(lattice)
+data(mtcars)
+ 
+# Create first plot and assign it to variable
+p1 = xyplot(mpg ~ wt, data = mtcars,
+            xlab = 'Car weight', ylab = 'Mileage')
+ 
+# Create second plot and assign it to variable
+p2 = xyplot(mpg ~ wt, group= factor(cyl), data = mtcars,
+            xlab = 'Car weight', ylab = 'Miles/gallon',
+            type=c('p', 'smooth'))
+ 
+# print calls print.lattice, which takes a position
+# argument.
+print(p1, position = c(0, 0, 0.5, 1), more = TRUE)
+print(p2, position = c(0.5, 0, 1, 1))
+```
+
 
 Continuing to look for trends in delinquency, I will investigate possible expected and unexpected relationships between features with scatterplot and by measuring thier coorelation (pearson / spearman / rho).
 
