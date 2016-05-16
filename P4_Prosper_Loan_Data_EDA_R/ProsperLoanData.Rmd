@@ -343,6 +343,8 @@ ggplot(prosperloans, aes(prosperloans$ListingCategoryFullName)) +
 
 Discuss
 
+Unidentifable: Debt consolidation (could be a mix of anything), Not Available, Other, Business (maybe)...The next "real" answer is Auto and Home Improvement
+
 
 ### Bivariate analysis
 ```{r}
