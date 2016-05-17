@@ -89,9 +89,6 @@ After reviewing the long list of variables, and thinking of all of the different
 * **IncomeRange**: The income range of the borrower at the time the listing was created.
 * **TotalProsperLoans**: Number of Prosper loans the borrower at the time they created this listing. This value will be null if the borrower had no prior loans. 
 * **LoanOriginalAmount**: The origination amount of the loan.
-* **PercentFunded**: Percent the listing was funded.
-* **InvestmentFromFriendsCount**: Number of recommendations the borrower had at the time the listing was created.
-* **InvestmentFromFriendsAmount**: Dollar amount of investments that were made by friends.
 * **Investors**: The number of investors that funded the loan.
 
 #### Supporting Features
@@ -103,6 +100,8 @@ Supporting features...
 * **BorrowerAPR**: The Borrower's Annual Percentage Rate (APR) for the loan.
 * **BorrowerRate**: The Borrower's interest rate for this loan. 
 * **Recommendations**: Number of recommendations the borrower had at the time the listing was created.
+* **DebtToIncomeRatio**:
+* **StatedMonthlyIncome**:
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Packages}
@@ -113,6 +112,7 @@ library(ggplot2)
 library(dplyr)
 library(maps)
 library(mapproj)
+library(gridExtra)
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Load_the_Data}
@@ -141,9 +141,9 @@ names(pld[17])
 # List of variables to keep
 colsToKeep <- c("Term","LoanStatus","BorrowerState","ListingCategory..numeric.",
                "CreditScoreRangeLower","CreditScoreRangeUpper","BankcardUtilization","IncomeRange",
-               "TotalProsperLoans","LoanOriginalAmount","PercentFunded","InvestmentFromFriendsCount",
-               "InvestmentFromFriendsAmount","Investors","ListingCreationDate","Occupation",
-               "IsBorrowerHomeowner","BorrowerAPR","BorrowerRate","Recommendations")
+               "TotalProsperLoans","LoanOriginalAmount", "Investors","ListingCreationDate",
+               "Occupation","IsBorrowerHomeowner","BorrowerAPR","BorrowerRate",
+               "Recommendations","DebtToIncomeRatio", "StatedMonthlyIncome")
 
 # Keep only variables in colsToKeep (columns to keep)
 prosperloans <- subset(pld, select=colsToKeep)
@@ -208,6 +208,7 @@ This assumption also explains the dip in 2009 and gradual increase, less borrowe
 Time to further the analysis and some other interesting initial features to look at in regards to delinquency are: Term, LoanStatus, LoanOriginalAmount, Income Range, Borrower's State and Listing Category (the reason for a loan).
 
 **Term and Loan Status**
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 # Summary of loan terms
 summary(prosperloans$Term)
@@ -229,6 +230,7 @@ From the summary breakdown, the average term appears to be 36 months (3 yrs) wit
 It's also very clear that the majority of borrowers choose a 36 month term, where 60 and then 12 month terms are 2nd and 3rd most popular, respectively. And approximately 15% of the total borrowers are delinquent on their loans. And the distribution of delinquency is not surprisingly very similar to that of the total loan distribution across loan terms.
 
 **Original Loan Amount**
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 # Summary of loan terms
 summary(prosperloans$LoanOriginalAmount)
@@ -250,6 +252,7 @@ g + geom_histogram(binwidth = 100) +
 Zooming in to look at the details, specifically under $10,000, you can see multiple spikes at these "nice" numbers - 1000, 2000,...,8000, 9000, 10000 - dollars. Since most debt doesn't come in nice round numbers, we can assume borrowers are probably rounding up instead to requesting exact dollar values for their loans. For example, if a borrower is $4678.86 dollars in debt, she is probably requesting a loan of $5000.00. From the data provided, I don't believe there is in specific way to determine if this assumption is true, however, given that debt / money is a floating value with interest rate applied as floating value, it is quite unlikely that the majority of borrowers have debt divisible by 5.
 
 **Income Range**
+
 ```{r}
 # Plot out income range of delinquent borrowers
 # Plot out income range of all borrowers
@@ -274,6 +277,7 @@ ggplot(prosperloans, aes(IncomeRange)) +
 discuss
 
 **Borrowers State**
+
 ```{r}
 ggplot(prosperloans,aes(BorrowerState)) +
   geom_bar() +
@@ -334,6 +338,7 @@ gg
 Discuss - count of delinquent borrowers across the US. CA has the highest levels but it should be taken into consideration that CA is the more populous. Middle of the America has the lowest rate of delinquency, East, West and Texas.
 
 **Listing Category**
+
 ```{r}
 # map numbers to category
 listing_category <- c("Not Available", "Debt Consolidation", "Home Improvement", "Business",
@@ -362,26 +367,6 @@ In my observation with this plot is that, although "Debt Consolidation" is by fa
 
 
 ### Bivariate analysis
-```{r}
-library(lattice)
-data(mtcars)
- 
-# Create first plot and assign it to variable
-p1 = xyplot(mpg ~ wt, data = mtcars,
-            xlab = 'Car weight', ylab = 'Mileage')
- 
-# Create second plot and assign it to variable
-p2 = xyplot(mpg ~ wt, group= factor(cyl), data = mtcars,
-            xlab = 'Car weight', ylab = 'Miles/gallon',
-            type=c('p', 'smooth'))
- 
-# print calls print.lattice, which takes a position
-# argument.
-print(p1, position = c(0, 0, 0.5, 1), more = TRUE)
-print(p2, position = c(0.5, 0, 1, 1))
-```
-
-
 Continuing to look for trends in delinquency, I will investigate possible expected and unexpected relationships between features with scatterplot and by measuring thier coorelation (pearson / spearman / rho).
 
 (?cor.test look for correlation)
@@ -398,12 +383,109 @@ xlim(0, quantile(data$col_name, 0.95)) get 95% of data along x and y
 * What was the strongest relationship you found?
 
 **listing cateogry and loan original amount**
-loan amount for different categories. How to compare this with delinquent loans???
 
+loan amount for different categories. How to compare this with delinquent loans???
+```{r}
+g <- ggplot(prosperloans, aes(ListingCategoryFullName, LoanOriginalAmount, group = ListingCategoryFullName)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+g
+```
+
+Discuss - mean, debt consolidation outliers, max loan amount, baby/adoption and debt consolidation are surprising similar plots
 
 **loan original amount and delinquent loans**
+
 loan amount for delinquent borrowers and the number of delinquents
 (x=amount, y=count of delinquents, filter by past due)
+
+```{r}
+g <- ggplot(prosperloans, aes(LoanOriginalAmount, Term)) +
+  geom_point()
+g
+```
+
+
+**Loan Term and Loan Amount**
+
+```{r}
+# boxplot
+# look into outliers and discrete x axis on correct terms
+g <- ggplot(prosperloans, aes(Term, LoanOriginalAmount, group = Term)) +
+  geom_boxplot()
+g
+```
+
+
+**Interest Rate and Listing Category**
+
+Is there a relationship between what rate someone gets and their reason for a loan
+```{r}
+g <- ggplot(prosperloans, aes(ListingCategoryFullName, BorrowerRate, group = ListingCategoryFullName)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+g
+```
+
+Discuss - person loans has the lower mean APR, debt consolidation, boat and baby loans have similar mean APRs
+
+
+**remember to bring it back to delinquency**
+
+**loan and bankcard utilization**
+
+```{r}
+# laon, bankcard and loan status (factor)
+ggplot(prosperloans, aes(LoanOriginalAmount, BankcardUtilization)) +
+  geom_point() +
+  scale_y_log10()
+```
+
+Discuss - over 7k borrowers with NA utilization and values over 1 (100% utilization) which I'm not sure how that was calculated. Even for lower loan amounts there is a high card utilization 
+
+
+**Borrower Rate and APR**
+
+```{r}
+# useful in any way???
+g <- ggplot(prosperloans, aes(BorrowerRate, BorrowerAPR)) +
+  geom_point(alpha = 1/50)
+g
+```
+
+Discuss - APR is annual cost of the loan to the Borrower, Rate is the interest rate to the borrower excluding fees.
+
+**Debt-to-Income Ratio**
+
+```{r}
+# monthly income vs debt to income ratio
+# relatioship between more monthly income and debt:income
+p1 <- ggplot(prosperloans, aes(StatedMonthlyIncome, DebtToIncomeRatio)) +
+  geom_point(alpha = 0.1) +
+  scale_x_continuous(limits = c(0,20000)) +
+  scale_y_continuous(limits = c(0, 1)) +
+  geom_density2d()
+
+p2 <- ggplot(pl_defaulted, aes(StatedMonthlyIncome, DebtToIncomeRatio)) +
+  geom_point(alpha = 0.1) +
+  scale_x_continuous(limits = c(0,20000)) +
+  scale_y_continuous(limits = c(0, 1))
+
+grid.arrange(p1, p2, nrow=1)
+```
+
+Discuss - at 20k a month, outliers with zero income and over 20k (approx 10k observations). Most borrower's debt-to-income ratio is under 0.25 (or 0.5). 
+
+Look up "good", debt-to-income ratios
+
+```{r}
+# names(prosperloans)
+
+ggplot(prosperloans, aes(BorrowerRate, DebtToIncomeRatio)) +
+  geom_point(alpha = 0.1) +
+  scale_y_log10()
+
+```
 
 
 ### Multivariate Analysis
@@ -434,4 +516,10 @@ stuff
 * http://zevross.com/blog/2014/08/04/beautiful-plotting-in-r-a-ggplot2-cheatsheet-3
 * https://en.wikipedia.org/wiki/List_of_states_and_territories_of_the_United_States
 * http://stackoverflow.com/a/29618201/1343001
+* http://www.investopedia.com/ask/answers/100314/what-difference-between-interest-rate-and-annual-percentage-rate-apr.asp
+
+### Programming Environment
+```{r}
+sessionInfo()
+```
 
