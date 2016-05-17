@@ -105,9 +105,6 @@ Supporting features...
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Packages}
-#TODO: include "install.packages???" 
-
-# Required for plots and manipulation
 library(ggplot2) 
 library(dplyr)
 library(maps)
@@ -267,11 +264,6 @@ ggplot(prosperloans, aes(IncomeRange)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   geom_bar()
 
-# TODO: Create a new varible indicating delinquent then use as fill = x for above plot
-#ggplot(pl_defaulted, aes(IncomeRange)) + 
-#  scale_x_discrete(limits = positions) +
-#  geom_bar()
-
 ```
 
 discuss
@@ -284,14 +276,7 @@ ggplot(prosperloans,aes(BorrowerState)) +
   scale_y_log10() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
-# Look at the top 10 states and show factors from LoanStatus
-
-#TODO
-
-#library(dplyr)
-#f <- group_by(prosperloans,BorrowerState)
-#summarize(f,count=n()) 
-#arrange(f, desc(count))
+# TODO Look at the top 10 states and show factors from LoanStatus
 ```
 
 Borrowers state covers 52 states, this includes DC and Puerto Rico. Representation for California is skewing the graph, unable to distinguish smaller state count and differences among states. Given California is the most populous state in the US, having a much higher count in borrowers is probably not a good indicator of a trend. To fix this and to better view any trend a log10 transformation was applied to the y axis.
@@ -398,13 +383,6 @@ Discuss - mean, debt consolidation outliers, max loan amount, baby/adoption and 
 
 loan amount for delinquent borrowers and the number of delinquents
 (x=amount, y=count of delinquents, filter by past due)
-
-```{r}
-g <- ggplot(prosperloans, aes(LoanOriginalAmount, Term)) +
-  geom_point()
-g
-```
-
 
 **Loan Term and Loan Amount**
 
