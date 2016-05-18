@@ -110,6 +110,7 @@ library(dplyr)
 library(maps)
 library(mapproj)
 library(gridExtra)
+library(GGally)
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Load_the_Data}
@@ -148,48 +149,45 @@ prosperloans <- subset(pld, select=colsToKeep)
 # Create new variable
 prosperloans$LoanCreationYear <- format(as.Date(prosperloans$ListingCreationDate), "%Y")
 
-# Filter out those who are > 120 days, defaulted or chargedoff to be considered delinquent
-pl_defaulted <- subset(prosperloans, 
-                        LoanStatus == "Defaulted" |
-                        LoanStatus == "Chargedoff" |
-                        LoanStatus == "Past Due (91-120 days)" |
-                        LoanStatus == "Past Due (>120 days)")
-
-# TODO: Create a new varible indicating delinquent 
-# then i souldn't need pl_defaulted, just use new variable as flag??
-
 str(prosperloans)
 ```
 
 There are a few categorical features in the new dataset. At first glance, BorrowerState has 52 states or levels and Occupation has 68 levels/categories for over 113k observations - it should be possible to group by occupations to see any trends.
 
 Example of categorical values in "LoanStatus"
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, LoanStatus_Categories}
 # Review LoanStatus cateogories
 levels(prosperloans$LoanStatus)
 ```
 
 There are a few challenges here. If I'm investigating delinquencies, I need to define a definition for it, and since the Prosper data has a few categories that could cover this, I need to do two things 1) learn the difference between Chargedoff and Defaulted and 2) assign a cutoff line for delinquents, i.e if someone is 1-15 days late on payment is that delinquent? What about 61-90 days late?
 
-Dictionary...
-
 Chargedoff: 
+
+> A charge-off or chargeoff is the declaration by a creditor (usually a credit card account) that an amount of debt is unlikely to be collected. This occurs when a consumer becomes severely delinquent on a debt. Traditionally, creditors will make this declaration at the point of six months without payment. In the United States, Federal regulations require creditors to charge-off installment loans after 120 days of delinquency, while revolving credit accounts must be charged-off after 180 days
 
 Defaulted: 
 
-Before going too far, I was curious as to the creation date distribution of observations in the dataset. This is important as this could cause bias in further investigation, for example, if the majority of the data was observed during 2008-2009 (the financial crisis) this could skew the data towards having a majority of delinquency. To analysis this I'm going to explore the ListingCreationDate feature along with LoanStatus.
+> In finance, default is failure to meet the legal obligations (or conditions) of a loan,[1] for example when a home buyer fails to make a mortgage payment, or when a corporation or government fails to pay a bond which has reached maturity.
 
+```{r, message=FALSE, warning=FALSE, Create_Delinquent_Variable}
+# New variable to be used to identify "delinquent" borrowers
+prosperloans$DelinquentBorrowers <- ifelse(prosperloans$LoanStatus == "Defaulted" |
+                                            prosperloans$LoanStatus == "Chargedoff" |
+                                            prosperloans$LoanStatus == "Past Due (61-90 days)" |
+                                            prosperloans$LoanStatus == "Past Due (91-120 days)" |
+                                            prosperloans$LoanStatus == "Past Due (>120 days)", 1, 0)
+
+```
+
+Before going too far, I was curious as to the creation date distribution of observations in the dataset. This is important as this could cause bias in further investigation, for example, if the majority of the data was observed during 2008-2009 (the financial crisis) this could skew the data towards having a majority of delinquency. To analysis this I'm going to explore the ListingCreationDate feature along with LoanStatus.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 # Investigate distribution of loan creation year
-ggplot(prosperloans, aes(prosperloans$LoanCreationYear)) + 
-  geom_bar()
-
-# Review only delinquent borrowers looking for trends
-ggplot(pl_defaulted, aes(pl_defaulted$LoanCreationYear, fill=pl_defaulted$LoanStatus)) + 
+ggplot(prosperloans, aes(prosperloans$LoanCreationYear, fill = factor(DelinquentBorrowers))) + 
   geom_bar() +
-  scale_fill_brewer(palette = "Blues")
-
+  scale_fill_brewer() + 
+  theme_dark()
 ```
 
 Inorder to help faciliate this more easily, I've decided to create a new variable which will capture the year segment of the loan creation date.
@@ -210,16 +208,12 @@ Time to further the analysis and some other interesting initial features to look
 # Summary of loan terms
 summary(prosperloans$Term)
 
-# Plot loan terms
-ggplot(prosperloans,aes(Term)) + 
-  geom_bar(width = 12) +
-  scale_x_continuous(breaks = c(0,12,36,60))
-
 # Plot defaulted terms and their loan status distribution
-ggplot(pl_defaulted,aes(Term, fill = LoanStatus)) + 
+ggplot(prosperloans,aes(Term, fill = factor(DelinquentBorrowers))) + 
   geom_bar(width = 12) +
   scale_x_continuous(breaks = c(0,12,36,60)) + 
-  scale_fill_brewer(palette = "Blues")
+  scale_fill_brewer() +
+  theme_dark()
 ```
 
 From the summary breakdown, the average term appears to be 36 months (3 yrs) with an original loan request being $8337, ranging from $1000 to 35000. This seems to cover the full available range allowed by Prosper, although at the time of writting this analysis, Prosper has a minimum limit of $2000. And what seems like a surprising amount, on average these loans have 80 investors.
@@ -233,8 +227,12 @@ It's also very clear that the majority of borrowers choose a 36 month term, wher
 summary(prosperloans$LoanOriginalAmount)
 
 # Plot loan terms
-g <- ggplot(pl_defaulted,aes(LoanOriginalAmount))
+g <- ggplot(prosperloans,aes(LoanOriginalAmount, fill = factor(DelinquentBorrowers))) +
+  scale_fill_brewer() +
+  theme_dark()
+
 g + geom_histogram(binwidth = 500)
+
 ```
 
 Summary data indicates mean and median quite far apart. This is visualized in the graph which is right skewed graph. As it the spikes of borrowers at $10,000, $15,000 and $25,000 are pulling the mean higher. Although, it's not particularly surprising that borrowers gravitate to these "nice" numbers. 
@@ -257,7 +255,6 @@ Zooming in to look at the details, specifically under $10,000, you can see multi
 positions <- c("Not employed", "Not displayed", "$0", 
                 "$1-24,999", "$25,000-49,999", "$50,000-74,999",
                 "$75,000-99,999", "$100,000+")
-
 
 ggplot(prosperloans, aes(IncomeRange)) + 
   scale_x_discrete(limits = positions) +
@@ -286,7 +283,7 @@ group borrowers state and summarize count by loan status
 
 ```{r}
 
-# Map 2 letter abbrievation to full name for map plot
+# Map the 2 letter abbrievations to their full name for map plot
 prosperloans$BorrowerStateFullName <- tolower(state.name[match(prosperloans$BorrowerState, state.abb)])
 
 us <- map_data("state")
@@ -294,12 +291,9 @@ us <- map_data("state")
 # need loanStatus to be their own varible with each region value totalled
 # group by stateName, loanStatus factors 
 grp_by_state <- prosperloans %>%
-  group_by(BorrowerStateFullName, BorrowerState, LoanStatus) %>%
+  group_by(BorrowerStateFullName, BorrowerState, DelinquentBorrowers) %>%
   summarise(count = n()) %>%
-  filter(LoanStatus == "Defaulted" |
-          LoanStatus == "Chargedoff" |
-          LoanStatus == "Past Due (91-120 days)" |
-          LoanStatus == "Past Due (>120 days)")
+  filter(DelinquentBorrowers == True)
 
 #TODO: clean this up + add abbr/labels
 gg <- ggplot()
@@ -325,20 +319,25 @@ Discuss - count of delinquent borrowers across the US. CA has the highest levels
 **Listing Category**
 
 ```{r}
-# map numbers to category
+# Map numbers to category
 listing_category <- c("Not Available", "Debt Consolidation", "Home Improvement", "Business",
                       "Personal Loan", "Student Use", "Auto", "Other", "Baby&Adoption",
                       "Boat", "Cosmetic Procedure", "Engagement Ring", "Green Loans",
                       "Household Expenses", "Large Purchases", "Medical/Dental", "Motorcycle",
                       "RV", "Taxes", "Vacation", "Wedding Loans")
 
-
+# Create new variable for mapped names (remember vector is not 0 based indexed, starts at 1)
 prosperloans$ListingCategoryFullName <- listing_category[(prosperloans$ListingCategory..numeric.)+1]
 
-ggplot(prosperloans, aes(prosperloans$ListingCategoryFullName)) +
-  geom_bar() +
-  scale_y_log10() + # consider including the log version as well
+g <- ggplot(prosperloans, aes(prosperloans$ListingCategoryFullName, fill = factor(DelinquentBorrowers))) +
+  geom_bar(position="dodge") +
+  scale_fill_brewer() +
+  theme_dark() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+g
+
+# Log file will help with comparison across all categories
+g + scale_y_log10()
 
 ```
 
@@ -367,7 +366,7 @@ xlim(0, quantile(data$col_name, 0.95)) get 95% of data along x and y
 * Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
 * What was the strongest relationship you found?
 
-**listing cateogry and loan original amount**
+**Listing Cateogry and Loan Amount**
 
 loan amount for different categories. How to compare this with delinquent loans???
 ```{r}
@@ -379,15 +378,10 @@ g
 
 Discuss - mean, debt consolidation outliers, max loan amount, baby/adoption and debt consolidation are surprising similar plots
 
-**loan original amount and delinquent loans**
-
-loan amount for delinquent borrowers and the number of delinquents
-(x=amount, y=count of delinquents, filter by past due)
 
 **Loan Term and Loan Amount**
 
 ```{r}
-# boxplot
 # look into outliers and discrete x axis on correct terms
 g <- ggplot(prosperloans, aes(Term, LoanOriginalAmount, group = Term)) +
   geom_boxplot()
@@ -407,7 +401,6 @@ g
 
 Discuss - person loans has the lower mean APR, debt consolidation, boat and baby loans have similar mean APRs
 
-
 **remember to bring it back to delinquency**
 
 **loan and bankcard utilization**
@@ -415,7 +408,7 @@ Discuss - person loans has the lower mean APR, debt consolidation, boat and baby
 ```{r}
 # laon, bankcard and loan status (factor)
 ggplot(prosperloans, aes(LoanOriginalAmount, BankcardUtilization)) +
-  geom_point() +
+  geom_point(alpha = 1/50) +
   scale_y_log10()
 ```
 
@@ -427,7 +420,7 @@ Discuss - over 7k borrowers with NA utilization and values over 1 (100% utilizat
 ```{r}
 # useful in any way???
 g <- ggplot(prosperloans, aes(BorrowerRate, BorrowerAPR)) +
-  geom_point(alpha = 1/50)
+  geom_point(alpha = 1/50) 
 g
 ```
 
@@ -438,18 +431,11 @@ Discuss - APR is annual cost of the loan to the Borrower, Rate is the interest r
 ```{r}
 # monthly income vs debt to income ratio
 # relatioship between more monthly income and debt:income
-p1 <- ggplot(prosperloans, aes(StatedMonthlyIncome, DebtToIncomeRatio)) +
+ggplot(prosperloans, aes(StatedMonthlyIncome, DebtToIncomeRatio, colour = factor(DelinquentBorrowers))) +
   geom_point(alpha = 0.1) +
   scale_x_continuous(limits = c(0,20000)) +
   scale_y_continuous(limits = c(0, 1)) +
   geom_density2d()
-
-p2 <- ggplot(pl_defaulted, aes(StatedMonthlyIncome, DebtToIncomeRatio)) +
-  geom_point(alpha = 0.1) +
-  scale_x_continuous(limits = c(0,20000)) +
-  scale_y_continuous(limits = c(0, 1))
-
-grid.arrange(p1, p2, nrow=1)
 ```
 
 Discuss - at 20k a month, outliers with zero income and over 20k (approx 10k observations). Most borrower's debt-to-income ratio is under 0.25 (or 0.5). 
@@ -458,11 +444,9 @@ Look up "good", debt-to-income ratios
 
 ```{r}
 # names(prosperloans)
-
 ggplot(prosperloans, aes(BorrowerRate, DebtToIncomeRatio)) +
-  geom_point(alpha = 0.1) +
+  geom_point(alpha = 0.01) +
   scale_y_log10()
-
 ```
 
 
@@ -471,6 +455,23 @@ ggplot(prosperloans, aes(BorrowerRate, DebtToIncomeRatio)) +
 * Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
 * Were there any interesting or surprising interactions between features?
 * OPTIONAL: Did you create any models with your dataset? Discuss the strengths and limitations of your model.
+
+```{r}
+# Pearson correlation coefficients, using pairwise observations (default method)
+ggcorr(prosperloans, label = TRUE, label_size = 3, hjust = 0.75, size = 3, color = "grey50")
+
+names(prosperloans)
+ggplot(prosperloans, aes(CreditScoreRangeLower, BorrowerRate)) +
+  geom_point(alpha = 0.1)
+
+
+# OR just use built in cor and corrplot
+#library(corrplot)
+#M <- cor(mtcars)
+#corrplot(M, method="circle")
+
+```
+
 
 ## Final Plots
 ### plot 1
@@ -487,6 +488,7 @@ stuff
 
 ### References
 * https://en.wikipedia.org/wiki/Charge-off
+* https://en.wikipedia.org/wiki/Default_(finance)
 * https://www.prosper.com/help/topics/how-to-read-a-loan-listing
 * http://www.investopedia.com/terms/c/credit-utilization-rate.asp
 * http://www.investopedia.com/terms/d/delinquent.asp
@@ -495,6 +497,7 @@ stuff
 * https://en.wikipedia.org/wiki/List_of_states_and_territories_of_the_United_States
 * http://stackoverflow.com/a/29618201/1343001
 * http://www.investopedia.com/ask/answers/100314/what-difference-between-interest-rate-and-annual-percentage-rate-apr.asp
+* https://briatte.github.io/ggcorr
 
 ### Programming Environment
 ```{r}
