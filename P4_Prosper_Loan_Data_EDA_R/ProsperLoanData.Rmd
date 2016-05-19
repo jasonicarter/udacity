@@ -104,16 +104,14 @@ Supporting features...
 * **StatedMonthlyIncome**:
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, Packages}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Packages_and_Data}
 library(ggplot2) 
 library(dplyr)
 library(maps)
 library(mapproj)
 library(gridExtra)
 library(GGally)
-```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, Load_the_Data}
 # Load the Data
 pld <- read.csv("prosperLoanData.csv")
 ```
@@ -177,7 +175,6 @@ prosperloans$DelinquentBorrowers <- ifelse(prosperloans$LoanStatus == "Defaulted
                                             prosperloans$LoanStatus == "Past Due (61-90 days)" |
                                             prosperloans$LoanStatus == "Past Due (91-120 days)" |
                                             prosperloans$LoanStatus == "Past Due (>120 days)", 1, 0)
-
 ```
 
 Before going too far, I was curious as to the creation date distribution of observations in the dataset. This is important as this could cause bias in further investigation, for example, if the majority of the data was observed during 2008-2009 (the financial crisis) this could skew the data towards having a majority of delinquency. To analysis this I'm going to explore the ListingCreationDate feature along with LoanStatus.
@@ -186,8 +183,7 @@ Before going too far, I was curious as to the creation date distribution of obse
 # Investigate distribution of loan creation year
 ggplot(prosperloans, aes(prosperloans$LoanCreationYear, fill = factor(DelinquentBorrowers))) + 
   geom_bar() +
-  scale_fill_brewer() + 
-  theme_dark()
+  theme_minimal()
 ```
 
 Inorder to help faciliate this more easily, I've decided to create a new variable which will capture the year segment of the loan creation date.
@@ -212,8 +208,7 @@ summary(prosperloans$Term)
 ggplot(prosperloans,aes(Term, fill = factor(DelinquentBorrowers))) + 
   geom_bar(width = 12) +
   scale_x_continuous(breaks = c(0,12,36,60)) + 
-  scale_fill_brewer() +
-  theme_dark()
+  theme_minimal()
 ```
 
 From the summary breakdown, the average term appears to be 36 months (3 yrs) with an original loan request being $8337, ranging from $1000 to 35000. This seems to cover the full available range allowed by Prosper, although at the time of writting this analysis, Prosper has a minimum limit of $2000. And what seems like a surprising amount, on average these loans have 80 investors.
@@ -228,10 +223,9 @@ summary(prosperloans$LoanOriginalAmount)
 
 # Plot loan terms
 g <- ggplot(prosperloans,aes(LoanOriginalAmount, fill = factor(DelinquentBorrowers))) +
-  scale_fill_brewer() +
-  theme_dark()
+  theme_minimal()
 
-g + geom_histogram(binwidth = 500)
+g + geom_histogram(binwidth = 500)  
 
 ```
 
@@ -251,7 +245,6 @@ Zooming in to look at the details, specifically under $10,000, you can see multi
 ```{r}
 # Plot out income range of delinquent borrowers
 # Plot out income range of all borrowers
-
 positions <- c("Not employed", "Not displayed", "$0", 
                 "$1-24,999", "$25,000-49,999", "$50,000-74,999",
                 "$75,000-99,999", "$100,000+")
@@ -260,10 +253,9 @@ ggplot(prosperloans, aes(IncomeRange)) +
   scale_x_discrete(limits = positions) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   geom_bar()
-
 ```
 
-discuss
+discuss - majority of borrowers have an income rage between $25k and $75k. Not employed and $0 seem to be negliable in comparison 
 
 **Borrowers State**
 
@@ -272,14 +264,9 @@ ggplot(prosperloans,aes(BorrowerState)) +
   geom_bar() +
   scale_y_log10() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
-
-# TODO Look at the top 10 states and show factors from LoanStatus
 ```
 
 Borrowers state covers 52 states, this includes DC and Puerto Rico. Representation for California is skewing the graph, unable to distinguish smaller state count and differences among states. Given California is the most populous state in the US, having a much higher count in borrowers is probably not a good indicator of a trend. To fix this and to better view any trend a log10 transformation was applied to the y axis.
-
-borrowers state count/heatmap overlaid on country map using pl.defaulted
-group borrowers state and summarize count by loan status
 
 ```{r}
 
@@ -288,30 +275,27 @@ prosperloans$BorrowerStateFullName <- tolower(state.name[match(prosperloans$Borr
 
 us <- map_data("state")
 
-# need loanStatus to be their own varible with each region value totalled
-# group by stateName, loanStatus factors 
+# Group by stateName and delinquent borrowers
 grp_by_state <- prosperloans %>%
   group_by(BorrowerStateFullName, BorrowerState, DelinquentBorrowers) %>%
   summarise(count = n()) %>%
-  filter(DelinquentBorrowers == True)
+  filter(DelinquentBorrowers == 1)
 
-#TODO: clean this up + add abbr/labels
-gg <- ggplot()
-gg <- gg + geom_map(data = us, map = us,
-                    aes(x = long, y = lat, map_id = region, label = region),
-                    fill="#ffffff", color="#ffffff", size=0.15)
-gg <- gg + geom_map(data = grp_by_state, map=us,
-                    aes(fill = count, map_id = BorrowerStateFullName),
-                    color = "#ffffff", size = 0.15)
-gg <- gg + scale_fill_continuous(low='lightblue', high='darkblue', guide='colorbar')
-gg <- gg + labs(x=NULL, y=NULL)
-gg <- gg + coord_map("albers", lat0 = 39, lat1 = 45) 
-gg <- gg + theme(panel.border = element_blank())
-gg <- gg + theme(panel.background = element_blank())
-gg <- gg + theme(axis.ticks = element_blank())
-gg <- gg + theme(axis.text = element_blank())
-gg
-
+# Plot US map with delinquent borrower data
+ggplot() + 
+  geom_map(data = us, map = us,
+            aes(x = long, y = lat, map_id = region, label = region),
+            fill="#ffffff", color="#ffffff", size=0.15) +
+  geom_map(data = grp_by_state, map=us,
+            aes(fill = count, map_id = BorrowerStateFullName),
+            color = "#ffffff", size = 0.15) +
+  scale_fill_continuous(low='lightgray', high='black', guide='colorbar') +
+  labs(x="Delinquent Borrowers", y=NULL) +
+  coord_map("albers", lat0 = 39, lat1 = 45) +
+  theme(panel.border = element_blank(),
+        panel.background = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_blank())
 ```
 
 Discuss - count of delinquent borrowers across the US. CA has the highest levels but it should be taken into consideration that CA is the more populous. Middle of the America has the lowest rate of delinquency, East, West and Texas.
@@ -331,8 +315,7 @@ prosperloans$ListingCategoryFullName <- listing_category[(prosperloans$ListingCa
 
 g <- ggplot(prosperloans, aes(prosperloans$ListingCategoryFullName, fill = factor(DelinquentBorrowers))) +
   geom_bar(position="dodge") +
-  scale_fill_brewer() +
-  theme_dark() +
+  theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 g
 
@@ -353,14 +336,10 @@ In my observation with this plot is that, although "Debt Consolidation" is by fa
 ### Bivariate analysis
 Continuing to look for trends in delinquency, I will investigate possible expected and unexpected relationships between features with scatterplot and by measuring thier coorelation (pearson / spearman / rho).
 
-(?cor.test look for correlation)
-xlim(0, quantile(data$col_name, 0.95)) get 95% of data along x and y
-
 * listingCategory and loanOriginalAmount (need to map listing to values)
 * bankcardUtilization and loanStatus
 * borrowerRate and loanStatus
 * loanStatus and investors (are you more likely to default if you have less investors? investors think you're a good bet to payoff your loan so more people invest in you. This would imply that having fewer investors mean people tend to believe you are a bad investment - more likely to default. Is this true?)
-
 
 * Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
 * Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
@@ -370,22 +349,22 @@ xlim(0, quantile(data$col_name, 0.95)) get 95% of data along x and y
 
 loan amount for different categories. How to compare this with delinquent loans???
 ```{r}
-g <- ggplot(prosperloans, aes(ListingCategoryFullName, LoanOriginalAmount, group = ListingCategoryFullName)) +
+ggplot(prosperloans, aes(ListingCategoryFullName, LoanOriginalAmount, group = ListingCategoryFullName)) +
   geom_boxplot() +
+  theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-g
 ```
 
 Discuss - mean, debt consolidation outliers, max loan amount, baby/adoption and debt consolidation are surprising similar plots
-
 
 **Loan Term and Loan Amount**
 
 ```{r}
 # look into outliers and discrete x axis on correct terms
-g <- ggplot(prosperloans, aes(Term, LoanOriginalAmount, group = Term)) +
-  geom_boxplot()
-g
+ggplot(prosperloans, aes(Term, LoanOriginalAmount, group = Term)) +
+  geom_boxplot() +
+  scale_x_continuous(breaks = c(0,12,36,60)) +
+  theme_minimal()
 ```
 
 
@@ -393,10 +372,10 @@ g
 
 Is there a relationship between what rate someone gets and their reason for a loan
 ```{r}
-g <- ggplot(prosperloans, aes(ListingCategoryFullName, BorrowerRate, group = ListingCategoryFullName)) +
+ggplot(prosperloans, aes(ListingCategoryFullName, BorrowerRate, group = ListingCategoryFullName)) +
   geom_boxplot() +
+  theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-g
 ```
 
 Discuss - person loans has the lower mean APR, debt consolidation, boat and baby loans have similar mean APRs
@@ -409,6 +388,7 @@ Discuss - person loans has the lower mean APR, debt consolidation, boat and baby
 # laon, bankcard and loan status (factor)
 ggplot(prosperloans, aes(LoanOriginalAmount, BankcardUtilization)) +
   geom_point(alpha = 1/50) +
+  theme_minimal() +
   scale_y_log10()
 ```
 
@@ -419,9 +399,9 @@ Discuss - over 7k borrowers with NA utilization and values over 1 (100% utilizat
 
 ```{r}
 # useful in any way???
-g <- ggplot(prosperloans, aes(BorrowerRate, BorrowerAPR)) +
-  geom_point(alpha = 1/50) 
-g
+ggplot(prosperloans, aes(BorrowerRate, BorrowerAPR)) +
+  geom_point(alpha = 1/50) +
+  theme_minimal()
 ```
 
 Discuss - APR is annual cost of the loan to the Borrower, Rate is the interest rate to the borrower excluding fees.
@@ -433,6 +413,7 @@ Discuss - APR is annual cost of the loan to the Borrower, Rate is the interest r
 # relatioship between more monthly income and debt:income
 ggplot(prosperloans, aes(StatedMonthlyIncome, DebtToIncomeRatio, colour = factor(DelinquentBorrowers))) +
   geom_point(alpha = 0.1) +
+  theme_minimal() +
   scale_x_continuous(limits = c(0,20000)) +
   scale_y_continuous(limits = c(0, 1)) +
   geom_density2d()
@@ -446,42 +427,119 @@ Look up "good", debt-to-income ratios
 # names(prosperloans)
 ggplot(prosperloans, aes(BorrowerRate, DebtToIncomeRatio)) +
   geom_point(alpha = 0.01) +
+  theme_minimal() +
   scale_y_log10()
 ```
 
+Discuss - 
 
 ### Multivariate Analysis
 
 * Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
 * Were there any interesting or surprising interactions between features?
-* OPTIONAL: Did you create any models with your dataset? Discuss the strengths and limitations of your model.
 
+**Correlation Matrix**
 ```{r}
 # Pearson correlation coefficients, using pairwise observations (default method)
-ggcorr(prosperloans, label = TRUE, label_size = 3, hjust = 0.75, size = 3, color = "grey50")
+ggcorr(prosperloans, label = TRUE, label_size = 3, hjust = 0.9, size = 3, color = "black")
 
-names(prosperloans)
-ggplot(prosperloans, aes(CreditScoreRangeLower, BorrowerRate)) +
-  geom_point(alpha = 0.1)
+```
+
+Discuss - Correlation matrix
+
+**Credit Score and Borrowing Rate**
+```{r}
+g1 <- ggplot(prosperloans, aes(CreditScoreRangeLower, BorrowerRate)) +
+  geom_point(alpha = 0.1) +
+  theme_minimal()
+
+g2 <- ggplot(prosperloans, aes(CreditScoreRangeUpper, BorrowerRate)) +
+  geom_point(alpha = 0.1) +
+  theme_minimal()
+
+grid.arrange(g1, g2, nrow = 1)
+```
+
+Discuss - shows expected correlation between a borrower's lower credit and a lower borrowing rate.
+
+**Credit Score and Loan Amount**
+```{r}
+g1 <- ggplot(prosperloans, aes(CreditScoreRangeLower, LoanOriginalAmount)) +
+  geom_point(alpha = 0.1) +
+  theme_minimal()
+
+g2 <- ggplot(prosperloans, aes(CreditScoreRangeUpper, LoanOriginalAmount)) +
+  geom_point(alpha = 0.1) +
+  theme_minimal()
+
+grid.arrange(g1, g2, nrow = 1)
+```
+
+Discuss - expected higher credit score, the higher the loan amount
+
+**Loan Amount and Investors**
+```{r}
+# scale_x limits
+ggplot(prosperloans, aes(LoanOriginalAmount, Investors)) +
+  geom_point(alpha = 0.1) +
+  theme_minimal()
+```
+
+Discuss - 
+
+**Bankcard Utilization and Borrowing Rate**
+```{r}
+ggplot(prosperloans, aes(BankcardUtilization, BorrowerRate)) +
+  geom_point(alpha = 0.1, position = "jitter") +
+  scale_x_continuous(limits = c(0, 1)) +
+  theme_minimal()
+```
+
+Discuss - 
+
+```{r}
+
+prosperloans <- transform(prosperloans, 
+               IncomeRange = factor(IncomeRange, levels = positions, labels = positions))
+
+ggplot(prosperloans, aes(LoanCreationYear, LoanOriginalAmount)) + 
+  geom_boxplot() +
+  scale_y_continuous(limits = c(0,20000)) +
+  facet_grid(IncomeRange ~ .) +
+  theme_minimal()
+```
+
+Discuss - all income ranges display the same curve (distribution across 2007 - 2014). Missing "not displayed" after 2008, possibly this category was removed as an option for users after 2008. Borrowers with $100,000+ consistently have a wider spread of loan amounts over the years.
 
 
-# OR just use built in cor and corrplot
-#library(corrplot)
-#M <- cor(mtcars)
-#corrplot(M, method="circle")
+```{r}
+ggplot(prosperloans, aes(LoanCreationYear, LoanOriginalAmount, colour = factor(DelinquentBorrowers))) + 
+  geom_boxplot() +
+  scale_y_continuous(limits = c(0,20000)) +
+  facet_grid(IncomeRange ~ .) +
+  scale_color_discrete(name = "Borrowers", breaks = c(0,1), labels = c("Good Standing", "Delinquent")) +
+  theme_minimal()
+```
+
+
+```{r}
 
 ```
 
 
 ## Final Plots
 ### plot 1
-description
+bivariate plot
 
 ### plot 2
-description
+US map
+
+* legend
+* State.abb
+* rename "count"
 
 ### plot 3
-description
+correlation if any good
 
 ## Reflection
 stuff
