@@ -433,50 +433,66 @@ Discuss -
 
 ### Multivariate Analysis
 
-* Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
-* Were there any interesting or surprising interactions between features?
+Here I dive into the examining the relationship between multiple variables of the dataset. There are some expected "strong" relationships which will be investigated but also any unusual or unexpected relationships strong or weak relationships will also be called out for investigation as well.
+
+First, to start with, a correlation matrix will be calculated and used in order to help start the investigation where by the variables with strong and/or weak relationships will be reviewed.
 
 **Correlation Matrix**
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, Correlation_Matrix}
 # Pearson correlation coefficients, using pairwise observations (default method)
 # Non-numeric columns automatically removed/ignored
 ggcorr(prosperloans, label = TRUE, label_size = 3, hjust = 0.9, size = 3, color = "black")
 
 ```
 
-Discuss - Correlation matrix
+The correlation matrix relieved a few surprising things - I thought there would be a much stronger relationship between interest rate (BorrowerRate) and the credit score (CreditScoreRangeUpper/Lower). At a score of -0.5 it's the strongest correlation out of the selected variables. Also, the number of investors (Investors) and the borrower loan amount (LoanOriginalAmount) has a positive correlation of 0.4, which was somewhat expected as investors are only allowed to contribute a partion of a loan amount, i.e. no one investor can lend an entire loan amount.
+
+Below, a few particularly interesting relationships will be investigated further.
 
 **Credit Score and Borrowing Rate**
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-g1 <- ggplot(prosperloans, aes(CreditScoreRangeLower, BorrowerRate)) +
-  geom_point(alpha = 0.1) +
-  theme_minimal()
 
-g2 <- ggplot(prosperloans, aes(CreditScoreRangeUpper, BorrowerRate)) +
-  geom_point(alpha = 0.1) +
-  theme_minimal()
-
-grid.arrange(g1, g2, nrow = 1)
+ggplot(prosperloans, aes(CreditScoreRangeUpper, BorrowerRate,
+                               color = factor(DelinquentBorrowers))) +
+  scale_x_continuous(limits = c(250, 1000)) +
+  scale_y_continuous(limits = c(0, 0.4)) +
+  geom_point(alpha = 0.01) +
+  geom_jitter() +
+  scale_color_discrete(labels = c("Good Standing", "Delinquent")) +
+  theme_minimal() +
+  theme(legend.position="top", 
+        legend.title=element_blank())
 ```
 
-Discuss - shows expected correlation between a borrower's lower credit and a lower borrowing rate.
+We see an expected result here, where the trend is lower credit scores tend to have higher borrowing rates and higher credit scores obtaining a lower borrowing rate. Delinquent borrowers also tend to have lower credit scores, this could be in part due to their higher interest rates on loan hendering payments but more investigation would be required to come to a conclusion. And also as expected, borrowers with higher credit scores and lower interest rate, tend to be in good standing with their loans.
 
 **Credit Score and Loan Amount**
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-g1 <- ggplot(prosperloans, aes(CreditScoreRangeLower, LoanOriginalAmount)) +
+g1 <- ggplot(subset(prosperloans, DelinquentBorrowers == 1), 
+             aes(CreditScoreRangeLower, LoanOriginalAmount)) +
+  ggtitle("Delinquent Borrowers") +
   geom_point(alpha = 0.1) +
+  scale_x_continuous(limits = c(400, 1000)) +
+  scale_y_continuous(limits = c(0, 35000)) +
   theme_minimal()
 
-g2 <- ggplot(prosperloans, aes(CreditScoreRangeUpper, LoanOriginalAmount)) +
+g2 <- ggplot(subset(prosperloans, DelinquentBorrowers == 0), 
+             aes(CreditScoreRangeUpper, LoanOriginalAmount)) +
+  ggtitle("Good Standing Borrowers") +
   geom_point(alpha = 0.1) +
+  scale_x_continuous(limits = c(400, 1000)) +
+  scale_y_continuous(limits = c(0, 35000)) +
   theme_minimal()
 
 grid.arrange(g1, g2, nrow = 1)
 ```
 
-Discuss - expected higher credit score, the higher the loan amount
+Discuss - expected higher credit score, the higher the loan amount...partially due, but still the majority of borrowers even with higher credit score borrow under $20k
 
 **Loan Amount and Investors**
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 # scale_x limits
 ggplot(prosperloans, aes(LoanOriginalAmount, Investors)) +
@@ -487,14 +503,16 @@ ggplot(prosperloans, aes(LoanOriginalAmount, Investors)) +
 Discuss - 
 
 **Bankcard Utilization and Borrowing Rate**
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-ggplot(prosperloans, aes(BankcardUtilization, BorrowerRate)) +
-  geom_point(alpha = 0.1, position = "jitter") +
-  scale_x_continuous(limits = c(0, 1)) +
+ggplot(prosperloans, aes(BorrowerRate, BankcardUtilization)) + 
+  geom_point(alpha = 0.1) +
+  scale_y_continuous(limits = c(0, 1.5), labels = scales::percent) +
+  facet_grid(DelinquentBorrowers ~ .) +
   theme_minimal()
 ```
 
-Discuss - 
+It was unexpected to see bankcard utilization over 1 or 100% and how the typical calculation happens doesn't seem to allow a utilization of over 100%. Another unexpected result, was the large number of borrowers with high bankcard utilization who were in good standing. And although there are a larger number of borrowers in good standing, in comparison to delinquent borrowers, good standing borrowers have a utilization which is more evenly spread through 0 to 100%.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
