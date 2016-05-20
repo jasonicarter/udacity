@@ -87,12 +87,12 @@ After reviewing the long list of variables, and thinking of all of the different
 * **CreditScoreRangeUpper**: The upper value representing the range of the borrower's credit score as provided by a consumer credit rating agency. 
 * **BankcardUtilization**: The percentage of available revolving credit that is utilized at the time the credit profile was pulled.
 * **IncomeRange**: The income range of the borrower at the time the listing was created.
-* **TotalProsperLoans**: Number of Prosper loans the borrower at the time they created this listing. This value will be null if the borrower had no prior loans. 
 * **LoanOriginalAmount**: The origination amount of the loan.
 * **Investors**: The number of investors that funded the loan.
 
 #### Supporting Features
-Supporting features...
+
+Below are a list of supporting features. These features will not be the source of my main investigation but will certainly help to contribute to deeper dives and identification of possible trends.
 
 * **ListingCreationDate**: The date the listing was created.
 * **Occupation**: The Occupation selected by the Borrower at the time they created the listing.
@@ -100,6 +100,7 @@ Supporting features...
 * **BorrowerAPR**: The Borrower's Annual Percentage Rate (APR) for the loan.
 * **BorrowerRate**: The Borrower's interest rate for this loan. 
 * **Recommendations**: Number of recommendations the borrower had at the time the listing was created.
+* **TotalProsperLoans**: Number of Prosper loans the borrower at the time they created this listing. This value will be null if the borrower had no prior loans.
 * **DebtToIncomeRatio**:
 * **StatedMonthlyIncome**:
 
@@ -118,17 +119,18 @@ pld <- read.csv("prosperLoanData.csv")
 
 ## Exploratory Analysis
 ### Univariate analysis 
-First, I want to review some basics values and descriptive statistics of the dataset. This is for two reasons, 1) to verify some values put forward by Udacity, such as the 81 variables and 113,937 observations. And 2) to determine if there is anything "weird" or stands out about the data which I may want to dive deeper into. Although I have a general direction, i.e deliquencies and their correlations, if something as or more interesting pops up from the descriptive stats, I'll take a peek in that direction as well. 
+
+First, I want to review some basics values and descriptive statistics of the dataset. This is for two main reasons, 1) to verify some values put forward by Udacity, such as the 81 variables and 113,937 observations. And 2) to determine if there is anything "weird" or "stands out" about the data which I may want to dive deeper into. Although I have a general direction, i.e deliquencies and their correlations, if something interesting pops up from the descriptive stats, I'll take a peek in that direction as well. 
 
 Lets take a look at the dataset and verify the dimensions
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, dataset_dimensions}
 # Investigate dataset dimensions
 dim(pld)
 ```
 
-Now, I setup the new data frame by keeping only the main and support variables.
+Now I setup the new dataframe by keeping only the main and support variables.
 
-Column "ListingCategory" is actually labelled "ListingCategory..numeric." as its column value, numeric, is mapped to a string one word description.
+Column "ListingCategory" is actually labelled "ListingCategory..numeric." as its column value, numeric, is mapped to a string one word description/category.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Create_Dataframe_Subsets}
 # Review column name to fix subset() issue
@@ -144,13 +146,10 @@ colsToKeep <- c("Term","LoanStatus","BorrowerState","ListingCategory..numeric.",
 # Keep only variables in colsToKeep (columns to keep)
 prosperloans <- subset(pld, select=colsToKeep)
 
-# Create new variable
-prosperloans$LoanCreationYear <- format(as.Date(prosperloans$ListingCreationDate), "%Y")
-
 str(prosperloans)
 ```
 
-There are a few categorical features in the new dataset. At first glance, BorrowerState has 52 states or levels and Occupation has 68 levels/categories for over 113k observations - it should be possible to group by occupations to see any trends.
+There are a few categorical features in the new dataset. At first glance, BorrowerState has 52 states or levels and Occupation has 68 levels/categories for over 113k observations - it should be possible to nicely group by occupations to see any trends.
 
 Example of categorical values in "LoanStatus"
 ```{r echo=FALSE, message=FALSE, warning=FALSE, LoanStatus_Categories}
@@ -163,10 +162,14 @@ There are a few challenges here. If I'm investigating delinquencies, I need to d
 Chargedoff: 
 
 > A charge-off or chargeoff is the declaration by a creditor (usually a credit card account) that an amount of debt is unlikely to be collected. This occurs when a consumer becomes severely delinquent on a debt. Traditionally, creditors will make this declaration at the point of six months without payment. In the United States, Federal regulations require creditors to charge-off installment loans after 120 days of delinquency, while revolving credit accounts must be charged-off after 180 days
+>
+> -- [Wikipedia](https://en.wikipedia.org/wiki/Charge-off)
 
 Defaulted: 
 
 > In finance, default is failure to meet the legal obligations (or conditions) of a loan,[1] for example when a home buyer fails to make a mortgage payment, or when a corporation or government fails to pay a bond which has reached maturity.
+>
+> -- [Wikipedia](https://en.wikipedia.org/wiki/Default_(finance)
 
 ```{r, message=FALSE, warning=FALSE, Create_Delinquent_Variable}
 # New variable to be used to identify "delinquent" borrowers
@@ -177,9 +180,12 @@ prosperloans$DelinquentBorrowers <- ifelse(prosperloans$LoanStatus == "Defaulted
                                             prosperloans$LoanStatus == "Past Due (>120 days)", 1, 0)
 ```
 
-Before going too far, I was curious as to the creation date distribution of observations in the dataset. This is important as this could cause bias in further investigation, for example, if the majority of the data was observed during 2008-2009 (the financial crisis) this could skew the data towards having a majority of delinquency. To analysis this I'm going to explore the ListingCreationDate feature along with LoanStatus.
+Before going too far, I was curious as to the creation date distribution of observations in the dataset. This is important as this could cause bias in further investigation, for example, if the majority of the data was observed during 2008-2009 [(the financial crisis)](https://en.wikipedia.org/wiki/Financial_crisis) this could skew the data towards having a majority of delinquency. To analysis this, I'm going to explore the ListingCreationDate feature along with LoanStatus.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Creation_Year_Distribution}
+# Create new variable 
+prosperloans$LoanCreationYear <- format(as.Date(prosperloans$ListingCreationDate), "%Y")
+
 # Investigate distribution of loan creation year
 ggplot(prosperloans, aes(prosperloans$LoanCreationYear, fill = factor(DelinquentBorrowers))) + 
   geom_bar() +
@@ -188,15 +194,13 @@ ggplot(prosperloans, aes(prosperloans$LoanCreationYear, fill = factor(Delinquent
 
 Inorder to help faciliate this more easily, I've decided to create a new variable which will capture the year segment of the loan creation date.
 
-Discuss - drop in 2009 and a steady pick up following subsequent years. Financial crisis??? No investors??? Competitors entered??? Need to review further. 
+From first glance, there is an obvious dip in borrowers, both delinquent and otherwise across 2008 and 2009. My first thoughts were connecting this fall in borrowers to the finanical crisis which occurred in late 2008. Howwever, remember, this is loan "creation" date, and on a side note, is a good lesson in understanding the data and miss-communication in visuals. 
 
-Looking at only delinqunet borrowers, a possible lead up to the financial crisis - using the same scale, no issues 2004/5, with increase in volume of defaults and chargedoff leading up to 2007/8 almost half of all borrowers
+This data is not representing delinquent loans of 2008-9 but loans which went delinquent at some point in time that were created in 2007/8. I believe it can be assumed this is a lead up to the financial crisis, i.e. borrowers took out loans at a "normal" rate from 2006-2008 but potentially after the financial crisis in 2008, borrowers could no longer cover their monthly payments and loans created 2006-2008 were the most succeptable to defaults. 
 
-Remember - this is loan "creation" date, this is a good lesson in understanding the data and miss communication in visuals. This is not representing delinquent loans of 2007/8 but loans which went delinquent at some point in time that were created in 2007/8. I believe it can be assumed this is why you see a lead up to the financial crisis, i.e. borrowers took out loans at a "normal" rate from 2005-2008 but potentially after the financial crisis in 2008, borrowers can no longer pay and loans created 2006-2008 were the most succeptable to defaults. 
+This assumption also explains the dip in 2009 and gradual increase over the next few subsequent years, less borrowers and much fewer delinquents in comparison to the level of loans in good standing.
 
-This assumption also explains the dip in 2009 and gradual increase, less borrowers (1st graph) and much fewer delinquents in comparison to the level of loans in good standing.
-
-Time to further the analysis and some other interesting initial features to look at in regards to delinquency are: Term, LoanStatus, LoanOriginalAmount, Income Range, Borrower's State and Listing Category (the reason for a loan).
+Time to further the analysis and investigate some other interesting features. Leaning towards investigating the relationship of borrowers and delinquency, I will do a deeper dive into: Term, LoanStatus, LoanOriginalAmount, Income Range, Borrower's State and Listing Category (the reason for a loan).
 
 **Term and Loan Status**
 
@@ -211,13 +215,13 @@ ggplot(prosperloans,aes(Term, fill = factor(DelinquentBorrowers))) +
   theme_minimal()
 ```
 
-From the summary breakdown, the average term appears to be 36 months (3 yrs) with an original loan request being $8337, ranging from $1000 to 35000. This seems to cover the full available range allowed by Prosper, although at the time of writting this analysis, Prosper has a minimum limit of $2000. And what seems like a surprising amount, on average these loans have 80 investors.
+From the summary breakdown, the average term appears to be 36 months (3 yrs) with an original loan request being $8337, ranging from $1000 to 35000. This seems to cover the full available range allowed by Prosper, although at the time of writting this analysis, Prosper now has a minimum loan limit of $2000. And what seems like a surprising amount, on average loans have 80 investors.
 
-It's also very clear that the majority of borrowers choose a 36 month term, where 60 and then 12 month terms are 2nd and 3rd most popular, respectively. And approximately 15% of the total borrowers are delinquent on their loans. And the distribution of delinquency is not surprisingly very similar to that of the total loan distribution across loan terms.
+It's also very clear that the majority of borrowers choose a 36 month term, where 60 and then 12 month terms are 2nd and 3rd most popular, respectively. And approximately 15% of the total borrowers are delinquent on their loans. Thinking of the distribution of delinquency arcoss terms, one would imagine larger term equates to a larger loan amount and monthly payments which may be too much to handle for some. This inturn would contribute to having more delinquncies. However, the distribution of delinquency is surprisingly very similar to that of the total loan distribution across loan terms. An investigation around loan amounts and across terms may reveal more, i.e if loans with larger amounts are associated to the borrowers with better credit scores, it's more likely that these loans will be paid off and borrowers will be in good standing.
 
 **Original Loan Amount**
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Loan_and_Delinquents}
 # Summary of loan terms
 summary(prosperloans$LoanOriginalAmount)
 
@@ -231,7 +235,7 @@ g + geom_histogram(binwidth = 500)
 
 Summary data indicates mean and median quite far apart. This is visualized in the graph which is right skewed graph. As it the spikes of borrowers at $10,000, $15,000 and $25,000 are pulling the mean higher. Although, it's not particularly surprising that borrowers gravitate to these "nice" numbers. 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Loan_and_Delinquents_with_Breaks}
 # Zoom in to get details with reduced binwidth and added breaks
 g + geom_histogram(binwidth = 100) + 
   scale_x_continuous(limits = c(500, 12000), 
@@ -242,9 +246,9 @@ Zooming in to look at the details, specifically under $10,000, you can see multi
 
 **Income Range**
 
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, IncomeRange_Distribution}
 # Plot out income range of all borrowers
-positions <- c("Not employed", "Not displayed", "$0", 
+positions <- c("Not employed", "$0", "Not displayed", 
                 "$1-24,999", "$25,000-49,999", "$50,000-74,999",
                 "$75,000-99,999", "$100,000+")
 
@@ -254,7 +258,11 @@ ggplot(prosperloans, aes(IncomeRange)) +
   geom_bar()
 ```
 
-discuss - majority of borrowers have an income rage between $25k and $75k. Not employed and $0 seem to be negliable in comparison 
+Reviewing income range allows us to see the distribution of total borrowers and their income with a $25k dollar bin / range. This could shine light into the fincanical standing of borrowers which may be contributing factors to delinqunency. 
+
+The distribution of borrowers across income range is somewhat normal if we consider that there are a number of users in the "Not Displayed" category, which was re-odered with the assumption that this category of borrowers do indeed have an income. 
+
+TODO: mean range
 
 **Borrowers State**
 
@@ -263,6 +271,8 @@ ggplot(prosperloans,aes(BorrowerState)) +
   geom_bar() +
   scale_y_log10() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+prosperloans$BorrowerState
 ```
 
 Borrowers state covers 52 states, this includes DC and Puerto Rico. Representation for California is skewing the graph, unable to distinguish smaller state count and differences among states. Given California is the most populous state in the US, having a much higher count in borrowers is probably not a good indicator of a trend. To fix this and to better view any trend a log10 transformation was applied to the y axis.
