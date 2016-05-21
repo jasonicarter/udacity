@@ -238,11 +238,13 @@ Summary data indicates mean and median quite far apart. This is visualized in th
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Loan_and_Delinquents_with_Breaks}
 # Zoom in to get details with reduced binwidth and added breaks
 g + geom_histogram(binwidth = 100) + 
-  scale_x_continuous(limits = c(500, 12000), 
-                     breaks = c(1000,2000,3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000))
+    scale_x_continuous(limits = c(500, quantile(prosperloans$LoanOriginalAmount, 0.95)),
+                       breaks = c(0, 2500, 5000, 7500, 10000, 12500, 15000, 17500, 20000)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
 ```
 
-Zooming in to look at the details, specifically under $10,000, you can see multiple spikes at these "nice" numbers - 1000, 2000,...,8000, 9000, 10000 - dollars. Since most debt doesn't come in nice round numbers, we can assume borrowers are probably rounding up instead to requesting exact dollar values for their loans. For example, if a borrower is $4678.86 dollars in debt, she is probably requesting a loan of $5000.00. From the data provided, I don't believe there is in specific way to determine if this assumption is true, however, given that debt / money is a floating value with interest rate applied as floating value, it is quite unlikely that the majority of borrowers have debt divisible by 5.
+Taking a closer look at 95% of the data, specifically under $20,000, you can see multiple spikes at these "nice" numbers - 1000, 2000,...,8000, 9000, 10000 - dollars. Since most debt doesn't come in nice round numbers, we can assume borrowers are probably rounding up instead to requesting exact dollar values for their loans. For example, if a borrower is $4678.86 dollars in debt, she is probably requesting a loan of $5000.00. From the data provided, I don't believe there is in specific way to determine if this assumption is true, however, given that debt / money is a floating value with interest rate applied as floating value, it is quite unlikely that the majority of borrowers have debt divisible by 5.
 
 **Income Range**
 
@@ -266,23 +268,21 @@ TODO: mean range
 
 **Borrowers State**
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-ggplot(prosperloans,aes(BorrowerState)) +
-  geom_bar() +
+```{r echo=FALSE, message=FALSE, warning=FALSE, US_Map_of_Borrowers}
+ggplot(na.omit(prosperloans),aes(BorrowerState, fill = factor(DelinquentBorrowers))) +
+  geom_bar(position = "dodge") +
   scale_y_log10() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
-
-prosperloans$BorrowerState
-```
-
-Borrowers state covers 52 states, this includes DC and Puerto Rico. Representation for California is skewing the graph, unable to distinguish smaller state count and differences among states. Given California is the most populous state in the US, having a much higher count in borrowers is probably not a good indicator of a trend. To fix this and to better view any trend a log10 transformation was applied to the y axis.
-
-```{r message=FALSE, warning=FALSE, US_Map_of_Borrowers}
+  theme_minimal() +
+  scale_fill_discrete(labels = c("Good Standing", "Delinquent")) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1),
+        legend.position="top", 
+        legend.title=element_blank())
 
 # Map the 2 letter abbrievations to their full name for map plot
 prosperloans$BorrowerStateFullName <- tolower(state.name[match(prosperloans$BorrowerState, state.abb)])
 
 us <- map_data("state")
+states <- data.frame(state.center, state.abb)
 
 # Group by stateName and delinquent borrowers
 grp_by_state <- prosperloans %>%
@@ -295,11 +295,12 @@ ggplot() +
   geom_map(data = us, map = us,
             aes(x = long, y = lat, map_id = region, label = region),
             fill="#ffffff", color="#ffffff", size=0.15) +
-  geom_map(data = grp_by_state, map=us,
+  geom_map(data = na.omit(grp_by_state), map=us,
             aes(fill = count, map_id = BorrowerStateFullName),
             color = "#ffffff", size = 0.15) +
+  geom_text(data = states, aes(x = x, y = y, label = state.abb, group = NULL), size = 2) +
   scale_fill_continuous(low='lightgray', high='black', guide='colorbar') +
-  labs(x="Delinquent Borrowers", y=NULL) +
+  labs(x="Delinquent Borrowers by State", y=NULL) +
   coord_map("albers", lat0 = 39, lat1 = 45) +
   theme(panel.border = element_blank(),
         panel.background = element_blank(),
@@ -307,7 +308,11 @@ ggplot() +
         axis.text = element_blank())
 ```
 
-Discuss - count of delinquent borrowers across the US. CA has the highest levels but it should be taken into consideration that CA is the more populous. Middle of the America has the lowest rate of delinquency, East, West and Texas.
+Borrowers state covers 52 states, this includes Alaska and Hawaii. Representation for California is skewing the graph, unable to distinguish smaller state count and differences among states. Given California is the most populous state in the US, having a much higher count in borrowers is probably not a good indicator of a trend. To fix this and to better view any trend a log10 transformation was applied to the y axis.
+
+CA has the highest levels but it should be taken into consideration that CA is the more populous. While Florida, Texas and the East coast follow suite. Noticably, "middle America" has the lowest levels of delinquent borrowers but this could also be due to lower levels in population, technical savvy, lower cost of living resulting in better financial situations not requiring loans, etc or a host of other reasons outside of the information the dataset provides.
+
+ND and WY have no delinquent borrowers
 
 **Listing Category**
 
@@ -403,69 +408,60 @@ ggplot(prosperloans, aes(LoanOriginalAmount, BankcardUtilization)) +
 
 Discuss - over 7k borrowers with NA utilization and values over 1 (100% utilization) which I'm not sure how that was calculated. Even for lower loan amounts there is a high card utilization 
 
-
-**Borrower Rate and APR**
-
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-# useful in any way???
-ggplot(prosperloans, aes(BorrowerRate, BorrowerAPR)) +
-  geom_point(alpha = 1/50) +
-  theme_minimal()
-```
-
-Discuss - APR is annual cost of the loan to the Borrower, Rate is the interest rate to the borrower excluding fees.
-
 **Debt-to-Income Ratio**
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Income_and_Debt_Ratio}
 # monthly income vs debt to income ratio, highlighting delinquent borrowers
 ggplot(prosperloans, aes(StatedMonthlyIncome, DebtToIncomeRatio, colour = factor(DelinquentBorrowers))) +
   geom_point(alpha = 0.1) +
   theme_minimal() +
   scale_x_continuous(limits = c(0,20000)) +
   scale_y_continuous(limits = c(0, 1)) +
+  scale_color_discrete(labels = c("Good Standing", "Delinquent")) +
   geom_density2d()
 ```
 
-Discuss - at 20k a month, outliers with zero income and over 20k (approx 10k observations). Most borrower's debt-to-income ratio is under 0.25 (or 0.5). 
+In comparing debt-to-income ratio with a borrower's stated monthly income, I was expecting to see a, somewhat obvious, trend that delinquent borrowers would have a lower monthly income and a higher debt-to-income ratio. With overplotting in the scatterplot two additional techniques were used to more clearly reveal any trends or unexpected results.
 
-Look up "good", debt-to-income ratios
+Borrwers with stated incomes over $20k and debt-to-income ratios over 1 were considered as outliers and removed from the plot. 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+The density contour lines show a high concentration of delinquent borrowers earn less than $2500 a month but have a relatively low debt-to-income ratio of under 0.25 (or 25%). The plot also suggests a negative correlation between monthly income and debt-to-income ratio, i.e the more a borrower makes in monthly income the lower their debt-to-income ratio; However, this does not guarantee the loan will not go into delinquency.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, Rate_and_Debt_Ratio}
 # names(prosperloans)
 ggplot(prosperloans, aes(BorrowerRate, DebtToIncomeRatio)) +
   geom_point(alpha = 0.01) +
-  theme_minimal() +
-  scale_y_log10()
+  scale_y_log10() +
+  scale_x_continuous(limits = c(0,0.4)) +
+  theme_minimal()
 ```
 
-Discuss - 
+The relationship between a borrower's interest rate (BorrowerRate) and their debt ratio (DebtToIncomeRatio) was expected to be a positive correlation. I expected borrowers with high debt-to-income ratios would automatically receive higher interest rates on their loans. However, based on the above scatterplot, there seems to be no trend and a weak positive correlation between these two variables. Further investigation when plotting a correlation matrix will expose the details.
 
 ### Multivariate Analysis
 
-Here I dive into the examining the relationship between multiple variables of the dataset. There are some expected "strong" relationships which will be investigated but also any unusual or unexpected relationships strong or weak relationships will also be called out for investigation as well.
+In this section, I'll dive into examining the relationships between multiple variables of the dataset. There are some expected "strong" relationships which will be investigated but also any unusual or unexpected relationships ,strong or weak, will also be called out for a deep dive into the details.
 
-First, to start with, a correlation matrix will be calculated and used in order to help start the investigation where by the variables with strong and/or weak relationships will be reviewed.
+First, to start with, a correlation matrix will be calculated and used in order to help start the investigation process where by the variables with strong and/or weak relationships will be reviewed.
 
 **Correlation Matrix**
+
 ```{r message=FALSE, warning=FALSE, Correlation_Matrix}
 # Pearson correlation coefficients, using pairwise observations (default method)
 # Non-numeric columns automatically removed/ignored
-ggcorr(prosperloans, label = TRUE, label_size = 3, hjust = 0.9, size = 3, color = "black")
-
+ggcorr(prosperloans, label = TRUE, label_size = 3, hjust = 0.8, size = 2.5, color = "black", layout.exp = 2)
 ```
 
-The correlation matrix relieved a few surprising things - I thought there would be a much stronger relationship between interest rate (BorrowerRate) and the credit score (CreditScoreRangeUpper/Lower). At a score of -0.5 it's the strongest correlation out of the selected variables. Also, the number of investors (Investors) and the borrower loan amount (LoanOriginalAmount) has a positive correlation of 0.4, which was somewhat expected as investors are only allowed to contribute a partion of a loan amount, i.e. no one investor can lend an entire loan amount.
+The correlation matrix revealed a few surprising things - I thought there would be a much stronger relationship between interest rate (BorrowerRate) and the credit score (CreditScoreRangeUpper/Lower). At a score of -0.5 it's the strongest correlation out of the selected variables. Also, the number of investors (Investors) and the borrower loan amount (LoanOriginalAmount) has a positive correlation of 0.4, which was somewhat expected as investors are only allowed to contribute a partion of a loan amount, i.e. no one investor can lend an entire loan amount.
 
 Below, a few particularly interesting relationships will be investigated further.
 
 **Credit Score and Borrowing Rate**
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-
+```{r echo=FALSE, message=FALSE, warning=FALSE, CreditScore_and_BorrowerRate}
 ggplot(prosperloans, aes(CreditScoreRangeUpper, BorrowerRate,
                                color = factor(DelinquentBorrowers))) +
-  scale_x_continuous(limits = c(250, 1000)) +
+  scale_x_continuous(limits = c(400, 1000)) +
   scale_y_continuous(limits = c(0, 0.4)) +
   geom_point(alpha = 0.01) +
   geom_jitter() +
@@ -479,9 +475,9 @@ We see an expected result here, where the trend is lower credit scores tend to h
 
 **Credit Score and Loan Amount**
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, CreditScore_and_LoanAmount}
 g1 <- ggplot(subset(prosperloans, DelinquentBorrowers == 1), 
-             aes(CreditScoreRangeLower, LoanOriginalAmount)) +
+             aes(CreditScoreRangeUpper, LoanOriginalAmount)) +
   ggtitle("Delinquent Borrowers") +
   geom_point(alpha = 0.1) +
   scale_x_continuous(limits = c(400, 1000)) +
@@ -493,28 +489,34 @@ g2 <- ggplot(subset(prosperloans, DelinquentBorrowers == 0),
   ggtitle("Good Standing Borrowers") +
   geom_point(alpha = 0.1) +
   scale_x_continuous(limits = c(400, 1000)) +
-  scale_y_continuous(limits = c(0, 35000)) +
+  scale_y_continuous(limits = c(1000, 35000)) +
   theme_minimal()
 
 grid.arrange(g1, g2, nrow = 1)
+
+summary(prosperloans$CreditScoreRangeUpper)
 ```
 
-Discuss - expected higher credit score, the higher the loan amount...partially due, but still the majority of borrowers even with higher credit score borrow under $20k
+In the above comparisons, both scatterplots show a borrower's credit score against their loan amounts. Once again, this plot reveals some expected and unexpected results. 
+
+The higher concentration of delinquent borrowers have lower credit scores, and they also tend to borrow less money, under $10,000. This maybe due to our previous plot which indicates, lower credit scores often tend to have higher interest rates on their loans - this was an expected result. What was a bit unexpected was the lower loan amount for borrowers with much higher credit scores. Based on previous plots, higher scores provide lower rates, which would tent to allow the borrower to gain access to a higher loan amount. And although the average loan amount for loans in good standing are higher, there is still a high concentration of loans under $20,000 and with credit scores over 700. One other "weird" result which I've ignored so far has to do with the credit score values, for example, some borrowers have score of 899 where credit scores range only between 300 and 850.
 
 **Loan Amount and Investors**
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-# scale_x limits
+```{r echo=FALSE, message=FALSE, warning=FALSE, LoanAmount_and_Investors}
+# Plot loans and investors
 ggplot(prosperloans, aes(LoanOriginalAmount, Investors)) +
   geom_point(alpha = 0.1) +
+  scale_x_log10() +
   theme_minimal()
 ```
 
-Discuss - 
+Discuss -  log10, positive correlation, investor can investor up to 10% of their net worth (Prosper.com), expected results
 
 **Bankcard Utilization and Borrowing Rate**
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, BorrowerRate_and_BankcardUtilization}
+# Loan rates and bankcard utilization as a percentage 
 ggplot(prosperloans, aes(BorrowerRate, BankcardUtilization)) + 
   geom_point(alpha = 0.1) +
   scale_y_continuous(limits = c(0, 1.5), labels = scales::percent) +
@@ -524,8 +526,8 @@ ggplot(prosperloans, aes(BorrowerRate, BankcardUtilization)) +
 
 It was unexpected to see bankcard utilization over 1 or 100% and how the typical calculation happens doesn't seem to allow a utilization of over 100%. Another unexpected result, was the large number of borrowers with high bankcard utilization who were in good standing. And although there are a larger number of borrowers in good standing, in comparison to delinquent borrowers, good standing borrowers have a utilization which is more evenly spread through 0 to 100%.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-
+```{r echo=FALSE, message=FALSE, warning=FALSE, IncomeRange_LoanAmounts_across_Years}
+# Examin income range and loan amounts across years 
 prosperloans <- transform(prosperloans, 
                IncomeRange = factor(IncomeRange, levels = positions, labels = positions))
 
@@ -536,10 +538,12 @@ ggplot(prosperloans, aes(LoanCreationYear, LoanOriginalAmount)) +
   theme_minimal()
 ```
 
-Discuss - all income ranges display the same curve (distribution across 2007 - 2014). Missing "not displayed" after 2008, possibly this category was removed as an option for users after 2008. Borrowers with $100,000+ consistently have a wider spread of loan amounts over the years.
+These were quite interesting plots, as all income ranges display the same curve (distribution across 2007 - 2014). Again, this could be a result of loans, investors and the financial crisis as mentioned previously. Also, the cateogry "not displayed" is missing data after 2008, and one can assume that possibly this category was removed as an option for users after 2008, forcing users to provide more transparency - which also could have been a side effect of the crisis. However, only in 2007 is there data for any of the other categories, which would imply that during 2005 and 2006, none of the income range categories existed (or the data was lost/not recorded).
 
+Also of note, borrowers with $100,000+ consistently have a wider spread of loan amounts over the years. And borrowers within the categories of "$0" and "not employed" should probably be lumped together to provide more accurate information or at least, more manageable information - since by definition, you cannot be employed with $0 income but you can be, not employed, and still have income (e.g. retirees).
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, IncomeRange_LoanAmounts_Years_Delinquency}
+# Comparison of delinquent and good standing borrowers
 ggplot(prosperloans, aes(LoanCreationYear, LoanOriginalAmount, colour = factor(DelinquentBorrowers))) + 
   geom_boxplot() +
   scale_y_continuous(limits = c(0,20000)) +
@@ -548,13 +552,16 @@ ggplot(prosperloans, aes(LoanCreationYear, LoanOriginalAmount, colour = factor(D
   theme_minimal()
 ```
 
+On a deeper dive of the same plot, loan amount by year across income range, I investigate any possible trends around delinquency and spot some neccessily any new trends but unexpected results. Particularly with borrowers who income range is over $100,000, delinquency tends to tread higher then good standing accounts, especially with loans created prior to 2008. These delinquent loans tend to have a higher min, max and mean dollar amount. This larger delinquency gap can also be seen with borrowers of the $0 income range.
 
 ```{r}
+
+# linear regression
 
 ```
 
 
-## Final Plots
+## Final Plots and Summary
 ### plot 1
 bivariate plot
 
@@ -565,11 +572,18 @@ US map
 * State.abb
 * rename "count"
 
+OR IncomeRange_LoanAmounts_Years_Delinquency
+
 ### plot 3
-correlation if any good
+IncomeRange_LoanAmounts_Years_Delinquency OR linear regression 
+
+CreditScore_and_BorrowerRate
+LoanAmount_and_Investors
 
 ## Reflection
-stuff
+
+* Too many variables and ideas to dive into, had to focus and not pull in more features
+* credit score and borrowing rate - is your rate a predictor or the cause? 
 
 ### References
 * https://en.wikipedia.org/wiki/Charge-off
