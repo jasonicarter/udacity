@@ -1,3 +1,6 @@
+---
+output: html_document
+---
 Delinquency at Peer-to-Peer Lender Prosper.com
 ========================================================
 **by Jason Carter**
@@ -617,7 +620,10 @@ The density contour lines show a high concentration of delinquent borrowers earn
 
 ### Plot 3
 
+Income Range:
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Final_Plot_3}
+levels(prosperloans$IncomeRange)
+
 # Comparison of delinquent and good standing borrowers
 thousands <- 1000
 ggplot(subset(prosperloans, prosperloans$IncomeRange != "Not displayed"), 
@@ -626,7 +632,7 @@ ggplot(subset(prosperloans, prosperloans$IncomeRange != "Not displayed"),
   scale_y_continuous(limits = c(0,20), labels = scales::dollar) +
   facet_grid(IncomeRange ~ .) +
   scale_fill_discrete(name = "Borrowers", breaks = c(0,1), labels = c("Good Standing", "Delinquent")) +
-  labs(x="Year (of loan creation)", y="Loan Amount (in 000's)", 
+  labs(x="Year (of loan creation)", y="Loan Amount (in dollars 000's)", 
        title = "Loan Amount by Income Range and Status across Years") +
   theme_minimal()
 ```
