@@ -570,7 +570,7 @@ ggplot(prosperloans, aes(prosperloans$ListingCategoryFullName, fill = factor(Del
   scale_y_log10() +
   theme_minimal() +
   scale_fill_discrete(labels = c("Good Standing", "Delinquent")) +
-  labs(x="Loan Category", y="Number of Borrowers") +
+  labs(x="Loan Category", y="Number of Borrowers", title = "Borrowers per Loan Category and Status") +
   theme(legend.title=element_blank()) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -580,7 +580,7 @@ ggplot(cat_filtered_data, aes(cat_filtered_data$ListingCategoryFullName, fill = 
   geom_bar(position="dodge") +
   theme_minimal() +
   scale_fill_discrete(labels = c("Good Standing", "Delinquent")) +
-  labs(x="Loan Category", y="Number of Borrowers") +
+  labs(x="Loan Category", y="Number of Borrowers", title = "Borrowers per Loan Category and Status") +
   theme(legend.title=element_blank()) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -601,11 +601,11 @@ When reviewing the plot under log10 y axis, the low delinquency of boat loans an
 ggplot(prosperloans, aes(StatedMonthlyIncome, DebtToIncomeRatio, colour = factor(DelinquentBorrowers))) +
   geom_point(alpha = 0.1) +
   theme_minimal() +
+  scale_color_discrete(labels = c("Good Standing", "Delinquent")) +
   scale_x_continuous(limits = c(0,20000), labels = scales::dollar) +
   scale_y_continuous(limits = c(0, 1)) +
   theme(legend.title=element_blank()) +
-  scale_color_discrete(labels = c("Good Standing", "Delinquent")) +
-  labs(x="Monthly Income", y="Debt-to-Income Ratio") +
+  labs(x="Monthly Income", y="Debt-to-Income Ratio", title = "Monthly Income to Debt-to-Income Ratio by Status") +
   geom_density2d()
 ```
 
@@ -626,7 +626,8 @@ ggplot(subset(prosperloans, prosperloans$IncomeRange != "Not displayed"),
   scale_y_continuous(limits = c(0,20), labels = scales::dollar) +
   facet_grid(IncomeRange ~ .) +
   scale_fill_discrete(name = "Borrowers", breaks = c(0,1), labels = c("Good Standing", "Delinquent")) +
-  labs(x="Year (of loan creation)", y="Loan Amount (in 000's)") +
+  labs(x="Year (of loan creation)", y="Loan Amount (in 000's)", 
+       title = "Loan Amount by Income Range and Status across Years") +
   theme_minimal()
 ```
 
