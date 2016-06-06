@@ -57,6 +57,10 @@ to clean the OpenStreetMap data for a part of the world that you care about.
 Use R and apply exploratory data analysis techniques to explore relationships in one variable to multiple variables
 and to explore a selected data set for distributions, outliers, and anomalies.
 
+> Awesome work! There isn't much I can suggest to improve this project further.
+>
+> -- [Udacity Review](https://github.com/jasonicarter/udacity/blob/master/P4_Prosper_Loan_Data_EDA_R/UdacityReview.pdf)
+
 ### Identify Fraud from Enron Email
 
 Play detective and put your machine learning skills to use by building an algorithm to identify Enron Employees
