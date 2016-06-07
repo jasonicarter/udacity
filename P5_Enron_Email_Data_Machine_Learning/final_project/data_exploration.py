@@ -35,6 +35,7 @@ def scatter_plot(data_dict, x_feature, y_feature):
     plt.ylabel(y_feature)
     plt.show()
 
+
 def fill_nan_values(data_dict):
     # Update NaN values with 0 except for email address
     people_keys = data_dict.keys()
@@ -44,6 +45,7 @@ def fill_nan_values(data_dict):
             if feature != 'email_address' and \
                 data_dict[person][feature] == 'NaN':
                 data_dict[person][feature] = 0
+
 
 # TODO: break up function
 def exploreData(data_dict):
