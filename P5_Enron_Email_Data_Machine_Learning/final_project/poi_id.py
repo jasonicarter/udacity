@@ -15,57 +15,29 @@ from tester import dump_classifier_and_data, test_classifier
 with open("final_project_dataset.pkl", "r") as data_file:
     data_dict = pickle.load(data_file)
 
-# Data exploration
+# Data Exploration and Removal of Outliers
 # exploreData(data_dict)
+# TODO: return data_dict
+# my_dataset = exploreData(data_dict) returns updated data_dict
+
+# Feature Selection
+# featureSelection.py - featureListSelection(old_feature_list, data_dict) returns new_feature_list, feature_names
+# featureSelection.py - classifierTest(feature_list, clf,...) return clf, etc..
+# featureSelection.py - classifier(...) return clf, etc
 
 
-# Feature selection / engineering
 # features_list is a list of strings, each of which is a feature name.
 # The first feature must be "poi".
-
 features_list = ['poi', 'salary', 'deferral_payments', 'total_payments',
                  'bonus', 'restricted_stock_deferred', 'deferred_income', 'total_stock_value', 'expenses',
                  'exercised_stock_options', 'long_term_incentive', 'restricted_stock']
 
-# TODO: create def to return top x features (e.g kbest)
-# TODO: create new feature(s), rerun feature section (e.g kbest)
-# TODO: update features_list and my_dataset
-# Store to my_dataset for easy export below.
-my_dataset = data_dict
-
-# Extract features and labels from dataset for local testing
-data = featureFormat(my_dataset, features_list, sort_keys=True)
-labels, features = targetFeatureSplit(data)
-
-from sklearn.feature_selection import SelectKBest
-kbest = SelectKBest(k=5)  # retain only the top 5 features with the best score
-ktransform = kbest.fit_transform(features, labels)  # fit and transform the data
-indices = kbest.get_support(True)  # get the indices of the features_list which were kept
-
-print ktransform.shape
-print ktransform[0]
-
-# Table this maybe with actual score values
-f_list = ['poi']
-for index in indices:
-    f_list.append(features_list[index])
-    print '%s: %f' % (features_list[index], kbest.scores_[index])
-
-features_list = f_list
-features = ktransform
-
-# Task 4: Try a variety of classifiers
+# Test classifiers
 # Please name your classifier clf for easy export below.
 # Note that if you want to do PCA or other multi-stage operations,
 # you'll need to use Pipelines. For more info:
 # http://scikit-learn.org/stable/modules/pipeline.html
 
-# Task 5: Tune your classifier to achieve better than .3 precision and recall
-# using our testing script. Check the tester.py script in the final project
-# folder for details on the evaluation method, especially the test_classifier
-# function. Because of the small size of the dataset, the script uses
-# stratified shuffle split cross validation. For more info:
-# http://scikit-learn.org/stable/modules/generated/sklearn.cross_validation.StratifiedShuffleSplit.html
 
 # Example starting point. Try investigating other evaluation techniques!
 from sklearn.cross_validation import train_test_split
@@ -119,12 +91,16 @@ print(report)
 
 
 
+# Task 5: Tune your classifier to achieve better than .3 precision and recall
+# using our testing script. Check the tester.py script in the final project
+# folder for details on the evaluation method, especially the test_classifier
+# function. Because of the small size of the dataset, the script uses
+# stratified shuffle split cross validation. For more info:
+# http://scikit-learn.org/stable/modules/generated/sklearn.cross_validation.StratifiedShuffleSplit.html
 
 
-
-
-
-
+# Use tester.py here
+# TODO: 'make sure [this] poi.py [...] can run on its own. (will need to fix that up)
 
 # Task 6: Dump your classifier, dataset, and features_list so anyone can
 # check your results. You do not need to change anything below, but make sure
