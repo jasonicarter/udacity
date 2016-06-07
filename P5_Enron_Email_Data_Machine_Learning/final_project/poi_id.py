@@ -16,18 +16,21 @@ with open("final_project_dataset.pkl", "r") as data_file:
 
 
 # Data exploration
-exploreData(data_dict)
+# exploreData(data_dict)
 
 
 # Feature engineering
-# TODO: select features, create features, test with PCA
+# TODO: select features, create features
 # features_list is a list of strings, each of which is a feature name.
 # The first feature must be "poi".
-features_list = ['poi', 'salary']
+# features_list = ['poi', 'salary', 'bonus']
+
+features_list = ['poi','salary', 'deferral_payments', 'total_payments',
+'bonus', 'restricted_stock_deferred', 'deferred_income', 'total_stock_value', 'expenses',
+'exercised_stock_options', 'long_term_incentive', 'restricted_stock']
 
 # TODO: create def to return top x features (e.g kbest)
 # TODO: create new feature(s), rerun feature section (e.g kbest)
-
 # TODO: update features_list and my_dataset
 # Store to my_dataset for easy export below.
 my_dataset = data_dict
@@ -35,6 +38,36 @@ my_dataset = data_dict
 # Extract features and labels from dataset for local testing
 data = featureFormat(my_dataset, features_list, sort_keys = True)
 labels, features = targetFeatureSplit(data)
+
+
+def test_kbest(features,labels,features_list):
+
+    from sklearn.feature_selection import SelectKBest
+
+    x = 0
+
+    kbest = SelectKBest(k=5)
+    kbestrans = kbest.fit_transform(features,labels)
+
+    for f in features_list:
+        if x > 0:
+            print(f,'KBEST',kbest.scores_[x-1])
+        x = x + 1
+
+    return kbest
+
+# Just a test
+test_kbest(features, labels, features_list)
+from sklearn.feature_selection import SelectKBest
+kbest = SelectKBest(k=5)  # retain only the top 5 features with the best score
+kbestrans = kbest.fit_transform(features, labels)  # fit and transform the data
+indices = kbest.get_support(True)  # get the indices of the features_list which were kept
+
+
+print kbestrans.shape
+print kbest.scores_[0]
+print kbestrans[0]
+print indices
 
 
 # Task 4: Try a variety of classifiers
