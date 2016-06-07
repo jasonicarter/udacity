@@ -6,3 +6,5 @@ P3_OpenStreeMap_Data_MongoDB/src/old_toronto_canada.osm.json
 P3_OpenStreeMap_Data_MongoDB/src/old_toronto_canada.osm
 P4_Prosper_Loan_Data_EDA_R/prosperLoanData.csv
 .Rproj.user
+ud120-projects/
+*.pyc
