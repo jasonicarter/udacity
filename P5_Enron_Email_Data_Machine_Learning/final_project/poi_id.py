@@ -24,6 +24,7 @@ with open("final_project_dataset.pkl", "r") as data_file:
 # Data Exploration and Removal of Outliers
 print '########## Data Exploration ##########'
 # exploreData(data_dict)
+# TODO: Add data_exploration.py here
 
 # Store to my_dataset for easy export below.
 my_dataset = data_dict
@@ -84,14 +85,7 @@ labels, features = targetFeatureSplit(data)
 
 # Select the best features and return new features with transform
 f_list, kb_transform, kb = featureListSelection(features, labels)
-print f_list
-print kb_transform[0]
 features_list = f_list
-
-
-# Update features and labels based on new features list
-# data = featureFormat(my_dataset, features_list, sort_keys=True)
-# labels, features = targetFeatureSplit(data)
 
 
 # Test classifiers
@@ -103,7 +97,10 @@ print '########## Test and Tune Classifiers ##########'
 # stratified shuffle split cross validation. For more info:
 # http://scikit-learn.org/stable/modules/generated/sklearn.cross_validation.StratifiedShuffleSplit.html
 clf = buildClassifierPipeline('random_forest')
-test_classifier(clf, my_dataset, features_list, folds=100)
+
+# TODO: test classifier pipeline before using test.py - use the gridsearchcv from katie
+
+#test_classifier(clf, my_dataset, features_list, folds=100)
 
 
 # Task 6: Dump your classifier, dataset, and features_list so anyone can
