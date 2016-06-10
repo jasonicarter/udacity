@@ -3,28 +3,34 @@
 
 import sys
 import pickle
+import sklearn
 
-from data_exploration import exploreData
+from sklearn.feature_selection import SelectKBest
+from sklearn.pipeline import Pipeline
+from sklearn.ensemble import RandomForestClassifier
 
 sys.path.append("../tools/")
 
 from feature_format import featureFormat, targetFeatureSplit
 from tester import dump_classifier_and_data, test_classifier
 
+
 # Load the dictionary containing the dataset
+print '########## Load Dataset ##########'
 with open("final_project_dataset.pkl", "r") as data_file:
     data_dict = pickle.load(data_file)
+    print 'data_dict of length %d loaded successfully' % len(data_dict)
 
 # Data Exploration and Removal of Outliers
+print '########## Data Exploration ##########'
 # exploreData(data_dict)
-# TODO: return data_dict
-# my_dataset = exploreData(data_dict) returns updated data_dict
+
+# Store to my_dataset for easy export below.
+my_dataset = data_dict
+
 
 # Feature Selection
-# featureSelection.py - featureListSelection(old_feature_list, data_dict) returns new_feature_list, feature_names
-# featureSelection.py - classifierTest(feature_list, clf,...) return clf, etc..
-# featureSelection.py - classifier(...) return clf, etc
-
+print '########## Feature Selection ##########'
 
 # features_list is a list of strings, each of which is a feature name.
 # The first feature must be "poi".
@@ -33,134 +39,77 @@ features_list = ['poi', 'salary', 'deferral_payments', 'total_payments',
                  'exercised_stock_options', 'long_term_incentive', 'restricted_stock']
 
 
-
-
-# Feature selection
-# features_list is a list of strings, each of which is a feature name.
-# The first feature must be "poi".
-
-
-def featureListSelection():
+def featureListSelection(feats, lbls):
     # featureSelection.py - featureListSelection(old_feature_list, data_dict) returns new_feature_list, feature_names
-    print 'return features_list, feature_names'
+
+    # Retain only the top 5 features with the best score, fit and transform data
+    # Get the indices of the feat_list which were kept
+    kbest = SelectKBest(k=5)
+    ktransform = kbest.fit_transform(feats, lbls)
+    indices = kbest.get_support(True)
+
+    # feature_list must start with labels
+    feats_list = ['poi']
+
+    # Get actual feature names
+    for index in indices:
+        feats_list.append(features_list[index])
+        print '%s: %f' % (features_list[index], kbest.scores_[index])
+
+    return feats_list, ktransform, kbest
 
 
-def classifierTest(type_of_classifier):
+def buildClassifierPipeline(classifier_type):
     # featureSelection.py - classifierTest(feature_list, clf,...) return clf, etc..
-    # some pipeline stuff here
-    print 'return clf'
+
+    # TODO: GridSearchCV
+
+    # build switch statement
+    classifier = setClassifier(classifier_type)
+    return Pipeline(steps=[('kBest', kb), (classifier_type, classifier)])
 
 
-def classifier():
-    # featureSelection.py - classifier(...) return clf, etc
-    print 'return clf'
+def setClassifier(x):
+    # switch statement Python replacement - http://stackoverflow.com/a/103081
+    return {
+        'random_forest': RandomForestClassifier(n_estimators=1, bootstrap=False),
+        'decision_tree': RandomForestClassifier(n_estimators=10, bootstrap=False),
+    }.get(x)
 
-
-
-# Store to my_dataset for easy export below.
-my_dataset = data_dict
 
 # Extract features and labels from dataset for local testing
 data = featureFormat(my_dataset, features_list, sort_keys=True)
 labels, features = targetFeatureSplit(data)
 
-from sklearn.feature_selection import SelectKBest
-kbest = SelectKBest(k=5)  # retain only the top 5 features with the best score
-ktransform = kbest.fit_transform(features, labels)  # fit and transform the data
-indices = kbest.get_support(True)  # get the indices of the features_list which were kept
 
-print ktransform.shape
-print ktransform[0]
-
-# Table this maybe with actual score values
-f_list = ['poi']
-for index in indices:
-    f_list.append(features_list[index])
-    print '%s: %f' % (features_list[index], kbest.scores_[index])
-
+# Select the best features and return new features with transform
+f_list, kb_transform, kb = featureListSelection(features, labels)
+print f_list
+print kb_transform[0]
 features_list = f_list
-features = ktransform
 
 
-
-
+# Update features and labels based on new features list
+# data = featureFormat(my_dataset, features_list, sort_keys=True)
+# labels, features = targetFeatureSplit(data)
 
 
 # Test classifiers
-# Please name your classifier clf for easy export below.
-# Note that if you want to do PCA or other multi-stage operations,
-# you'll need to use Pipelines. For more info:
-# http://scikit-learn.org/stable/modules/pipeline.html
-
-
-# Example starting point. Try investigating other evaluation techniques!
-from sklearn.cross_validation import train_test_split
-features_train, features_test, labels_train, labels_test = \
-    train_test_split(features, labels, test_size=0.3, random_state=42)
-
-from time import time
-from sklearn import tree
-from sklearn.metrics import accuracy_score
-
-t0 = time()
-clf = tree.DecisionTreeClassifier()
-clf = clf.fit(features_train, labels_train)
-print "training time:", round(time()-t0, 3), "s"
-
-t0 = time()
-pred = clf.predict(features_test)
-print "predicting time:", round(time()-t0, 3), "s"
-print accuracy_score(pred, labels_test)
-
-# training time: 0.004 s
-# predicting time: 0.0 s
-# 0.863636363636
-
-
-import sklearn.pipeline
-
-select = sklearn.feature_selection.SelectKBest(k=5)
-dt = tree.DecisionTreeClassifier()  # sklearn.ensemble.RandomForestClassifier()
-
-steps = [('feature_selection', select),
-        ('decision_tree', dt)]
-
-clf = sklearn.pipeline.Pipeline(steps)
-
-# testing
-test_classifier(clf, my_dataset, features_list, folds=100)
-
-
-X_train, X_test, y_train, y_test = \
-    train_test_split(features, labels, test_size=0.3, random_state=42)
-
-# fit your pipeline on X_train and y_train
-clf.fit(X_train, y_train)
-# call pipeline.predict() on your X_test data to make a set of test predictions
-y_prediction = clf.predict(X_test)
-# test your predictions using sklearn.classification_report()
-report = sklearn.metrics.classification_report(y_test, y_prediction)
-# and print the report
-print(report)
-
-
-
+print '########## Test and Tune Classifiers ##########'
 # Task 5: Tune your classifier to achieve better than .3 precision and recall
 # using our testing script. Check the tester.py script in the final project
 # folder for details on the evaluation method, especially the test_classifier
 # function. Because of the small size of the dataset, the script uses
 # stratified shuffle split cross validation. For more info:
 # http://scikit-learn.org/stable/modules/generated/sklearn.cross_validation.StratifiedShuffleSplit.html
+clf = buildClassifierPipeline('random_forest')
+test_classifier(clf, my_dataset, features_list, folds=100)
 
-
-# Use tester.py here
-# TODO: 'make sure [this] poi.py [...] can run on its own. (will need to fix that up)
 
 # Task 6: Dump your classifier, dataset, and features_list so anyone can
 # check your results. You do not need to change anything below, but make sure
 # that the version of poi_id.py that you submit can be run on its own and
 # generates the necessary .pkl files for validating your results.
-
 # dump_classifier_and_data(clf, my_dataset, features_list)
 
 
