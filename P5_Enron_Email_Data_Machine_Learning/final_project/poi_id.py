@@ -8,6 +8,7 @@ import sklearn
 from sklearn.feature_selection import SelectKBest
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
 
 sys.path.append("../tools/")
 
@@ -69,12 +70,19 @@ def buildClassifierPipeline(classifier_type):
     classifier = setClassifier(classifier_type)
     return Pipeline(steps=[('kBest', kb), (classifier_type, classifier)])
 
+def runCrossValScore(classifier_type):
+    import sklearn.ensemble
+
+    clf = setClassifier(classifier_type)
+    score = sklearn.cross_validation.cross_val_score(clf, kb_transform, labels)
+    print(score)
+
 
 def setClassifier(x):
     # switch statement Python replacement - http://stackoverflow.com/a/103081
     return {
         'random_forest': RandomForestClassifier(n_estimators=1, bootstrap=False),
-        'decision_tree': RandomForestClassifier(n_estimators=10, bootstrap=False),
+        'decision_tree': DecisionTreeClassifier()
     }.get(x)
 
 
@@ -88,6 +96,10 @@ f_list, kb_transform, kb = featureListSelection(features, labels)
 features_list = f_list
 
 
+# Cross_val_score testing to pick and test classifier then use picked clf for pipeline
+runCrossValScore('decision_tree')
+runCrossValScore('random_forest')
+
 # Test classifiers
 print '########## Test and Tune Classifiers ##########'
 # Task 5: Tune your classifier to achieve better than .3 precision and recall
@@ -96,7 +108,7 @@ print '########## Test and Tune Classifiers ##########'
 # function. Because of the small size of the dataset, the script uses
 # stratified shuffle split cross validation. For more info:
 # http://scikit-learn.org/stable/modules/generated/sklearn.cross_validation.StratifiedShuffleSplit.html
-clf = buildClassifierPipeline('random_forest')
+#clf = buildClassifierPipeline('random_forest')
 
 # TODO: test classifier pipeline before using test.py - use the gridsearchcv from katie
 
