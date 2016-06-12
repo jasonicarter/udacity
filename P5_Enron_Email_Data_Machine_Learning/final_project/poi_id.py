@@ -13,6 +13,9 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import classification_report
 from sklearn.grid_search import GridSearchCV
+from sklearn.cross_validation import StratifiedShuffleSplit
+from time import time
+
 
 sys.path.append("../tools/")
 
@@ -69,38 +72,43 @@ def kbest_feature_list_selection(feats, lbls):
 
 def build_classifier_pipeline(classifier_type):
     # featureSelection.py - classifierTest(feature_list, clf,...) return clf, etc..
+    # was using kb transform data for splitting and still using it in pipeline causing very high precision and recall
+    # very off target from test.py
+
+    data = featureFormat(my_dataset, features_list, sort_keys=True)
+    labels, features = targetFeatureSplit(data)
+
+    sss = StratifiedShuffleSplit(labels, 100, test_size=0.3, random_state=42)
 
     # build pipeline
+    kbest = SelectKBest()
     classifier = set_classifier(classifier_type)
-    pipeline = Pipeline(steps=[('feature_selection', kb), (classifier_type, classifier)])
-
-    # Get train test sets
-    features_train, features_test, labels_train, labels_test = \
-        train_test_split(kb_features, labels, test_size=0.5, random_state=42)
+    pipeline = Pipeline(steps=[('feature_selection', kbest), (classifier_type, classifier)])
 
     # Set parameters for random forest
     parameters = []
     if classifier_type == 'random_forest':
-        parameters = dict(feature_selection__k=[5, 10, 'all'],
+        parameters = dict(feature_selection__k=[5, 10],
                           random_forest__n_estimators=[25, 50, 75, 100],
                           random_forest__min_samples_split=[2, 3, 4, 5],
-                          random_forest__bootstrap=[True, False],
                           random_forest__criterion=['gini', 'entropy'])
 
-    cv = GridSearchCV(pipeline, param_grid=parameters)
+    # Get best optimized parameters
+    cv = GridSearchCV(pipeline, param_grid=parameters, scoring='f1', cv=sss)
 
-    cv.fit(features_train, labels_train)
-    predictions = cv.predict(features_test)
-    report = classification_report(labels_test, predictions)
+    # Fit, predict and report
+    t0 = time()
+    cv.fit(features, labels)
+    print 'Random Forest tuning: %r' % round(time() - t0, 3)
 
-    return report, cv
+    return cv
 
 
 def run_cross_val_score(classifier_type):
     import sklearn.ensemble
 
     clf = set_classifier(classifier_type)
-    score = sklearn.cross_validation.cross_val_score(clf, kb_features, labels)
+    score = sklearn.cross_validation.cross_val_score(clf, kb_features, labels, scoring='f1')
     print score
 
 
@@ -137,10 +145,10 @@ features_list = kb_features_list
 
 # Cross_val_score testing to pick and test classifier then use picked clf for pipeline
 # Categorical models not linear...
-run_cross_val_score('decision_tree')  # [ 0.83673469  0.79166667  0.83333333]
-run_cross_val_score('random_forest')  # [ 0.87755102  0.875       0.875     ]
-run_cross_val_score('logistic_reg')   # [ 0.75510204  0.85416667  0.85416667]
-run_cross_val_score('gaussian_nb')    # [ 0.30612245  0.27083333  0.27083333]
+run_cross_val_score('decision_tree')  # [ 0.42857143  0.15384615  0.25      ]
+run_cross_val_score('random_forest')  # [ 0.          0.22222222  0.28571429]
+run_cross_val_score('logistic_reg')   # [ 0.          0.46153846  0.36363636]
+run_cross_val_score('gaussian_nb')    # [ 0.22727273  0.25531915  0.22222222]
 
 
 # Test classifiers
@@ -152,18 +160,14 @@ print '########## Test and Tune Classifiers ##########'
 # stratified shuffle split cross validation. For more info:
 # http://scikit-learn.org/stable/modules/generated/sklearn.cross_validation.StratifiedShuffleSplit.html
 
-rpt, cross_val = build_classifier_pipeline('random_forest')
-print cross_val.best_params_
-print rpt
-
-# {'feature_selection__k': 10, 'random_forest__n_estimators': 50, 'random_forest__min_samples_split': 4}
+# cross_val = build_classifier_pipeline('random_forest')
+# print cross_val.best_params_
+# clf = cross_val.best_estimator_
 
 # See test results
-# selector = SelectKBest(k=10)
-# classifier = RandomForestClassifier(n_estimators=50, min_samples_split=4)
-# clf = Pipeline(steps=[('feature_selection', selector), ('random_forest', classifier)])
-# test_classifier(clf, my_dataset, features_list)
-
+# t0 = time()
+# test_classifier(clf, my_dataset, features_list, folds=100)
+# print 'Random forest fitting time: %rs' % round(time() - t0, 3)
 
 # Task 6: Dump your classifier, dataset, and features_list so anyone can
 # check your results. You do not need to change anything below, but make sure
