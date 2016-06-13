@@ -252,6 +252,7 @@ t0 = time()
 test_classifier(clf, my_dataset, features_list, folds=100)
 print 'Classifier fitting time: %rs' % round(time() - t0, 3)
 
+# {'logistic_reg__solver': 'liblinear', 'feature_selection__k': 7, 'logistic_reg__C': 4, 'logistic_reg__class_weight': 'balanced'}
 
 # Dump classifier, dataset and features_list
 print '########## Dump Classifiers, dataset and features_list ##########'
