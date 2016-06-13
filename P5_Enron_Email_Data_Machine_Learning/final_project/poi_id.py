@@ -58,7 +58,9 @@ def fill_nan_values(data_dict):
                 data_dict[person][feature] = 0
 
 
+# TODO: need to review and create new features
 def create_new_features():
+    # https: // github.com / grace - pehl / enron / blob / master / Project / poi_id.py
     # Create new features
     # Give emails to/from POIs as a proportion of total emails
     for person in data_dict.keys():
@@ -163,7 +165,7 @@ def build_classifier_pipeline(classifier_type):
     data = featureFormat(my_dataset, features_list, sort_keys=True)
     labels, features = targetFeatureSplit(data)
 
-    sss = StratifiedShuffleSplit(labels, 10, test_size=0.5, random_state=42)
+    sss = StratifiedShuffleSplit(labels, 100, test_size=0.4, random_state=42)
 
     # Build pipeline
     kbest = SelectKBest()
@@ -180,9 +182,9 @@ def build_classifier_pipeline(classifier_type):
                           random_forest__criterion=['gini', 'entropy'])
     if classifier_type == 'logistic_reg':
         parameters = dict(feature_selection__k=range(2, 10),
-                          random_forest__n_estimators=[25, 50, 100],
-                          random_forest__min_samples_split=[2, 3, 4],
-                          random_forest__criterion=['gini', 'entropy'])
+                          logistic_reg__class_weight=['balanced'],
+                          logistic_reg__solver=['liblinear'],
+                          logistic_reg__C=range(1, 5))
 
     # Get best optimized parameters
     cv = GridSearchCV(pipeline, param_grid=parameters, scoring='f1', cv=sss)
@@ -240,15 +242,15 @@ print '########## Test and Tune Classifiers ##########'
 # stratified shuffle split cross validation. For more info:
 # http://scikit-learn.org/stable/modules/generated/sklearn.cross_validation.StratifiedShuffleSplit.html
 
-cross_val = build_classifier_pipeline('random_forest')
+cross_val = build_classifier_pipeline('logistic_reg')
 print cross_val.best_params_
 print cross_val.best_score_
 clf = cross_val.best_estimator_
 
 # Evaluate model
 t0 = time()
-test_classifier(clf, my_dataset, features_list, folds=10)
-print 'Random forest fitting time: %rs' % round(time() - t0, 3)
+test_classifier(clf, my_dataset, features_list, folds=100)
+print 'Classifier fitting time: %rs' % round(time() - t0, 3)
 
 
 # Dump classifier, dataset and features_list
