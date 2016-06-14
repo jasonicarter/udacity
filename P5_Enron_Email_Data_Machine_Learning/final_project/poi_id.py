@@ -47,21 +47,73 @@ def scatter_plot(data_dict, x_feature, y_feature):
     plt.show()
 
 
-def fill_nan_values(data_dict):
+def fill_nan_values():
     # Update NaN values with 0 except for email address
     people_keys = data_dict.keys()
     feature_keys = data_dict[people_keys[0]]
+    nan_features = {}
+    # Get list of NaN values and replace them
+    for feature in feature_keys:
+        nan_features[feature] = 0
     for person in people_keys:
         for feature in feature_keys:
             if feature != 'email_address' and \
                 data_dict[person][feature] == 'NaN':
                 data_dict[person][feature] = 0
+                nan_features[feature] += 1
+
+    return nan_features
+
+
+def poi_missing_email_info():
+    # POI with missing or no to/from email information
+    poi_count = 0
+    poi_keys = []
+    for person in data_dict.keys():
+        if data_dict[person]["poi"]:
+            poi_count += 1
+            poi_keys.append(person)
+
+    poi_missing_emails = []
+    for poi in poi_keys:
+        if (data_dict[poi]['to_messages'] == 'NaN' and data_dict[poi]['from_messages'] == 'NaN') or \
+            (data_dict[poi]['to_messages'] == 0 and data_dict[poi]['from_messages'] == 0):
+            poi_missing_emails.append(poi)
+
+    return poi_count, poi_missing_emails
+
+
+def salary_bonus_bonanza():
+    # 4 more outliers in scatter plot to investigate
+    # Makes over 5M in bonus
+    bonanza = []
+    people_keys = data_dict.keys()
+    for person in people_keys:
+        if data_dict[person]["bonus"] > 5000000 or data_dict[person]["salary"] > 1000000:
+            bonanza.append(person)
+
+    return bonanza
+
+
+def people_with_all_nan():
+    people_keys = data_dict.keys()
+    feature_keys = data_dict[people_keys[0]]
+
+    nan_people = []
+    for person in people_keys:
+        existing_value = 0
+        for feature in feature_keys:
+            if data_dict[person][feature] != 'NaN':
+                existing_value += 1
+        if not existing_value:
+            nan_people.append(person)
+
+    return nan_people
 
 
 # TODO: need to review and create new features
 def create_new_features():
     # https: // github.com / grace - pehl / enron / blob / master / Project / poi_id.py
-    # Create new features
     # Give emails to/from POIs as a proportion of total emails
     for person in data_dict.keys():
         to_poi = float(data_dict[person]['from_this_person_to_poi'])
@@ -84,76 +136,49 @@ def create_new_features():
 # TODO: break up function
 def explore_data():
 
-    people_keys = data_dict.keys()
-    feature_keys = data_dict[people_keys[0]]
-
-    poi_count = 0
-    poi_keys = []
-    for person in people_keys:
-        if data_dict[person]["poi"]:
-            poi_count += 1
-            poi_keys.append(person)
-
-    # TODO: move into fill_nan_values and return (or print)
-    # Get list of NaN values and replace them
-    nan_features = {}
-    for feature in feature_keys:
-        nan_features[feature] = 0
-    for person in people_keys:
-        for feature in feature_keys:
-            if data_dict[person][feature] == 'NaN':
-                nan_features[feature] += 1
-
-    # POI with missing or no to/from email information
-    poi_missing_emails = []
-    for poi in poi_keys:
-        if (data_dict[poi]['to_messages'] == 'NaN' and
-                data_dict[poi]['from_messages'] == 'NaN') or \
-            (data_dict[poi]['to_messages'] == 0 and
-                 data_dict[poi]['from_messages'] == 0):
-            poi_missing_emails.append(poi)
-
     # Top 3 POI payments and stock value
     # Top 3 non-POI payments and stock value
 
     # May have to fix up total_payments
-    # print data_dict['BELFER ROBERT']['total_payments']
     # Look for users with all NaN values
     # Look for 'weird' user names
 
-    # TODO: calculate percentage allocation of classes poi/all
+    people_keys = data_dict.keys()
+    feature_keys = data_dict[people_keys[0]]
+    poi_cnt, poi_missing_emails = poi_missing_email_info()
 
     print 'Number of people in dataset: %d' % len(people_keys)
     print 'Number of features for each person: %d' % len(feature_keys)
-    print 'Number of Persons of Interests (POIs) in dataset: %d out of 34 total POIs' % poi_count
-    print 'Number of non-POIs in dataset: %d' % (len(people_keys) - poi_count)
-    print nan_features
+    print 'Number of Persons of Interests (POIs) in dataset: %d out of 34 total POIs' % poi_cnt
+    print 'Number of non-POIs in dataset: %d' % (len(people_keys) - poi_cnt)
     print 'POIs with zero or missing to/from email messages in dataset: %d' % len(poi_missing_emails)
     print poi_missing_emails
 
     print '########## Removing Outliers ##########'
-    # Update NaN values
-    fill_nan_values(data_dict)  # having nan values messed up numeric comparisons like > < ==
+    # Update nan values in features, not good for numeric comparisons like > < ==
+    features_with_nan = fill_nan_values()
+    people_with_nan = people_with_all_nan()
+    print 'Updating NaN values in features'
+    print features_with_nan
+    print 'People with all NaN values'
+    print people_with_nan
 
-    # outlier at 26m in salary -> 'total
-    #scatter_plot(data_dict, 'salary', 'bonus')
-    # remove outlier 'total'
+    # Outlier at 26M in salary -> 'total
+    # scatter_plot(data_dict, 'salary', 'bonus')
+    # Remove outlier 'total'
     print(data_dict['TOTAL'])
+
+    #TODO: look for other "bed" people person
+
+    # Update dataset and re-plot
     data_dict.pop('TOTAL')
-    #scatter_plot(data_dict, 'salary', 'bonus')
+    # scatter_plot(data_dict, 'salary', 'bonus')
 
-    # 4 outliers in scatter plot to investigate
-    # Makes over 5mil in bonus
-    bonus_bonanza = []
-    people_keys = data_dict.keys()  # Update after removal of people
-    for person in people_keys:
-        if data_dict[person]["bonus"] > 5000000 and \
-                data_dict[person]["salary"] > 1000000:
-            bonus_bonanza.append(person)
+    high_salary_bonus = salary_bonus_bonanza()
+    print 'Salary Bonus Bonanza (1M+ and 5M+): \n', high_salary_bonus
 
-    print 'Bonus Bonanza: \n', bonus_bonanza  # ['LAY KENNETH L', 'SKILLING JEFFREY K']
-
-    print '########## Creating New Features ##########'
+    # Create new features
+    print '########## Create Features ##########'
     create_new_features()
 
 
@@ -186,7 +211,7 @@ def build_classifier_pipeline(classifier_type):
                           logistic_reg__solver=['liblinear'],
                           logistic_reg__C=range(1, 5))
 
-    # Get best optimized parameters
+    # Get optimized parameters for F1-scoring metrics
     cv = GridSearchCV(pipeline, param_grid=parameters, scoring='f1', cv=sss)
     t0 = time()
     cv.fit(features, labels)
@@ -221,8 +246,6 @@ my_dataset = data_dict
 # Feature selection
 print '########## Feature Selection ##########'
 
-
-
 # Having so many features invites problems with overfitting,
 # and don’t need all 3 thousand features to capture the patterns in my dataset.
 # This is a perfect use case for feature selection,
@@ -247,12 +270,10 @@ print cross_val.best_params_
 print cross_val.best_score_
 clf = cross_val.best_estimator_
 
-# Evaluate model
-t0 = time()
+# Validate model precision, recall and F1-score
 test_classifier(clf, my_dataset, features_list, folds=100)
-print 'Classifier fitting time: %rs' % round(time() - t0, 3)
-
 # {'logistic_reg__solver': 'liblinear', 'feature_selection__k': 7, 'logistic_reg__C': 4, 'logistic_reg__class_weight': 'balanced'}
+
 
 # Dump classifier, dataset and features_list
 print '########## Dump Classifiers, dataset and features_list ##########'
@@ -260,12 +281,12 @@ print '########## Dump Classifiers, dataset and features_list ##########'
 # check your results. You do not need to change anything below, but make sure
 # that the version of poi_id.py that you submit can be run on its own and
 # generates the necessary .pkl files for validating your results.
-# dump_classifier_and_data(clf, my_dataset, features_list)
+dump_classifier_and_data(clf, my_dataset, features_list)
 
 
 # References
 print '########## References ##########'
-# https://civisanalytics.com/blog/data-science/2016/01/06/workflows-python-using-pipeline-gridsearchcv-for-compact-code/
-# http://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.SelectKBest.html
-# http://scikit-learn.org/stable/modules/pipeline.html
-# https://civisanalytics.com/blog/data-science/2015/12/17/workflows-in-python-getting-data-ready-to-build-models/
+print 'https://civisanalytics.com/blog/data-science/2016/01/06/workflows-python-using-pipeline-gridsearchcv-for-compact-code/ \n' \
+        'http://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.SelectKBest.html' \
+        'http://scikit-learn.org/stable/modules/pipeline.html \n' \
+        'https://civisanalytics.com/blog/data-science/2015/12/17/workflows-in-python-getting-data-ready-to-build-models/'
