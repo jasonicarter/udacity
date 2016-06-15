@@ -25,9 +25,15 @@ from tester import dump_classifier_and_data, test_classifier
 # Removed 'email_address' (string) to prepare for ML algorithm
 features_list = ['poi', 'salary', 'deferral_payments', 'total_payments', 'loan_advances',
                  'bonus', 'restricted_stock_deferred', 'deferred_income', 'total_stock_value',
-                 'expenses', 'exercised_stock_options', 'other', 'long_term_incentive',
+                 'expenses', 'exercised_stock_options', 'long_term_incentive',
                  'restricted_stock', 'director_fees', 'to_messages', 'from_poi_to_this_person',
                  'from_messages', 'from_this_person_to_poi', 'shared_receipt_with_poi']
+
+# features_list = ['poi', 'salary', 'deferral_payments', 'total_payments', 'loan_advances',
+#                  'bonus', 'restricted_stock_deferred', 'deferred_income', 'total_stock_value',
+#                  'expenses', 'exercised_stock_options', 'other', 'long_term_incentive',
+#                  'restricted_stock', 'director_fees', 'to_messages', 'from_poi_to_this_person',
+#                  'from_messages', 'from_this_person_to_poi', 'shared_receipt_with_poi']
 
 
 def scatter_plot(data_dict, x_feature, y_feature):
@@ -114,34 +120,23 @@ def people_with_all_nan():
 # TODO: need to review and create new features
 def create_new_features():
     # https: // github.com / grace - pehl / enron / blob / master / Project / poi_id.py
-    # Give emails to/from POIs as a proportion of total emails
-    for person in data_dict.keys():
+
+    people_keys = data_dict.keys()
+
+    for person in people_keys:
         to_poi = float(data_dict[person]['from_this_person_to_poi'])
-        to_all = float(data_dict[person]['from_messages'])
-        if to_all > 0:
-            data_dict[person]['fraction_to_poi'] = to_poi / to_all
+        from_msg_total = float(data_dict[person]['from_messages'])
+        if from_msg_total > 0:
+            data_dict[person]['to_poi_fraction'] = to_poi / from_msg_total
         else:
-            data_dict[person]['fraction_to_poi'] = 0
-        from_poi = float(data_dict[person]['from_poi_to_this_person'])
-        from_all = float(data_dict[person]['to_messages'])
-        if from_all > 0:
-            data_dict[person]['fraction_from_poi'] = from_poi / from_all
-        else:
-            data_dict[person]['fraction_from_poi'] = 0
+            data_dict[person]['to_poi_fraction'] = 0
+
 
     # Add new feature to features_list
-    features_list.extend(['fraction_to_poi', 'fraction_from_poi'])
+    features_list.extend(['to_poi_fraction'])
 
 
-# TODO: break up function
 def explore_data():
-
-    # Top 3 POI payments and stock value
-    # Top 3 non-POI payments and stock value
-
-    # May have to fix up total_payments
-    # Look for users with all NaN values
-    # Look for 'weird' user names
 
     people_keys = data_dict.keys()
     feature_keys = data_dict[people_keys[0]]
@@ -166,16 +161,24 @@ def explore_data():
     # Outlier at 26M in salary -> 'total
     # scatter_plot(data_dict, 'salary', 'bonus')
     # Remove outlier 'total'
-    print(data_dict['TOTAL'])
+    print 'Scatter plot shows large outlier at 26M in salary'
+    print 'Outlier is "Total" value and should be removed'
+    # print(data_dict['TOTAL'])
 
-    #TODO: look for other "bed" people person
-
-    # Update dataset and re-plot
-    data_dict.pop('TOTAL')
-    # scatter_plot(data_dict, 'salary', 'bonus')
-
+    # Investigate other high salary or bonuses for outliers
     high_salary_bonus = salary_bonus_bonanza()
     print 'Salary Bonus Bonanza (1M+ and 5M+): \n', high_salary_bonus
+
+    # Only 146 values, can visually review names
+    print 'Look for other "odd" values to remove'
+    # print people_keys
+    print 'Found name: "THE TRAVEL AGENCY IN THE PARK" '
+
+    # Remove outlier and odd person value
+    print 'Removing two values: Total, The Travel Agency In The Park'
+    data_dict.pop('TOTAL')
+    data_dict.pop('THE TRAVEL AGENCY IN THE PARK')
+    # scatter_plot(data_dict, 'salary', 'bonus')
 
     # Create new features
     print '########## Create Features ##########'
@@ -245,16 +248,24 @@ my_dataset = data_dict
 
 # Feature selection
 print '########## Feature Selection ##########'
+# Using SelectKBest() which will do uni-variate feature selection to get the k best features
+# MinMaxScaling, SelectKBest performed as part of classifier pipeline
 
-# Having so many features invites problems with overfitting,
-# and don’t need all 3 thousand features to capture the patterns in my dataset.
-# This is a perfect use case for feature selection,
-# which is supported in scikit-learn by e.g. SelectKBest(),
-# which will do univariate feature selection to get the k features
-# (where k is a number which I have to tell the algorithm).
 
-# SelectKBest, MinMaxScaling performed as part of classifier pipeline
+from sklearn.feature_selection import chi2
+data = featureFormat(my_dataset, features_list, sort_keys=True)
+labels, features = targetFeatureSplit(data)
 
+skbest = SelectKBest(k=7)
+features_new = skbest.fit_transform(features, labels)
+indices = skbest.get_support(True)
+print skbest.scores_
+
+skb_features = []
+for index in indices:
+    d = 'feature: %s, score: %f' % (features_list[index], skbest.scores_[index])
+    skb_features.append(d)
+print skb_features
 
 # Test classifiers
 print '########## Test and Tune Classifiers ##########'
@@ -287,6 +298,6 @@ dump_classifier_and_data(clf, my_dataset, features_list)
 # References
 print '########## References ##########'
 print 'https://civisanalytics.com/blog/data-science/2016/01/06/workflows-python-using-pipeline-gridsearchcv-for-compact-code/ \n' \
-        'http://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.SelectKBest.html' \
+        'http://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.SelectKBest.html \n' \
         'http://scikit-learn.org/stable/modules/pipeline.html \n' \
         'https://civisanalytics.com/blog/data-science/2015/12/17/workflows-in-python-getting-data-ready-to-build-models/'
