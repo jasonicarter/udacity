@@ -19,10 +19,17 @@ and if you used an automated feature selection function like SelectKBest,
 please report the feature scores and reasons for your choice of parameter values.
 [relevant rubric items: “create new features”, “properly scale features”, “intelligently select feature”]
 
+used scaling, wasn't planning too (got rid of ourliers) F1-score was better (percision or recall)?
+used selectkbest, originally 10 to see scores and test, then used gridsearchcv for tuning
+which features were used and their scores?
+
 
 What algorithm did you end up using? What other one(s) did you try? How did model performance differ between algorithms?
 [relevant rubric item: “pick an algorithm”]
 
+used pipeline, minmax-scaling (scaling), selectkbest (feature selection)
+logistic regression (tried decision tree, NB and random forest)
+- docs on log reg mostly
 
 What does it mean to tune the parameters of an algorithm, and what can happen if you don’t do this well?
 How did you tune the parameters of your particular algorithm?
@@ -32,11 +39,20 @@ for the model that was not your final choice or a different model that does util
 e.g. a decision tree classifier).
 [relevant rubric item: “tune the algorithm”]
 
+gridsearchcv "tune" the parameters
+tried decision tree, random forest
+
 
 What is validation, and what’s a classic mistake you can make if you do it wrong? How did you validate your analysis?
 [relevant rubric item: “validation strategy”]
+
+overfitting, using all of the data for training and testing
+test.py, compared against other models
 
 
 Give at least 2 evaluation metrics and your average performance for each of them.
 Explain an interpretation of your metrics that says something human-understandable about your algorithm’s performance.
 [relevant rubric item: “usage of evaluation metrics”]
+
+percision, recall, F1-score
+make table
