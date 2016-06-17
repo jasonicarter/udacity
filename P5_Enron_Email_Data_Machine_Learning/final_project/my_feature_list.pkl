@@ -39,4 +39,8 @@ aS'shared_receipt_with_poi'
 p19
 aS'to_poi_fraction'
 p20
+aS'from_poi_fraction'
+p21
+aS'salary_bonus_fraction'
+p22
 a.

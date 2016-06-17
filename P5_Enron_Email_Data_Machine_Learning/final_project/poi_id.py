@@ -23,17 +23,17 @@ from tester import dump_classifier_and_data, test_classifier
 # features_list is a list of strings, each of which is a feature name.
 # The first feature must be "poi".
 # Removed 'email_address' (string) to prepare for ML algorithm
+# Removed 'Other' as this this quite ambiguous in nature
 features_list = ['poi', 'salary', 'deferral_payments', 'total_payments', 'loan_advances',
                  'bonus', 'restricted_stock_deferred', 'deferred_income', 'total_stock_value',
                  'expenses', 'exercised_stock_options', 'long_term_incentive',
                  'restricted_stock', 'director_fees', 'to_messages', 'from_poi_to_this_person',
                  'from_messages', 'from_this_person_to_poi', 'shared_receipt_with_poi']
 
-# features_list = ['poi', 'salary', 'deferral_payments', 'total_payments', 'loan_advances',
-#                  'bonus', 'restricted_stock_deferred', 'deferred_income', 'total_stock_value',
-#                  'expenses', 'exercised_stock_options', 'other', 'long_term_incentive',
-#                  'restricted_stock', 'director_fees', 'to_messages', 'from_poi_to_this_person',
-#                  'from_messages', 'from_this_person_to_poi', 'shared_receipt_with_poi']
+
+########################################################################################################################
+# Function definition starts here...
+########################################################################################################################
 
 
 def scatter_plot(data_dict, x_feature, y_feature):
@@ -117,23 +117,36 @@ def people_with_all_nan():
     return nan_people
 
 
-# TODO: need to review and create new features
 def create_new_features():
-    # https: // github.com / grace - pehl / enron / blob / master / Project / poi_id.py
 
     people_keys = data_dict.keys()
 
     for person in people_keys:
         to_poi = float(data_dict[person]['from_this_person_to_poi'])
+        from_poi = float(data_dict[person]['from_poi_to_this_person'])
+        to_msg_total = float(data_dict[person]['to_messages'])
         from_msg_total = float(data_dict[person]['from_messages'])
+
         if from_msg_total > 0:
             data_dict[person]['to_poi_fraction'] = to_poi / from_msg_total
         else:
             data_dict[person]['to_poi_fraction'] = 0
 
+        if to_msg_total > 0:
+            data_dict[person]['from_poi_fraction'] = from_poi / to_msg_total
+        else:
+            data_dict[person]['from_poi_fraction'] = 0
+
+        # fraction of your salary represented by your bonus (or something like that)
+        person_salary = float(data_dict[person]['salary'])
+        person_bonus = float(data_dict[person]['bonus'])
+        if person_salary > 0 and person_bonus > 0:
+            data_dict[person]['salary_bonus_fraction'] = data_dict[person]['salary'] / data_dict[person]['bonus']
+        else:
+            data_dict[person]['salary_bonus_fraction'] = 0
 
     # Add new feature to features_list
-    features_list.extend(['to_poi_fraction'])
+    features_list.extend(['to_poi_fraction', 'from_poi_fraction', 'salary_bonus_fraction'])
 
 
 def explore_data():
@@ -193,6 +206,7 @@ def build_classifier_pipeline(classifier_type):
     data = featureFormat(my_dataset, features_list, sort_keys=True)
     labels, features = targetFeatureSplit(data)
 
+    # Using stratified shuffle split cross validation because of the small size of the dataset
     sss = StratifiedShuffleSplit(labels, 100, test_size=0.4, random_state=42)
 
     # Build pipeline
@@ -209,7 +223,7 @@ def build_classifier_pipeline(classifier_type):
                           random_forest__min_samples_split=[2, 3, 4],
                           random_forest__criterion=['gini', 'entropy'])
     if classifier_type == 'logistic_reg':
-        parameters = dict(feature_selection__k=range(2, 10),
+        parameters = dict(feature_selection__k=range(4, 7),
                           logistic_reg__class_weight=['balanced'],
                           logistic_reg__solver=['liblinear'],
                           logistic_reg__C=range(1, 5))
@@ -233,6 +247,11 @@ def set_classifier(x):
     }.get(x)
 
 
+########################################################################################################################
+# Main starts here...
+########################################################################################################################
+
+
 # Load the dictionary containing the dataset
 print '########## Load Dataset ##########'
 with open("final_project_dataset.pkl", "r") as data_file:
@@ -251,39 +270,33 @@ print '########## Feature Selection ##########'
 # Using SelectKBest() which will do uni-variate feature selection to get the k best features
 # MinMaxScaling, SelectKBest performed as part of classifier pipeline
 
-
-from sklearn.feature_selection import chi2
+# Below used for Testing Only
 data = featureFormat(my_dataset, features_list, sort_keys=True)
 labels, features = targetFeatureSplit(data)
 
-skbest = SelectKBest(k=7)
-features_new = skbest.fit_transform(features, labels)
+from sklearn.cross_validation import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.33, random_state=42)
+
+skbest = SelectKBest()
+features_new = skbest.fit_transform(X_train, y_train)
 indices = skbest.get_support(True)
+print 'Testing scores from SelectKBest:'
 print skbest.scores_
 
-skb_features = []
 for index in indices:
-    d = 'feature: %s, score: %f' % (features_list[index], skbest.scores_[index])
-    skb_features.append(d)
-print skb_features
+    # need to map index (training without POI) back to feature_list so +1 index
+    print 'feature: %s, score: %f' % (features_list[index + 1], skbest.scores_[index])
+
 
 # Test classifiers
 print '########## Test and Tune Classifiers ##########'
-# Tune your classifier to achieve better than .3 precision and recall
-# using our testing script. Check the tester.py script in the final project
-# folder for details on the evaluation method, especially the test_classifier
-# function. Because of the small size of the dataset, the script uses
-# stratified shuffle split cross validation. For more info:
-# http://scikit-learn.org/stable/modules/generated/sklearn.cross_validation.StratifiedShuffleSplit.html
-
+# Tune your classifier to achieve better than .3 precision and recall using our testing script.
 cross_val = build_classifier_pipeline('logistic_reg')
-print cross_val.best_params_
-print cross_val.best_score_
+print 'Best parameters: ', cross_val.best_params_
 clf = cross_val.best_estimator_
 
 # Validate model precision, recall and F1-score
-test_classifier(clf, my_dataset, features_list, folds=100)
-# {'logistic_reg__solver': 'liblinear', 'feature_selection__k': 7, 'logistic_reg__C': 4, 'logistic_reg__class_weight': 'balanced'}
+test_classifier(clf, my_dataset, features_list)
 
 
 # Dump classifier, dataset and features_list
@@ -293,7 +306,7 @@ print '########## Dump Classifiers, dataset and features_list ##########'
 # that the version of poi_id.py that you submit can be run on its own and
 # generates the necessary .pkl files for validating your results.
 dump_classifier_and_data(clf, my_dataset, features_list)
-
+print 'Successfully created clf, my_dataset and features_list pkl files'
 
 # References
 print '########## References ##########'
