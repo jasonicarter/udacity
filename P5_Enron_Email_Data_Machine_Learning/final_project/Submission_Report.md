@@ -22,9 +22,9 @@ Data exploration was the first step, determining size of data set, number of fea
 When exploring the data, a number of outliers were discovered, some were not relevant while others were. In order to
 determine next steps, more data analysis was required. 
 
-One extreme outlier was removed from the dataset. It was data point representing the total values and not an actual observation,
+One extreme outlier was removed from the dataset. It was a data point representing the total values and not an actual observation,
 while another outliers were kept because although they were outliers, it was very representative of the data and to our overall goal for the project.
-Incompleteness was also a problem with the dataset. Below I've listed out the number of NaN values within the data.
+Incompleteness was also a problem with the dataset. Below is an overview of the data, missing values and interesting data points.
 
 **Data Overview**
 
@@ -76,28 +76,27 @@ explain what feature you tried to make, and the rationale behind it.
 (You do not necessarily have to use it in the final analysis, only engineer and test it.) 
 In your feature selection step, if you used an algorithm like a decision tree, 
 please also give the feature importances of the features that you use, and if you used an automated feature selection function like SelectKBest, 
-please report the feature scores and reasons for your choice of parameter values.  
+please report the feature scores and reasons for your choice of parameter values.
 [relevant rubric items: “create new features”, “properly scale features”, “intelligently select feature”]*
 
 Both univariate feature selection and engineering were performed and used in tested when creating the final model. 
-Feature scaling was also utilized as there were a number of outliers which could screw the results but 
-due to the validity of the data, these point could not be removed. However, performance was tested
+Feature scaling was also utilized as there were a number of outliers which could screw the results (be used as a primary predictor) but 
+due to the validity of the data, these points could not be removed. However, performance was tested
 with and without feature scaling as a reassurance to the process.
 
 ### Feature Selection
 
-The final features utilized in the model are: 
+Feature selection was performed by SelectKBest. The final features utilized in the model are: 
 * salary
 * total_payments
 * bonus
 * total_stock_value
 * exercised_stock_options
-* shared_receipt_with_poi
-* to_poi_fraction
+* deferred_income
 
 ### Feature Engineering
-Three features were engineered for testing of the model. Only one was determined of substantially useful enough for 
-during tuning. The engineered features are:
+Three features were engineered for testing of the model. A number of tests showed only "to_poi_fraction" was substantially useful enough 
+during tuning. However, in the final model none of the engineered featured were utilized.
 
 * to_poi_fraction - a fraction of the total 'to' emails that were sent to a POI 
 * from_poi_fraction - a fraction of the total 'from' emails that were received from a POI
@@ -135,7 +134,7 @@ Tuning the parameters of algorithm is simply the process of changing, testing an
 right mix or settings where once completed, the parameters are optimized to produce the best results. Most ML algorithms have parameters 
 and in some cases there are defaulted values, so it's no always necessary to "tune" an algorithm but in a lot of cases it is. 
 If you do tune your algorithm but not very well, you could end up with a model that seems correct but is actually providing false data.
-For example, I had an issue where my accuracy score was very high during tuning (test and train datasets) 
+For example, I had an issue where my accuracy score was very high during tuning (train test sets) 
 but in during validation the precision and recall were less than 0.1. I eventually realized that I was using "accuracy score" as the benchmark 
 for my tuning but my validation tests were using the F1-score, Precision and Recall.
 
@@ -189,7 +188,7 @@ Precision | Recall | F1 | # of Training (StratifiedShuffleSplit folds)
 0.31168 | 0.62850| 0.41671 | 1000
 
 * *Precision is the measurement of how many selected items were identified as relevant*
-* *Recall is the measurement of how many relevant*
+* *Recall is the measurement of how many relevant were selected*
 
 The model's precision is approx. 30% i.e from the people classified as POIs by the model, 30% of them are actual POIs.
 However, the model's recall is approx. 62% i.e from the number of actual POIs in the total dataset, the model correctly identifies
