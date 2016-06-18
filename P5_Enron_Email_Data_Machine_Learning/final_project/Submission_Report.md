@@ -1,5 +1,5 @@
 # Enron Email Fraud Detection with Machine Learning
-**By Jason Carter**
+##### By Jason Carter
 
 ## Summary
 *1.Summarize for us the goal of this project and how machine learning is useful in trying to accomplish it. 
@@ -40,6 +40,7 @@ Incompleteness was also a problem with the dataset. Below I've listed out the nu
 
 Salary vs Bonus (before and after) dropping outliers:
 ![alt text](./salarybonus_w_outliers.png "Salary vs Bonus with outliers")
+
 ![alt text](./salarybonus_wo_outliers.png "Salary vs Bonus without outliers")
 
 Salary Bonus Bonanza (Employees receiving a salary or bonus of 1M+ and 5M+, respectively):
@@ -187,8 +188,8 @@ Precision | Recall | F1 | # of Training (StratifiedShuffleSplit folds)
 0.30894 | 0.63100 | 0.41479 | 500
 0.31168 | 0.62850| 0.41671 | 1000
 
-*Precision is the measurement of how many selected items were identified as relevant*
-*Recall is the measurement of how many relevant*
+* *Precision is the measurement of how many selected items were identified as relevant*
+* *Recall is the measurement of how many relevant*
 
 The model's precision is approx. 30% i.e from the people classified as POIs by the model, 30% of them are actual POIs.
 However, the model's recall is approx. 62% i.e from the number of actual POIs in the total dataset, the model correctly identifies
