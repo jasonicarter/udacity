@@ -38,10 +38,8 @@ Incompleteness was also a problem with the dataset. Below I've listed out the nu
     * Yeager F Scott
     * Hirko Joseph
 
-Salary vs Bonus before dropping outliers:
-![alt text](./salarybonus_w_outliers.png "Salary vs Bonus with outliers")
 
-Salary vs Bonus after dropping outliers:
+![alt text](./salarybonus_w_outliers.png "Salary vs Bonus with outliers")
 ![alt text](./salarybonus_wo_outliers.png "Salary vs Bonus without outliers")
 
 Salary Bonus Bonanza (Employees receiving a salary or bonus of 1M+ and 5M+, respectively):
