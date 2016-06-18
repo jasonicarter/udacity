@@ -81,12 +81,13 @@ please report the feature scores and reasons for your choice of parameter values
 
 Both univariate feature selection and engineering were performed and used in tested when creating the final model. 
 Feature scaling was also utilized as there were a number of outliers which could screw the results (be used as a primary predictor) but 
-due to the validity of the data, these points could not be removed. However, performance was tested
-with and without feature scaling as a reassurance to the process.
+due to the validity of the data, these points could not be removed. Although performance was tested
+with and without feature scaling as a reassurance to the process, the final model utilized feature scaling.
 
 ### Feature Selection
 
-Feature selection was performed by SelectKBest. The final features utilized in the model are: 
+Feature selection was performed by SelectKBest and within the GridSearchCV. No features used were manually picked.
+The final features utilized in the model are: 
 * salary
 * total_payments
 * bonus
@@ -95,14 +96,29 @@ Feature selection was performed by SelectKBest. The final features utilized in t
 * deferred_income
 
 ### Feature Engineering
-Three features were engineered for testing of the model. A number of tests showed only "to_poi_fraction" was substantially useful enough 
-during tuning. However, in the final model none of the engineered featured were utilized.
+Three features were engineered for testing of the model. 
 
 * to_poi_fraction - a fraction of the total 'to' emails that were sent to a POI 
 * from_poi_fraction - a fraction of the total 'from' emails that were received from a POI
 * salary_bonus_fraction - a fraction of salary to bonus money
 
-Utilizing SelectKBest, the top 6 features were selected via GridSearchCV. Below is a table of features and their scores:
+With the project goal of identifying POIs, I believed adding two additional features which calculated the percentage/
+relationship of a POI with other employees at the company via their 'to' and 'from' email interaction would have
+shed insightful and useful information, allowing the algorithm to use these values as predictors.
+e.g if person A sends (or receives) a large portion of emails from a POI, there may be a greater likelihood that 
+person A is also a POI.
+
+Like-wise, after discovering the large salary and bonuses of some of the POIs, I believed knowing the fraction or
+multiplier between someone's salary and their bonus would help as a predictor for the algorithm.
+
+A number of tests showed only "to_poi_fraction" was substantially useful enough during tuning. 
+However, in the final model none of the engineered featured were selected by GridSearchCV.
+
+Utilizing SelectKBest, features were selected via GridSearchCV. The parameters used within GridSearchCV for 
+SelectKBest was a limited range between 4 and 7. The range was set manually as after multiple tests revealed that 
+this range for k resulted in the best performance for timing as well as Precision and Recall scores.
+
+Below is a table of features and their scores:
 
 Feature | Score
 --- | --- | ---

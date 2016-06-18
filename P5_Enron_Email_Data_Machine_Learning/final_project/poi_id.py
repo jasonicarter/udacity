@@ -253,31 +253,15 @@ my_dataset = data_dict
 # Feature selection
 print '\n'
 print '########## Feature Selection ##########'
-# Using SelectKBest() which will do uni-variate feature selection to get the k best features
-# MinMaxScaling, SelectKBest performed as part of classifier pipeline
-
-# Below used for Testing Only
-data = featureFormat(my_dataset, features_list, sort_keys=True)
-labels, features = targetFeatureSplit(data)
-
-from sklearn.cross_validation import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.45, random_state=42)
-
-skbest = SelectKBest(k=6)
-features_new = skbest.fit_transform(X_train, y_train)
-indices = skbest.get_support(True)
-print 'Testing scores from SelectKBest:'
-print skbest.scores_
-
-for index in indices:
-    # need to map index (training without POI) back to feature_list so +1 index
-    print 'feature: %s, score: %f' % (features_list[index + 1], skbest.scores_[index])
+# Feature select is performed with SelectKBest where k is selected by GridSearchCV
+# See "build_classifier_pipeline" for MinMaxScaling, SelectKBest and Logistic Regression tuning
 
 
 # Test classifiers
 print '\n'
 print '########## Test and Tune Classifiers ##########'
 # Tune your classifier to achieve better than .3 precision and recall using our testing script.
+# See "build_classifier_pipeline" for MinMaxScaling, SelectKBest and Logistic Regression tuning
 cross_val = build_classifier_pipeline('logistic_reg')
 print 'Best parameters: ', cross_val.best_params_
 clf = cross_val.best_estimator_
