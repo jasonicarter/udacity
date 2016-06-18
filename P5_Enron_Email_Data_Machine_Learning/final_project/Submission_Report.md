@@ -37,7 +37,8 @@ Incompleteness was also a problem with the dataset. Below I've listed out the nu
     * Fastow Andrew S
     * Yeager F Scott
     * Hirko Joseph
-
+    
+Salary vs Bonus (before and after) dropping outliers:
 
 ![alt text](./salarybonus_w_outliers.png "Salary vs Bonus with outliers")
 ![alt text](./salarybonus_wo_outliers.png "Salary vs Bonus without outliers")
