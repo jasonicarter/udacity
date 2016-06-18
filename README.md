@@ -61,7 +61,7 @@ and to explore a selected data set for distributions, outliers, and anomalies.
 >
 > -- [Udacity Review](https://github.com/jasonicarter/udacity/blob/master/P4_Prosper_Loan_Data_EDA_R/UdacityReview.pdf)
 
-### Identify Fraud from Enron Email
+### [Identify Fraud from Enron Email](https://github.com/jasonicarter/udacity/tree/master/P5_Enron_Email_Data_Machine_Learning/final_project)
 
 Play detective and put your machine learning skills to use by building an algorithm to identify Enron Employees
 who may have committed fraud based on the public Enron financial and email dataset.
