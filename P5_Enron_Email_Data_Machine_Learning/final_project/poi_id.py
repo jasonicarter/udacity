@@ -36,7 +36,8 @@ features_list = ['poi', 'salary', 'deferral_payments', 'total_payments', 'loan_a
 ########################################################################################################################
 
 
-def scatter_plot(data_dict, x_feature, y_feature):
+def scatter_plot(x_feature, y_feature):
+    # Create scatter plot, save to local path
     features = ['poi', x_feature, y_feature]
     data = featureFormat(data_dict, features)
 
@@ -50,7 +51,9 @@ def scatter_plot(data_dict, x_feature, y_feature):
             plt.scatter(x, y, color='b', marker=".")
     plt.xlabel(x_feature)
     plt.ylabel(y_feature)
-    plt.show()
+    pic = x_feature + y_feature + '.png'
+    plt.savefig(pic, transparent=True)
+    # plt.show()
 
 
 def fill_nan_values():
@@ -72,7 +75,7 @@ def fill_nan_values():
 
 
 def poi_missing_email_info():
-    # POI with missing or no to/from email information
+    # Find total count and values of POI with missing or no to/from email information
     poi_count = 0
     poi_keys = []
     for person in data_dict.keys():
@@ -90,8 +93,7 @@ def poi_missing_email_info():
 
 
 def salary_bonus_bonanza():
-    # 4 more outliers in scatter plot to investigate
-    # Makes over 5M in bonus
+    # Identify salary or bonus outliers
     bonanza = []
     people_keys = data_dict.keys()
     for person in people_keys:
@@ -101,24 +103,8 @@ def salary_bonus_bonanza():
     return bonanza
 
 
-def people_with_all_nan():
-    people_keys = data_dict.keys()
-    feature_keys = data_dict[people_keys[0]]
-
-    nan_people = []
-    for person in people_keys:
-        existing_value = 0
-        for feature in feature_keys:
-            if data_dict[person][feature] != 'NaN':
-                existing_value += 1
-        if not existing_value:
-            nan_people.append(person)
-
-    return nan_people
-
-
 def create_new_features():
-
+    # Create new features for possible use in feature selection
     people_keys = data_dict.keys()
 
     for person in people_keys:
@@ -150,7 +136,7 @@ def create_new_features():
 
 
 def explore_data():
-
+    # main data exploration function
     people_keys = data_dict.keys()
     feature_keys = data_dict[people_keys[0]]
     poi_cnt, poi_missing_emails = poi_missing_email_info()
@@ -165,18 +151,14 @@ def explore_data():
     print '########## Removing Outliers ##########'
     # Update nan values in features, not good for numeric comparisons like > < ==
     features_with_nan = fill_nan_values()
-    people_with_nan = people_with_all_nan()
     print 'Updating NaN values in features'
     print features_with_nan
-    print 'People with all NaN values'
-    print people_with_nan
 
     # Outlier at 26M in salary -> 'total
-    # scatter_plot(data_dict, 'salary', 'bonus')
+    # scatter_plot('salary', 'bonus')
     # Remove outlier 'total'
     print 'Scatter plot shows large outlier at 26M in salary'
     print 'Outlier is "Total" value and should be removed'
-    # print(data_dict['TOTAL'])
 
     # Investigate other high salary or bonuses for outliers
     high_salary_bonus = salary_bonus_bonanza()
@@ -191,23 +173,23 @@ def explore_data():
     print 'Removing two values: Total, The Travel Agency In The Park'
     data_dict.pop('TOTAL')
     data_dict.pop('THE TRAVEL AGENCY IN THE PARK')
-    # scatter_plot(data_dict, 'salary', 'bonus')
+    # scatter_plot('salary', 'bonus')
 
     # Create new features
+    print '\n'
     print '########## Create Features ##########'
     create_new_features()
+    print 'Updated features_list: \n', features_list
 
 
 def build_classifier_pipeline(classifier_type):
-    # TODO: in general - add def comments to all
-    # was using kb transform data for splitting and still using it in pipeline causing very high precision and recall
-    # very off target from test.py
+    # Build pipeline and tune parameters via GridSearchCV
 
     data = featureFormat(my_dataset, features_list, sort_keys=True)
     labels, features = targetFeatureSplit(data)
 
     # Using stratified shuffle split cross validation because of the small size of the dataset
-    sss = StratifiedShuffleSplit(labels, 100, test_size=0.4, random_state=42)
+    sss = StratifiedShuffleSplit(labels, 500, test_size=0.45, random_state=42)
 
     # Build pipeline
     kbest = SelectKBest()
@@ -253,6 +235,7 @@ def set_classifier(x):
 
 
 # Load the dictionary containing the dataset
+print '\n'
 print '########## Load Dataset ##########'
 with open("final_project_dataset.pkl", "r") as data_file:
     data_dict = pickle.load(data_file)
@@ -260,12 +243,14 @@ with open("final_project_dataset.pkl", "r") as data_file:
 
 
 # Data Exploration and removal of outliers
+print '\n'
 print '########## Data Exploration ##########'
 explore_data()
 my_dataset = data_dict
 
 
 # Feature selection
+print '\n'
 print '########## Feature Selection ##########'
 # Using SelectKBest() which will do uni-variate feature selection to get the k best features
 # MinMaxScaling, SelectKBest performed as part of classifier pipeline
@@ -289,6 +274,7 @@ for index in indices:
 
 
 # Test classifiers
+print '\n'
 print '########## Test and Tune Classifiers ##########'
 # Tune your classifier to achieve better than .3 precision and recall using our testing script.
 cross_val = build_classifier_pipeline('logistic_reg')
@@ -300,6 +286,7 @@ test_classifier(clf, my_dataset, features_list)
 
 
 # Dump classifier, dataset and features_list
+print '\n'
 print '########## Dump Classifiers, dataset and features_list ##########'
 # Dump your classifier, dataset, and features_list so anyone can
 # check your results. You do not need to change anything below, but make sure
