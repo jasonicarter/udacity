@@ -148,6 +148,7 @@ def explore_data():
     print 'POIs with zero or missing to/from email messages in dataset: %d' % len(poi_missing_emails)
     print poi_missing_emails
 
+    print '\n'
     print '########## Removing Outliers ##########'
     # Update nan values in features, not good for numeric comparisons like > < ==
     features_with_nan = fill_nan_values()
@@ -201,7 +202,7 @@ def build_classifier_pipeline(classifier_type):
     parameters = []
     if classifier_type == 'random_forest':
         parameters = dict(feature_selection__k=range(2, 10),
-                          random_forest__n_estimators=[25, 50, 100],
+                          random_forest__n_estimators=[25, 50],
                           random_forest__min_samples_split=[2, 3, 4],
                           random_forest__criterion=['gini', 'entropy'])
     if classifier_type == 'logistic_reg':
@@ -260,9 +261,9 @@ data = featureFormat(my_dataset, features_list, sort_keys=True)
 labels, features = targetFeatureSplit(data)
 
 from sklearn.cross_validation import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.33, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.45, random_state=42)
 
-skbest = SelectKBest()
+skbest = SelectKBest(k=6)
 features_new = skbest.fit_transform(X_train, y_train)
 indices = skbest.get_support(True)
 print 'Testing scores from SelectKBest:'
@@ -296,6 +297,7 @@ dump_classifier_and_data(clf, my_dataset, features_list)
 print 'Successfully created clf, my_dataset and features_list pkl files'
 
 # References
+print '\n'
 print '########## References ##########'
 print 'https://civisanalytics.com/blog/data-science/2016/01/06/workflows-python-using-pipeline-gridsearchcv-for-compact-code/ \n' \
         'http://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.SelectKBest.html \n' \
