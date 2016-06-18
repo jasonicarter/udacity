@@ -105,7 +105,7 @@ Three features were engineered for testing of the model.
 With the project goal of identifying POIs, I believed adding two additional features which calculated the percentage/
 relationship of a POI with other employees at the company via their 'to' and 'from' email interaction would have
 shed insightful and useful information, allowing the algorithm to use these values as predictors.
-e.g if person A sends (or receives) a large portion of emails from a POI, there may be a greater likelihood that 
+e.g if person A sends (or receives) a large portion of their total emails to/from a POI, there may be a greater likelihood that 
 person A is also a POI.
 
 Like-wise, after discovering the large salary and bonuses of some of the POIs, I believed knowing the fraction or
@@ -116,7 +116,7 @@ However, in the final model none of the engineered featured were selected by Gri
 
 Utilizing SelectKBest, features were selected via GridSearchCV. The parameters used within GridSearchCV for 
 SelectKBest was a limited range between 4 and 7. The range was set manually as after multiple tests revealed that 
-this range for k resulted in the best performance for timing as well as Precision and Recall scores.
+this range for k resulted in the best performance for both timing as well as Precision and Recall scores.
 
 Below is a table of features and their scores:
 
