@@ -81,7 +81,7 @@ please report the feature scores and reasons for your choice of parameter values
 [relevant rubric items: “create new features”, “properly scale features”, “intelligently select feature”]*
 
 Both univariate feature selection and engineering were performed and used in tested when creating the final model. 
-Feature scaling was also utilized as there were a number of outliers which could screw the results (be used as a primary predictor) but 
+Feature scaling was also utilized as there were a number of outliers which could skew the results (be used as a primary predictor) but 
 due to the validity of the data, these points could not be removed. Although performance was tested
 with and without feature scaling as a reassurance to the process, the final model does not utilized feature scaling.
 
