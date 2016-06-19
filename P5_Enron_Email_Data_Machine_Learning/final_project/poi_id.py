@@ -6,12 +6,12 @@ import pickle
 
 from sklearn.feature_selection import SelectKBest
 from sklearn.pipeline import Pipeline
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB
 from sklearn.grid_search import GridSearchCV
-from sklearn.cross_validation import StratifiedShuffleSplit
+from sklearn.cross_validation import StratifiedShuffleSplit, train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from time import time
 
@@ -183,17 +183,17 @@ def explore_data():
     print 'Updated features_list: \n', features_list
 
 
-def build_classifier_pipeline(classifier_type):
+def build_classifier_pipeline(classifier_type, kbest, f_list):
     # Build pipeline and tune parameters via GridSearchCV
 
-    data = featureFormat(my_dataset, features_list, sort_keys=True)
+    data = featureFormat(my_dataset, f_list, sort_keys=True)
     labels, features = targetFeatureSplit(data)
 
     # Using stratified shuffle split cross validation because of the small size of the dataset
     sss = StratifiedShuffleSplit(labels, 500, test_size=0.45, random_state=42)
 
     # Build pipeline
-    kbest = SelectKBest()
+    kbest = SelectKBest(k=kbest)
     scaler = MinMaxScaler()
     classifier = set_classifier(classifier_type)
     pipeline = Pipeline(steps=[('minmax_scaler', scaler), ('feature_selection', kbest), (classifier_type, classifier)])
@@ -201,15 +201,19 @@ def build_classifier_pipeline(classifier_type):
     # Set parameters for random forest
     parameters = []
     if classifier_type == 'random_forest':
-        parameters = dict(feature_selection__k=range(2, 10),
-                          random_forest__n_estimators=[25, 50],
+        parameters = dict(random_forest__n_estimators=[25, 50],
                           random_forest__min_samples_split=[2, 3, 4],
                           random_forest__criterion=['gini', 'entropy'])
     if classifier_type == 'logistic_reg':
-        parameters = dict(feature_selection__k=range(4, 7),
-                          logistic_reg__class_weight=['balanced'],
+        parameters = dict(logistic_reg__class_weight=['balanced'],
                           logistic_reg__solver=['liblinear'],
-                          logistic_reg__C=range(1, 5))
+                          logistic_reg__C=range(1, 5),
+                          logistic_reg__random_state=42)
+    if classifier_type == 'decision_tree':
+        parameters = dict(decision_tree__min_samples_leaf=range(1, 5),
+                          decision_tree__mix_depth=range(1, 5),
+                          decision_tree__class_weight=['balanced'],
+                          decision_tree__criterion=['gini', 'entropy'])
 
     # Get optimized parameters for F1-scoring metrics
     cv = GridSearchCV(pipeline, param_grid=parameters, scoring='f1', cv=sss)
@@ -254,7 +258,33 @@ my_dataset = data_dict
 print '\n'
 print '########## Feature Selection ##########'
 # Feature select is performed with SelectKBest where k is selected by GridSearchCV
-# See "build_classifier_pipeline" for MinMaxScaling, SelectKBest and Logistic Regression tuning
+# Using Stratify for small and minority POI dataset
+
+# Extract features and labels from dataset for local testing
+# data = featureFormat(my_dataset, features_list, sort_keys=True)
+# labels, features = targetFeatureSplit(data)
+# features_train, features_test, labels_train, labels_test = \
+#     train_test_split(features, labels, train_size=.45, stratify=labels)
+#
+# skbest = SelectKBest(k=10)  # try best value to fit
+# sk_transform = skbest.fit_transform(features_train, labels_train)
+# indices = skbest.get_support(True)
+# print skbest.scores_
+#
+# n_list = ['poi']
+# for index in indices:
+#     print 'features: %s score: %f' % (features_list[index + 1], skbest.scores_[index])
+#     n_list.append(features_list[index + 1])
+
+
+# Final features list determined from SelectKBest and manual selection
+n_list = ['poi', 'salary', 'total_stock_value', 'expenses', 'bonus',
+          'exercised_stock_options', 'deferred_income',
+          'to_poi_fraction', 'from_poi_to_this_person', 'from_poi_fraction',
+          'shared_receipt_with_poi']
+
+# Update features_list with new values
+features_list = n_list
 
 
 # Test classifiers
@@ -262,9 +292,17 @@ print '\n'
 print '########## Test and Tune Classifiers ##########'
 # Tune your classifier to achieve better than .3 precision and recall using our testing script.
 # See "build_classifier_pipeline" for MinMaxScaling, SelectKBest and Logistic Regression tuning
-cross_val = build_classifier_pipeline('logistic_reg')
-print 'Best parameters: ', cross_val.best_params_
-clf = cross_val.best_estimator_
+
+# Classifiers tested but not using - Logistic_Regression, RandomForestClassifier, DecisionTreeClassifier
+
+# cross_val = build_classifier_pipeline('logistic_reg', 10, features_list)
+# print 'Best parameters: ', cross_val.best_params_
+# clf = cross_val.best_estimator_
+
+
+clf = AdaBoostClassifier(DecisionTreeClassifier(max_depth=1, min_samples_leaf=2, class_weight='balanced'),
+                         n_estimators=50, learning_rate=.8)
+
 
 # Validate model precision, recall and F1-score
 test_classifier(clf, my_dataset, features_list)

@@ -22,8 +22,9 @@ Data exploration was the first step, determining size of data set, number of fea
 When exploring the data, a number of outliers were discovered, some were not relevant while others were. In order to
 determine next steps, more data analysis was required. 
 
-One extreme outlier was removed from the dataset. It was a data point representing the total values and not an actual observation,
-while another outliers were kept because although they were outliers, it was very representative of the data and to our overall goal for the project.
+Extreme outliers were removed from the dataset. One was a data point representing the total values and not an actual observation,
+and the other was listed as "The Travel Agency In The Park". This outlier seems to be the account of a company.
+Other outliers were kept because although they were outliers, it was very representative of the data and to our overall goal for the project.
 Incompleteness was also a problem with the dataset. Below is an overview of the data, missing values and interesting data points.
 
 **Data Overview**
@@ -82,18 +83,24 @@ please report the feature scores and reasons for your choice of parameter values
 Both univariate feature selection and engineering were performed and used in tested when creating the final model. 
 Feature scaling was also utilized as there were a number of outliers which could screw the results (be used as a primary predictor) but 
 due to the validity of the data, these points could not be removed. Although performance was tested
-with and without feature scaling as a reassurance to the process, the final model utilized feature scaling.
+with and without feature scaling as a reassurance to the process, the final model does not utilized feature scaling.
 
 ### Feature Selection
 
-Feature selection was performed by SelectKBest and within the GridSearchCV. No features used were manually picked.
+Feature selection was performed by SelectKBest obtain the the best Precision and Recall scores during numerous testing. No features used were manually picked.
+Train test sets were created with the use of Stratified Shuffle Split cross validation due to small size of the data and that of the POI list.
 The final features utilized in the model are: 
-* salary
-* total_payments
+
+* salary 
 * bonus
+* deferred_income 
+* exercised_stock_options 
 * total_stock_value
-* exercised_stock_options
-* deferred_income
+* to_poi_fraction score
+* shared_receipt_with_poi 
+* total_payments
+* expenses score
+* from_poi_fraction score 
 
 ### Feature Engineering
 Three features were engineered for testing of the model. 
@@ -111,12 +118,9 @@ person A is also a POI.
 Like-wise, after discovering the large salary and bonuses of some of the POIs, I believed knowing the fraction or
 multiplier between someone's salary and their bonus would help as a predictor for the algorithm.
 
-A number of tests showed only "to_poi_fraction" was substantially useful enough during tuning. 
-However, in the final model none of the engineered featured were selected by GridSearchCV.
-
-Utilizing SelectKBest, features were selected via GridSearchCV. The parameters used within GridSearchCV for 
-SelectKBest was a limited range between 4 and 7. The range was set manually as after multiple tests revealed that 
-this range for k resulted in the best performance for both timing as well as Precision and Recall scores.
+GridSearchCV was initially used but being unable to easily identify k best features, I did a number of separate SelectKBest testing,
+and viewed their precision and recall scores. With SelectKBest, the number 10 for k was decided upon after a number of performance and tuning 
+which determined this to deliver the best mix of performance (timing), precision and recall.
 
 Below is a table of features and their scores:
 
@@ -127,16 +131,20 @@ deferred_income | 19.454073
 salary | 18.012912
 exercised_stock_options | 14.621981
 total_stock_value | 14.544973
+to_poi_fraction score | 14.271175
+shared_receipt_with_poi | 12.597418
 total_payments | 11.007505
+expenses score | 2.995212
+from_poi_fraction score | 1.437558
 
 
 ## ML Model
 *3.What algorithm did you end up using? What other one(s) did you try? How did model performance differ between algorithms?
 [relevant rubric item: “pick an algorithm”]*
 
-The POI identifier model uses the Logistic Regression algorithm as it provided the best validation results. 
-The other main algorithms used were Decision Tree, Random Forest and GaussianNB, all of which performed adequately in one 
-aspect or another. For example, Random Forest provided the best accuracy score but had low Precision and Recall scores.
+The POI identifier model uses the AdaBoost and DecisionTree algorithm as it provided the best validation results. 
+The other main algorithms used were Decision Tree (without AdaBoost), Random Forest and GaussianNB, and Logistic Regression 
+all of which performed adequately in one aspect or another. For example, Random Forest provided the best accuracy score but had low Precision and Recall scores.
 
 
 ### Tuning
@@ -157,24 +165,11 @@ for my tuning but my validation tests were using the F1-score, Precision and Rec
 In the case of my final model, I used the GridSearchCV function to determine the optimized parameters. Given a set of parameters, 
 this function evaluates (fit, transforms) all of the possible combinations, then returns a classifier, that provides the best score.
 
-Multiple algorithms were initially tried but from those results two main ones were manually selected for testing with GridSearchCV. 
-From there, one was selected for the final model.
-
 Algorithm | Precision | Recall | # of Training (StratifiedShuffleSplit folds)
 --- | --- | --- | ---
 Random Forest | 0.41747 | 0.21750 | 100
 Logistic Regression | 0.31064 | 0.60900 | 100
-
-The parameters below show my Pipeline and their parameters (pipeline: MinMax_Scaling, SelectKBest, Logistic Regression)
-
->Pipeline(steps=[
->>      ('minmax_scaler', MinMaxScaler(copy=True, feature_range=(0, 1))), 
->       ('feature_selection', SelectKBest(k=6, score_func=<function f_classif at 0x102c00d70>)), 
->       ('logistic_reg', LogisticRegression(C=3, class_weight='balanced', dual=False,
->           fit_intercept=True, intercept_scaling=1, max_iter=100,
->           multi_class='ovr', n_jobs=1, penalty='l2', random_state=None,
->           solver='liblinear', tol=0.0001, verbose=0, warm_start=False))
-> ])
+AdaBoost (DecisionTree) | 0.43123 | 0.40600 | 100
             
 ### Validation
 *5.What is validation, and what’s a classic mistake you can make if you do it wrong? 
@@ -185,7 +180,7 @@ A classic mistake of overfitting occurs when you train the algorithm on all avai
 instead of splitting it into training and testing data. Overfitting causing the model to merely memorize classification 
 and not 'learn' to generalize and apply this information to new datasets.
 
-The final model used Stratified ShuffleSplit cross validation iterator to randomly create multiple train test sets of data. 
+The final model used Stratified Shuffle Split cross validation iterator to randomly create multiple train test sets of data. 
 This was an ideal approach given the small dataset and even smaller number of POIs within the dataset.
 
 ### Model Results
@@ -198,14 +193,13 @@ The raw data can be see below. Each observation is a test, and each test made 15
 
 Precision | Recall | F1 | # of Training (StratifiedShuffleSplit folds)
 --- | --- | --- | --- | ---
-0.30213 | 0.58900 | 0.39939 | 10
-0.31064 | 0.60900 | 0.41142 | 100
-0.30894 | 0.63100 | 0.41479 | 500
-0.31168 | 0.62850| 0.41671 | 1000
+0.50000 | 0.45000 | 0.47368 | 10
+0.47458 | 0.42000 | 0.44562 | 100
+0.43123 | 0.40600| 0.41823 | 1000
 
 * *Precision is the measurement of how many selected items were identified as relevant*
 * *Recall is the measurement of how many relevant were selected*
 
-The model's precision is approx. 30% i.e from the people classified as POIs by the model, 30% of them are actual POIs.
-However, the model's recall is approx. 62% i.e from the number of actual POIs in the total dataset, the model correctly identifies
-62% them. It can be concluded that although the model "spreads a wide net" it will capture over 60% of actual POIs.
+The model's precision is approx. 45% i.e from the people classified as POIs by the model, 45% of them are actual POIs.
+However, the model's recall is approx. 40% i.e from the number of actual POIs in the total dataset, the model correctly identifies
+40% them. It can be concluded that although the model "spreads a wide net" it will capture over 40% of actual POIs.
