@@ -1,13 +1,20 @@
 body {
     background-color: white;
     color: black;
+    font-family: Arial, sans-serif;
+    font-size:10px;
 }
 
-.chart div {
-  font: 10px sans-serif;
-  background-color: steelblue;
-  text-align: right;
-  padding: 3px;
-  margin: 1px;
-  color: white;
+.axis path,.axis line {
+    fill: none;
+    stroke:#b6b6b6;
+    shape-rendering: crispEdges;
 }
+
+.tick text{fill:#999;}
+
+g.journal.active{cursor:pointer;}
+
+text.label{font-size:12px;font-weight:bold;cursor:pointer;}
+
+text.value{font-size:12px;font-weight:bold;}
