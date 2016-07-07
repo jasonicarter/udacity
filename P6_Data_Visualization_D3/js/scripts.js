@@ -23,11 +23,11 @@ var c = d3.scale.category20c();
 var x = d3.scale.linear()
 	.range([0, width]);
 
-var svg = d3.select("body").append("svg")
+var svg = d3.select("body").append("svg") // Need to fix up spacing here to give label more room on right side
 	.attr("width", width + margin.left + margin.right)
 	.attr("height", height + margin.top + margin.bottom)
 	.style("margin-left", margin.left + "px")
-	.append("g")
+	.append("g") // D3 group element
 	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 d3.json("data/journals_optogenetic.json", function(data) {
@@ -37,7 +37,8 @@ d3.json("data/journals_optogenetic.json", function(data) {
 		.range([0, width]);
 
 	for (var j = 0; j < data.length; j++) {
-		var g = svg.append("g").attr("class","journal");
+		var g = svg.append("g")
+            .attr("class","journal");
 
 		var circles = g.selectAll("circle")
 			.data(data[j]['articles'])
@@ -54,14 +55,14 @@ d3.json("data/journals_optogenetic.json", function(data) {
 			.range([2, 9]);
 
 		circles
-			.attr("cx", function(d, i) { return xScale(d[0]); }) // Need to push right x dist to cover length of neigh label
+			.attr("cx", function(d, i) { return xScale(d[0])+150; }) // TODO: what is d[0] value print out
 			.attr("cy", j*20+20)
 			.attr("r", function(d) { return rScale(d[1]); })
 			.style("fill", function(d) { return c(j); });
 
 		text
 			.attr("y", j*20+25)
-			.attr("x",function(d, i) { return xScale(d[0])-5; }) // Controls text in circle x dist from labels
+			.attr("x",function(d, i) { return xScale(d[0])+150; }) // Controls text in circle x dist from labels
 			.attr("class","value")
 			.text(function(d){ return d[1]; })
 			.style("fill", function(d) { return c(j); })
@@ -69,9 +70,9 @@ d3.json("data/journals_optogenetic.json", function(data) {
 
 		g.append("text")
 			.attr("y", j*20+25)
-			.attr("x",width+20) // Need to flip, width is that of data section without labels
+			.attr("x", 0)
 			.attr("class","label")
-			.text(truncate(data[j]['name'],30,"..."))
+			.text(truncate(data[j]['name'],30,"...")) // This is maxLength in characters need to get a static length in px
 			.style("fill", function(d) { return c(j); })
 			.on("mouseover", mouseover)
 			.on("mouseout", mouseout);
