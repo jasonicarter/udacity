@@ -30,7 +30,10 @@ var svg = d3.select("body").append("svg") // Need to fix up spacing here to give
 	.append("g") // D3 group element
 	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-d3.json("data/journals_optogenetic.json", function(data) {
+d3.json("data/sample_data.json", function(data) {
+    
+    console.log(data[0])
+    
 	x.domain([start_year, end_year]);
 	var xScale = d3.scale.linear()
 		.domain([start_year, end_year])
@@ -38,41 +41,50 @@ d3.json("data/journals_optogenetic.json", function(data) {
 
 	for (var j = 0; j < data.length; j++) {
 		var g = svg.append("g")
-            .attr("class","journal");
+            .attr("class","neighbourhood");
 
 		var circles = g.selectAll("circle")
-			.data(data[j]['articles'])
+            .data(data[0])
+//			.data(data[j]['murders']) // needs to be an array
 			.enter()
 			.append("circle");
+        
+        console.log(circles)
 
 		var text = g.selectAll("text")
-			.data(data[j]['articles'])
+			.data(data[j]['murders'])
 			.enter()
 			.append("text");
 
 		var rScale = d3.scale.linear()
-			.domain([0, d3.max(data[j]['articles'], function(d) { return d[1]; })])
+			.domain([0, d3.max(data[j]['murders'], function(d) { return d[1]; })])
 			.range([2, 9]);
+        
+        circles
+            .attr("cx", 20)
+            .attr("cy", j*20+25)
+            .attr("r", 9)
+            .style("fill", function(d) { return c(j); });
 
-		circles
-			.attr("cx", function(d, i) { return xScale(d[0])+150; }) // TODO: what is d[0] value print out
-			.attr("cy", j*20+20)
-			.attr("r", function(d) { return rScale(d[1]); })
-			.style("fill", function(d) { return c(j); });
-
-		text
-			.attr("y", j*20+25)
-			.attr("x",function(d, i) { return xScale(d[0])+150; }) // Controls text in circle x dist from labels
-			.attr("class","value")
-			.text(function(d){ return d[1]; })
-			.style("fill", function(d) { return c(j); })
-			.style("display","none");
+//		circles
+//			.attr("cx", function(d, i) { return xScale(d[0])+150; }) // TODO: what is d[0] value print out
+//			.attr("cy", j*20+20)
+//            .attr("r", function(d) { return rScale(d[1]); })
+//			.style("fill", function(d) { return c(j); });
+//
+//		text
+//			.attr("y", j*20+25)
+//			.attr("x",function(d, i) { return xScale(d[0])+150; }) // Controls text in circle x dist from labels
+//			.attr("class","value")
+//			.text(function(d){ return d[1]; })
+//			.style("fill", function(d) { return c(j); })
+//			.style("display","none");
 
 		g.append("text")
 			.attr("y", j*20+25)
 			.attr("x", 140) // Setting text-anchor to end means x must be x-text.length where text.length is max px of label
 			.attr("class","label")
-			.text(truncate(data[j]['name'],30,"...")) // This is maxLength in characters need to get a static length in px
+			.text(truncate(data[j]['neighbourhood'],30,"...")) // This is maxLength in characters need to get a static length in px
 			.style("fill", function(d) { return c(j); })
             .style("text-anchor", "end")
 			.on("mouseover", mouseover)
