@@ -70,10 +70,11 @@ d3.json("data/journals_optogenetic.json", function(data) {
 
 		g.append("text")
 			.attr("y", j*20+25)
-			.attr("x", 0)
+			.attr("x", 140) // Setting text-anchor to end means x must be x-text.length where text.length is max px of label
 			.attr("class","label")
 			.text(truncate(data[j]['name'],30,"...")) // This is maxLength in characters need to get a static length in px
 			.style("fill", function(d) { return c(j); })
+            .style("text-anchor", "end")
 			.on("mouseover", mouseover)
 			.on("mouseout", mouseout);
 	};
