@@ -40,7 +40,7 @@ d3.json("data/sample_data.json", function(data) {
       
         var rScale = d3.scale.linear()
             .domain([0, 1500])
-            .range([0, 70]);
+            .range([0, 30]);
         
         circles
             .attr("cx", function(d, i) { return i*30+175; })
@@ -66,6 +66,7 @@ d3.json("data/sample_data.json", function(data) {
             .style("text-anchor", "end")
 			.on("mouseover", mouseover)
 			.on("mouseout", mouseout);
+      
 	};
 
 	function mouseover(p) {
