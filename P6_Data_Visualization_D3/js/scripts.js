@@ -1,29 +1,12 @@
-// (keep) Used to keep truncate stings titles/labels
-function truncate(str, maxLength, suffix) {
-	if(str.length > maxLength) {
-		str = str.substring(0, maxLength + 1); 
-		str = str.substring(0, Math.min(str.length, str.lastIndexOf(" ")));
-		str = str + suffix;
-	}
-	return str;
-}
+// modified from http://neuralengr.com/asifr/journals/
 
-// (update) Create spacing and width/height of content
-var margin = {top: 20, right: 200, bottom: 0, left: 20}, // Need to flip 'right' for left as labels will be on left side
-	width = 300, // Need to update 
-	height = 650; // Need to update
-
-// (remove) 
-var start_year = 2004,
-	end_year = 2013;
+var margin = {top: 20, right: 200, bottom: 0, left: 20}, // TODO: don't really need margin.right
+	width = 400,
+	height = 650; // TODO: need to update for ~50 neighbourhoods
 
 var c = d3.scale.category20c();
 
-// (keep)
-var x = d3.scale.linear()
-	.range([0, width]);
-
-var svg = d3.select("body").append("svg") // Need to fix up spacing here to give label more room on right side
+var svg = d3.select("body").append("svg")
 	.attr("width", width + margin.left + margin.right)
 	.attr("height", height + margin.top + margin.bottom)
 	.style("margin-left", margin.left + "px")
@@ -31,15 +14,13 @@ var svg = d3.select("body").append("svg") // Need to fix up spacing here to give
 	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 d3.json("data/sample_data.json", function(data) {
-    
-	x.domain([start_year, end_year]);
-	var xScale = d3.scale.linear()
-		.domain([start_year, end_year])
-		.range([0, width]);
+  
+//    TODO: look into using a scale and xAxis
 
 	for (var j = 0; j < data.length; j++) {
 		var g = svg.append("g")
-            .attr("class","neighbourhood");
+            .attr("class","neighbourhood")
+            .attr("transform", "translate(" + 0 + "," + j*10 + ")");
 
 		var circles = g.selectAll("circle")
 			.data(data[j]['crime_types'])
@@ -53,35 +34,34 @@ d3.json("data/sample_data.json", function(data) {
 			.enter()
 			.append("text");
 
-		var rScale = d3.scale.linear()
-			.domain([0, d3.max(data[j]['crime_types'], function(d) { return d[1]; })])
-			.range([2, 9]);
+//		var rScale = d3.scale.linear()
+//			.domain([0, d3.max(data[j]['crime_types'], function(d) { return d[1]; })])
+//			.range([2, 9]);
+      
+        var rScale = d3.scale.linear()
+            .domain([0, 1500])
+            .range([0, 70]);
         
         circles
-            .attr("cx", function(d, i) { return i*30+175; }) // TODO: fix this
+            .attr("cx", function(d, i) { return i*30+175; })
             .attr("cy", j*20+20)
-            .attr("r", 9)
+            .attr("r", function(d) { return rScale(d3.values(d)[0]); })
             .style("fill", function(d) { return c(j); });
       
-//		circles
-//			.attr("cx", function(d, i) { return xScale(d[0])+150; }) // TODO: what is d[0] value print out
-//			.attr("cy", j*20+20)
-//            .attr("r", function(d) { return rScale(d[1]); })
-//			.style("fill", function(d) { return c(j); });
-//
 		text
 			.attr("y", j*20+25)
-			.attr("x",function(d, i) { return i*30+175; }) // Controls text in circle x dist from labels
+			.attr("x",function(d, i) { return i*30+175; })
 			.attr("class", "value")
 			.text(function(d){ return d3.values(d)[0]; }) // each d = {key:value} of crime_types
 			.style("fill", function(d) { return c(j); })
+            .style("text-anchor", "middle")
 			.style("display", "none");
 
 		g.append("text")
 			.attr("y", j*20+25)
-			.attr("x", 140) // Setting text-anchor to end means x must be x-text.length where text.length is max px of label
+			.attr("x", 140) // Setting text-anchor to end means x must be x-(text.length) where text.length is max px of label
 			.attr("class", "label")
-			.text(truncate(data[j]['name'],30,"...")) // This is maxLength in characters need to get a static length in px
+			.text(data[j]['name'])
 			.style("fill", function(d) { return c(j); })
             .style("text-anchor", "end")
 			.on("mouseover", mouseover)
