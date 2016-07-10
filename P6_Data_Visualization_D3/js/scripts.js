@@ -32,10 +32,10 @@ d3.json("data/sample_data.json", function(data) {
 			.enter()
 			.append("text");
       
-//        TODO: try using clamp
-        var rScale = d3.scale.linear()
-            .domain([0, d3.max(data[j]['crime_types'], function(d) { return d3.values(d)[0]; }) ])
-            .range([1, 10]);
+        var rScale = d3.scale.sqrt() // d3.scale.linear()
+            .domain([1, 800 ]) // .domain([0, d3.max(data[j]['crime_types'], function(d) { return d3.values(d)[0]; }) ])
+            .range([1, 10])
+//            .clamp(true);
         
         circles
             .attr("cx", function(d, i) { return i*30+175; })
