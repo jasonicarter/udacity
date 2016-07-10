@@ -1,10 +1,10 @@
 // modified from http://neuralengr.com/asifr/journals/
-
 var margin = {top: 20, right: 200, bottom: 0, left: 20}, // TODO: don't really need margin.right
 	width = 400,
 	height = 650; // TODO: need to update for ~50 neighbourhoods
 
-var c = d3.scale.category20c();
+// http://bl.ocks.org/aaizemberg/78bd3dade9593896a59d
+var c10 = d3.scale.category10();
 
 var svg = d3.select("body").append("svg")
 	.attr("width", width + margin.left + margin.right)
@@ -26,14 +26,13 @@ d3.json("data/sample_data.json", function(data) {
 			.data(data[j]['crime_types'])
 			.enter()
 			.append("circle");
-        
-        console.log(circles)
 
 		var text = g.selectAll("text")
 			.data(data[j]['crime_types'])
 			.enter()
 			.append("text");
       
+//        TODO: try using clamp
         var rScale = d3.scale.linear()
             .domain([0, d3.max(data[j]['crime_types'], function(d) { return d3.values(d)[0]; }) ])
             .range([1, 10]);
@@ -42,14 +41,14 @@ d3.json("data/sample_data.json", function(data) {
             .attr("cx", function(d, i) { return i*30+175; })
             .attr("cy", j*20+20)
             .attr("r", function(d) { return rScale(d3.values(d)[0]); })
-            .style("fill", function(d) { return c(j); });
+            .style("fill", function(d,i) { return c10(i); });
       
 		text
 			.attr("y", j*20+25)
 			.attr("x",function(d, i) { return i*30+175; })
 			.attr("class", "value")
 			.text(function(d){ return d3.values(d)[0]; }) // each d = {key:value} of crime_types
-			.style("fill", function(d) { return c(j); })
+			.style("fill", function(d,i) { return c10(i); })
             .style("text-anchor", "middle")
 			.style("display", "none");
 
@@ -58,7 +57,7 @@ d3.json("data/sample_data.json", function(data) {
 			.attr("x", 140) // Setting text-anchor to end means x must be x-(text.length) where text.length is max px of label
 			.attr("class", "label")
 			.text(data[j]['name'])
-			.style("fill", function(d) { return c(j); })
+			.style("fill", "black")
             .style("text-anchor", "end")
 			.on("mouseover", mouseover)
 			.on("mouseout", mouseout);
