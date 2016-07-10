@@ -20,7 +20,7 @@ d3.json("data/sample_data.json", function(data) {
 	for (var j = 0; j < data.length; j++) {
 		var g = svg.append("g")
             .attr("class","neighbourhood")
-            .attr("transform", "translate(" + 0 + "," + j*10 + ")");
+            .attr("transform", "translate(" + 0 + "," + j*5 + ")");
 
 		var circles = g.selectAll("circle")
 			.data(data[j]['crime_types'])
@@ -33,14 +33,10 @@ d3.json("data/sample_data.json", function(data) {
 			.data(data[j]['crime_types'])
 			.enter()
 			.append("text");
-
-//		var rScale = d3.scale.linear()
-//			.domain([0, d3.max(data[j]['crime_types'], function(d) { return d[1]; })])
-//			.range([2, 9]);
       
         var rScale = d3.scale.linear()
-            .domain([0, 1500])
-            .range([0, 30]);
+            .domain([0, d3.max(data[j]['crime_types'], function(d) { return d3.values(d)[0]; }) ])
+            .range([1, 10]);
         
         circles
             .attr("cx", function(d, i) { return i*30+175; })
