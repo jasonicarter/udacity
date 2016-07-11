@@ -108,6 +108,38 @@ d3.json("data/data_formatted.json", function(data) {
             .attr("dy", "1.35em") //vertical align middle
             .attr("transform", "translate(" + 610 + "," + 0 + ")") // TODO: use exiting or put in variables at top
             .text(formatDecimal(data[j]["comm_housing_pop_ratio"]*100) + "%");
+        
+        d3.select("input").on("change", change);
+
+        var sortTimeout = setTimeout(function() {
+            d3.select("input").property("checked", true).each(change);
+        }, 2000);
+
+        function change() {
+            clearTimeout(sortTimeout);
+
+            // Copy-on-write since tweens are evaluated after a delay.
+            var x0 = x.domain(data.sort(this.checked
+                ? function(a, b) { return b.frequency - a.frequency; }
+                : function(a, b) { return d3.ascending(a.letter, b.letter); })
+                .map(function(d) { return d.letter; }))
+                .copy();
+
+            svg.selectAll(".bar")
+                .sort(function(a, b) { return x0(a.letter) - x0(b.letter); });
+
+            var transition = svg.transition().duration(750),
+                delay = function(d, i) { return i * 50; };
+
+            transition.selectAll(".bar")
+                .delay(delay)
+                .attr("x", function(d) { return x0(d.letter); });
+
+            transition.select(".x.axis")
+                .call(xAxis)
+              .selectAll("g")
+                .delay(delay);
+        }
       
 	};
 
