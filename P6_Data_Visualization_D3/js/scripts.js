@@ -13,10 +13,33 @@ var svg = d3.select("body").append("svg")
 	.append("g") // D3 group element
 	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+// TODO: pull this from dataset
+var x = d3.scale.ordinal()
+    .domain(["arsons","assaults", "break_enters", "fire_fire_alarms", "fire_medical_calls",
+            "fire_vehicle_incidents", "hazardous_incidents", "murders", "robberies",
+            "sexual_assaults", "thefts", "vehicle_thefts"])
+    .rangePoints([0, width]);
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("top");
+
+svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(" + 165 + "," + 0 + ")")
+    .call(xAxis)
+  .selectAll("text")
+    .attr("y", -10)
+    .attr("x", 5)
+    .attr("dy", ".35em")
+    .attr("transform", "rotate(-45)")
+    .style("text-anchor", "start");
+
+
+// Load data and create svg elements
 d3.json("data/sample_data.json", function(data) {
   
 //    TODO: look into using a scale and xAxis
-
 	for (var j = 0; j < data.length; j++) {
 		var g = svg.append("g")
             .attr("class","neighbourhood")
@@ -38,14 +61,14 @@ d3.json("data/sample_data.json", function(data) {
 //            .clamp(true);
         
         circles
-            .attr("cx", function(d, i) { return i*30+175; })
+            .attr("cx", function(d, i) { return i*35+175; })
             .attr("cy", j*20+20)
             .attr("r", function(d) { return rScale(d3.values(d)[0]); })
             .style("fill", function(d,i) { return c10(i); });
       
 		text
 			.attr("y", j*20+25)
-			.attr("x",function(d, i) { return i*30+175; })
+			.attr("x",function(d, i) { return i*35+175; })
 			.attr("class", "value")
 			.text(function(d){ return d3.values(d)[0]; }) // each d = {key:value} of crime_types
 			.style("fill", function(d,i) { return c10(i); })
