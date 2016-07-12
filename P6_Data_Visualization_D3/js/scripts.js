@@ -1,20 +1,24 @@
-// modified from http://neuralengr.com/asifr/journals/
-var margin = {top: 20, right: 400, bottom: 0, left: 20}, // TODO: don't really need margin.right
-	width = 400,
-	height = 650; // TODO: need to update for ~50 neighbourhoods
+/*
+// central idea modified from http://neuralengr.com/asifr/journals/
+*/
+
+var margin = {top: 80, right: 0, bottom: 0, left: 20},
+	width = 800, // width of neighbourhood + crime types + comm_housing bars
+	height = 650; // TODO: need to update
 
 var maxBarWidth = 200,
-    barHeight = 20;
+    barHeight = 20
+    xAxisWidth = 400;
 
 // http://bl.ocks.org/aaizemberg/78bd3dade9593896a59d
 var c10 = d3.scale.category10();
 
 // TODO: pull this from dataset
 var x = d3.scale.ordinal()
-    .domain(["arsons","assaults", "break_enters", "fire_fire_alarms", "fire_medical_calls",
-            "fire_vehicle_incidents", "hazardous_incidents", "murders", "robberies",
-            "sexual_assaults", "thefts", "vehicle_thefts"])
-    .rangePoints([0, width]);
+    .domain(["Arsons","Assaults", "Break & Enters", "Fire Alarms", "Medical Calls",
+            "Vehicle Incidents", "Hazardous Incidents", "Murders", "Robberies",
+            "Sexual Assaults", "Thefts", "Vehicle Thefts"])
+    .rangePoints([0, xAxisWidth]);
 
 var xAxis = d3.svg.axis()
     .scale(x)
@@ -68,7 +72,7 @@ d3.json("data/data_formatted.json", function(data) {
         var rScale = d3.scale.sqrt() // d3.scale.linear()
             .domain([1, 800 ]) // .domain([0, d3.max(data[j]['crime_types'], function(d) { return d3.values(d)[0]; }) ])
             .range([1, 10])
-//            .clamp(true);
+            // .clamp(true);
         
         circles
             .attr("cx", function(d, i) { return i*35+175; })
@@ -108,91 +112,9 @@ d3.json("data/data_formatted.json", function(data) {
             .attr("dy", "1.35em") //vertical align middle
             .attr("transform", "translate(" + 610 + "," + 0 + ")") // TODO: use exiting or put in variables at top
             .text(formatDecimal(data[j]["comm_housing_pop_ratio"]*100) + "%");
-        
-//        d3.select("input").on("change", change);
-//
-//        var sortTimeout = setTimeout(function() {
-//            d3.select("input").property("checked", true).each(change);
-//        }, 2000);
-//
-//        function change() {
-//            clearTimeout(sortTimeout);
-//
-//            // Copy-on-write since tweens are evaluated after a delay.
-//            var x0 = x.domain(data.sort(this.checked
-//                ? function(a, b) { return b["total_pop"] - a["total_pop"]; }
-//                : function(a, b) { return d3.ascending(a["name"], b["name"]); })
-//                .map(function(d) { return d["name"]; }))
-//                .copy();
-//
-//            svg.selectAll("neighbourhood")
-//                .sort(function(a, b) { return x0(a["total_pop"]) - x0(b["total_pop"]); });
-//
-//            var transition = svg.transition().duration(750),
-//                delay = function(d, i) { return i * 50; };
-//
-//            transition.selectAll("neighbourhood")
-//                .delay(delay)
-//                .attr("x", function(d) { return x0(d["name"]); });
-
-//            transition.select(".x.axis")
-//                .call(xAxis)
-//              .selectAll("g")
-//                .delay(delay);
-//        }
       
 	};
-        
-        
-var sortOrder = false;
-var sortBars = function () {
-    sortOrder = !sortOrder;
-  
-    console.log("I'm here")
-  
-    sortItems = function (a, b) {
-        if (sortOrder) {
-            return console.log(a) //a.total_pop - b.total_pop;
-        }
-        return console.log("this is b") //b.total_pop - a.total_pop;
-    };
-
-    svg.selectAll(".label")
-        .sort(sortItems)
-        .transition()
-        .delay(function (d, i) {
-          console.log("i'm here too")
-        return i * 50;
-    })
-        .duration(1000)
-        .attr("x", function (d, i) {
-        return i; //xScale(i);
-    });
-
-//    svg.selectAll('text')
-//        .sort(sortItems)
-//        .transition()
-//        .delay(function (d, i) {
-//        return i * 50;
-//    })
-//        .duration(1000)
-//        .text(function (d) {
-//        return d.value;
-//    })
-//        .attr("text-anchor", "middle")
-//        .attr("x", function (d, i) {
-//          return i + i / 2;
-////        return xScale(i) + xScale.rangeBand() / 2;
-//    })
-//        .attr("y", function (d) {
-//        return h - yScale(d.total_pop) + 14;
-//    });
-};
-// Add the onclick callback to the button
-//d3.select("#sort").on("click", sortBars);    
-d3.select("input").on("change", sortBars);
-        
-
+    
 	function mouseover(p) {
 		var g = d3.select(this).node().parentNode;
 		d3.select(g).selectAll("circle").style("display","none");
