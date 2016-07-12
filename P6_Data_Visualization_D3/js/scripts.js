@@ -109,39 +109,87 @@ d3.json("data/data_formatted.json", function(data) {
             .attr("transform", "translate(" + 610 + "," + 0 + ")") // TODO: use exiting or put in variables at top
             .text(formatDecimal(data[j]["comm_housing_pop_ratio"]*100) + "%");
         
-        d3.select("input").on("change", change);
+//        d3.select("input").on("change", change);
+//
+//        var sortTimeout = setTimeout(function() {
+//            d3.select("input").property("checked", true).each(change);
+//        }, 2000);
+//
+//        function change() {
+//            clearTimeout(sortTimeout);
+//
+//            // Copy-on-write since tweens are evaluated after a delay.
+//            var x0 = x.domain(data.sort(this.checked
+//                ? function(a, b) { return b["total_pop"] - a["total_pop"]; }
+//                : function(a, b) { return d3.ascending(a["name"], b["name"]); })
+//                .map(function(d) { return d["name"]; }))
+//                .copy();
+//
+//            svg.selectAll("neighbourhood")
+//                .sort(function(a, b) { return x0(a["total_pop"]) - x0(b["total_pop"]); });
+//
+//            var transition = svg.transition().duration(750),
+//                delay = function(d, i) { return i * 50; };
+//
+//            transition.selectAll("neighbourhood")
+//                .delay(delay)
+//                .attr("x", function(d) { return x0(d["name"]); });
 
-        var sortTimeout = setTimeout(function() {
-            d3.select("input").property("checked", true).each(change);
-        }, 2000);
-
-        function change() {
-            clearTimeout(sortTimeout);
-
-            // Copy-on-write since tweens are evaluated after a delay.
-            var x0 = x.domain(data.sort(this.checked
-                ? function(a, b) { return b.frequency - a.frequency; }
-                : function(a, b) { return d3.ascending(a.letter, b.letter); })
-                .map(function(d) { return d.letter; }))
-                .copy();
-
-            svg.selectAll(".bar")
-                .sort(function(a, b) { return x0(a.letter) - x0(b.letter); });
-
-            var transition = svg.transition().duration(750),
-                delay = function(d, i) { return i * 50; };
-
-            transition.selectAll(".bar")
-                .delay(delay)
-                .attr("x", function(d) { return x0(d.letter); });
-
-            transition.select(".x.axis")
-                .call(xAxis)
-              .selectAll("g")
-                .delay(delay);
-        }
+//            transition.select(".x.axis")
+//                .call(xAxis)
+//              .selectAll("g")
+//                .delay(delay);
+//        }
       
 	};
+        
+        
+var sortOrder = false;
+var sortBars = function () {
+    sortOrder = !sortOrder;
+  
+    console.log("I'm here")
+  
+    sortItems = function (a, b) {
+        if (sortOrder) {
+            return a.value - b.value;
+        }
+        return b.value - a.value;
+    };
+
+    svg.selectAll("rect")
+        .sort(sortItems)
+        .transition()
+        .delay(function (d, i) {
+        return i * 50;
+    })
+        .duration(1000)
+        .attr("x", function (d, i) {
+        return xScale(i);
+    });
+
+    svg.selectAll('text')
+        .sort(sortItems)
+        .transition()
+        .delay(function (d, i) {
+        return i * 50;
+    })
+        .duration(1000)
+        .text(function (d) {
+        return d.value;
+    })
+        .attr("text-anchor", "middle")
+        .attr("x", function (d, i) {
+        return xScale(i) + xScale.rangeBand() / 2;
+    })
+        .attr("y", function (d) {
+        return h - yScale(d.value) + 14;
+    });
+};
+// Add the onclick callback to the button
+//d3.select("#sort").on("click", sortBars);    
+d3.select("input").on("change", sortBars);
+        
 
 	function mouseover(p) {
 		var g = d3.select(this).node().parentNode;
