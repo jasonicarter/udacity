@@ -2,7 +2,7 @@
 // central idea modified from http://neuralengr.com/asifr/journals/
 */
 
-var margin = {top: 80, right: 0, bottom: 0, left: 20},
+var margin = {top: 80, right: 0, bottom: 0, left: 80},
 	width = 800, // width of neighbourhood + crime types + comm_housing bars
 	height = 650; // TODO: need to update
 
@@ -51,7 +51,7 @@ svg.append("g")
     .style("text-anchor", "start");
 
 // Load data and create svg elements
-d3.json("data/data_formatted.json", function(data) {
+d3.json("data/sample_data.json", function(data) {
     
     // Apply svg elements for each individual record / neighbourhood
 	for (var j = 0; j < data.length; j++) {

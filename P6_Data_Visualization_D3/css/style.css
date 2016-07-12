@@ -5,6 +5,10 @@ body {
     font-size:10px;
 }
 
+h1 {
+    text-align: center   
+}
+
 .axis path,.axis line {
     fill: none;
     stroke:#b6b6b6;
@@ -13,8 +17,8 @@ body {
 
 .tick text{fill:#999;}
 
-g.journal.active{cursor:pointer;}
+g.neighbourhood.active{cursor:pointer;}
 
 text.label{font-size:12px;font-weight:bold;cursor:pointer;}
-
 text.value{font-size:12px;font-weight:bold;}
+
