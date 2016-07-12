@@ -152,39 +152,41 @@ var sortBars = function () {
   
     sortItems = function (a, b) {
         if (sortOrder) {
-            return a.value - b.value;
+            return console.log(a) //a.total_pop - b.total_pop;
         }
-        return b.value - a.value;
+        return console.log("this is b") //b.total_pop - a.total_pop;
     };
 
-    svg.selectAll("rect")
+    svg.selectAll(".label")
         .sort(sortItems)
         .transition()
         .delay(function (d, i) {
+          console.log("i'm here too")
         return i * 50;
     })
         .duration(1000)
         .attr("x", function (d, i) {
-        return xScale(i);
+        return i; //xScale(i);
     });
 
-    svg.selectAll('text')
-        .sort(sortItems)
-        .transition()
-        .delay(function (d, i) {
-        return i * 50;
-    })
-        .duration(1000)
-        .text(function (d) {
-        return d.value;
-    })
-        .attr("text-anchor", "middle")
-        .attr("x", function (d, i) {
-        return xScale(i) + xScale.rangeBand() / 2;
-    })
-        .attr("y", function (d) {
-        return h - yScale(d.value) + 14;
-    });
+//    svg.selectAll('text')
+//        .sort(sortItems)
+//        .transition()
+//        .delay(function (d, i) {
+//        return i * 50;
+//    })
+//        .duration(1000)
+//        .text(function (d) {
+//        return d.value;
+//    })
+//        .attr("text-anchor", "middle")
+//        .attr("x", function (d, i) {
+//          return i + i / 2;
+////        return xScale(i) + xScale.rangeBand() / 2;
+//    })
+//        .attr("y", function (d) {
+//        return h - yScale(d.total_pop) + 14;
+//    });
 };
 // Add the onclick callback to the button
 //d3.select("#sort").on("click", sortBars);    
