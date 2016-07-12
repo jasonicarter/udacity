@@ -8,6 +8,7 @@ http://www1.toronto.ca/wps/portal/contentonly?vgnextoid=04b489fe9c18b210VgnVCM10
 http://geojson.org
 http://www1.toronto.ca/wps/portal/contentonly?vgnextoid=b1533f0aacaaa210VgnVCM1000006cd60f89RCRD&vgnextchannel=1a66e03bb8d1e310VgnVCM10000071d60f89RCRD
 https://suffenus.wordpress.com/2014/01/07/making-interactive-maps-with-d3-for-total-beginners/
+http://sandbox.idre.ucla.edu/sandbox/general/how-to-install-and-run-gdal
 */
 
 
