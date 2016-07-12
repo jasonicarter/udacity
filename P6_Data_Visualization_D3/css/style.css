@@ -5,8 +5,24 @@ body {
     font-size:10px;
 }
 
+#wrapper {
+    margin-left: auto;
+    margin-right: auto;
+}
+
 h1 {
     text-align: center   
+}
+
+.message {
+    width: 600px;  
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.message p {
+    font-size: 1.25em;   
 }
 
 .axis path,.axis line {
