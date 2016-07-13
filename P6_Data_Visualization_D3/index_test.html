@@ -1,57 +1,79 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>D3: Setting path fills</title>
-        <script src="//d3js.org/d3.v3.min.js"></script>
-        <script src="http://d3js.org/topojson.v0.min.js"></script>
-        <style type="text/css">
-            /* No style rules here yet */       
-        </style>
-    </head>
-    <body>
-        <script type="text/javascript">
-                        
-            //Width and height
-            var w = 500;
-            var h = 300;
-            //Define map projection
-//            var projection = d3.geo.mercator()
-//                .scale(500)
-//                .translate([w / 2, h / 2]);
-            
-            var projection = d3.geo.albers()
-                .center([0, 55.4])
-                .rotate([4.4, 0])
-                .parallels([50, 60])
-                .scale(6000)
-                .translate([w/2, h/2]);
 
-            //Define path generator
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.feature {
+  fill: #ccc;
+}
+
+.mesh {
+  fill: none;
+  stroke: #fff;
+  stroke-width: .5px;
+  stroke-linejoin: round;
+}
+
+.outline {
+  fill: #ddd;
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+
+</style>
+<body>
+        <script src="//d3js.org/d3.v3.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.20/topojson.min.js"></script>
+        <script>
+
+            var width = 960,
+                height = 500;
+
+            var projection = d3.geo.albers();
+
             var path = d3.geo.path()
                 .projection(projection);
-            
-            //Create SVG element
-            var svg = d3.select("body")
-                        .append("svg")
-                        .attr("width", w)
-                        .attr("height", h);
-            //Load in GeoJSON data
-            d3.json("data/toronto_crs84.json", function(json) {
 
-                //Bind data and create one path per GeoJSON feature
-                svg.selectAll("path")
-                   .data(json.features)
-                   .enter()
-                    .append("path")
-                    .attr("d", d3.geo.path().projection(d3.geo.mercator()));
-//                   .append("path")
-//                   .attr("d", path)
-//                   .style("fill", "steelblue");
-                    
+            var svg = d3.select("body").append("svg")
+                .attr("width", width)
+                .attr("height", height);
 
+            d3.json("data/toronto_topo.json", function(error, us) {
+              if (error) throw error;
+
+              var states = topojson.feature(us, us.objects.toronto),
+                   state = states.features.filter(function(d) { return d.properties.id == 97; })[0];
+//                  state = states.features.filter(function(d) { return d.id === 97; })[0];
+
+                console.log(state);
+                
+              projection
+                  .scale(1)
+                  .translate([0, 0]);
+
+              var b = path.bounds(states),
+                  s = .95 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
+                  t = [(width - s * (b[1][0] + b[0][0])) / 2, (height - s * (b[1][1] + b[0][1])) / 2];
+
+              projection
+                  .scale(s)
+                  .translate(t);
+
+              svg.append("path")
+                  .datum(states)
+                  .attr("class", "feature")
+                  .attr("d", path);
+
+              svg.append("path")
+                  .datum(topojson.mesh(us, us.objects.toronto, function(a, b) { return a !== b; }))
+                  .attr("class", "mesh")
+                  .attr("d", path);
+
+              svg.append("path")
+                  .datum(state)
+                  .attr("class", "outline")
+                  .attr("d", path);
             });
-            
         </script>
         
     </body>
