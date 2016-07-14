@@ -3,10 +3,6 @@
 <meta charset="utf-8">
 <style>
 
-.feature {
-  fill: #ccc;
-}
-
 .mesh {
   fill: none;
   stroke: #fff;
@@ -22,12 +18,17 @@
 
 </style>
 <body>
+        <link rel="stylesheet" href="css/style.css">
         <script src="//d3js.org/d3.v3.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.20/topojson.min.js"></script>
+        <script src="http://d3js.org/topojson.v1.min.js"></script>
         <script>
 
-            var width = 960,
-                height = 500;
+            // http://bl.ocks.org/michellechandra/0b2ce4923dc9b5809922
+          
+            var width = 400,
+                height = 400;
+          
+            var c10 = d3.scale.category10();
 
             var projection = d3.geo.albers();
 
@@ -37,16 +38,18 @@
             var svg = d3.select("body").append("svg")
                 .attr("width", width)
                 .attr("height", height);
+          
+            var label = svg.append("text")
+                .attr("y", 20)
+                .attr("x", 0)
+                .attr("class", "lbl_neighbourhood")
 
             d3.json("data/toronto_topo.json", function(error, us) {
               if (error) throw error;
 
-              var states = topojson.feature(us, us.objects.toronto),
-                   state = states.features.filter(function(d) { return d.properties.id == 97; })[0];
-//                  state = states.features.filter(function(d) { return d.id === 97; })[0];
+              var states = topojson.feature(us, us.objects.toronto); //,
+//                   state = states.features.filter(function(d) { return d.properties.id == 97; })[0];
 
-                console.log(state);
-                
               projection
                   .scale(1)
                   .translate([0, 0]);
@@ -58,22 +61,48 @@
               projection
                   .scale(s)
                   .translate(t);
-
-              svg.append("path")
-                  .datum(states)
-                  .attr("class", "feature")
-                  .attr("d", path);
+              
+              // get individual neighbourhoods
+              svg.selectAll("path")
+                    .data(states.features)
+                  .enter().append("path")
+                    .attr("class", "feature")
+                    .attr("d", path)
+                    .style("fill", c10(1) )
+                    .on("mouseover", mouseover) 
+                    .on("mouseout", mouseout)
+                    .on("click", clicked)
 
               svg.append("path")
                   .datum(topojson.mesh(us, us.objects.toronto, function(a, b) { return a !== b; }))
                   .attr("class", "mesh")
                   .attr("d", path);
 
-              svg.append("path")
-                  .datum(state)
-                  .attr("class", "outline")
-                  .attr("d", path);
+//              svg.append("path")
+//                  .datum(state)
+//                  .attr("class", "outline")
+//                  .attr("d", path)
+//                  .on("mouseover", function(d) { console.log(d); });
             });
+          
+            function mouseover(d) {     
+              label.text(d.properties.name.slice(0,-5)) // remove suffix id from name
+            }
+          
+            function mouseout(d) {     
+              label.text("")  
+            }
+
+            function clicked(d) {
+              console.log(d.properties.id, d.properties.name)
+              /*TODO: 
+                set selected to true
+                add d.id to list or dictionary
+                if selected == true, remove d.id from list
+                update text showing list
+              */
+            }
+
         </script>
         
     </body>
