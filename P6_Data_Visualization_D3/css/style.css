@@ -38,3 +38,17 @@ g.neighbourhood.active{cursor:pointer;}
 text.label{font-size:12px;font-weight:bold;cursor:pointer;}
 text.value{font-size:12px;font-weight:bold;}
 
+
+/* Neighbourhood Map Styles */
+.map_mesh {
+  fill: none;
+  stroke: #fff;
+  stroke-width: .5px;
+  stroke-linejoin: round;
+}
+
+.map_outline {
+  fill: #ddd;
+  stroke: #000;
+  stroke-width: 1.5px;
+}

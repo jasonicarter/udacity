@@ -1,22 +1,6 @@
-
 <!DOCTYPE html>
 <meta charset="utf-8">
-<style>
 
-.mesh {
-  fill: none;
-  stroke: #fff;
-  stroke-width: .5px;
-  stroke-linejoin: round;
-}
-
-.outline {
-  fill: #ddd;
-  stroke: #000;
-  stroke-width: 1.5px;
-}
-
-</style>
 <body>
         <link rel="stylesheet" href="css/style.css">
         <script src="//d3js.org/d3.v3.min.js"></script>
@@ -25,8 +9,8 @@
 
             // http://bl.ocks.org/michellechandra/0b2ce4923dc9b5809922
           
-            var width = 400,
-                height = 400;
+            var mapWidth = 400,
+                mapHeight = 400;
           
             var c10 = d3.scale.category10();
 
@@ -36,37 +20,41 @@
                 .projection(projection);
 
             var svg = d3.select("body").append("svg")
-                .attr("width", width)
-                .attr("height", height);
+                .attr("width", mapWidth)
+                .attr("height", mapHeight);
           
-            var label = svg.append("text")
+            var mapLabel = svg.append("text")
                 .attr("y", 20)
                 .attr("x", 0)
-                .attr("class", "lbl_neighbourhood")
+                .attr("class", "map_neighbourhood_name")
 
-            d3.json("data/toronto_topo.json", function(error, us) {
+            // load TopoJSON file
+            d3.json("data/toronto_topo.json", function(error, toronto) {
               if (error) throw error;
 
-              var states = topojson.feature(us, us.objects.toronto); //,
-//                   state = states.features.filter(function(d) { return d.properties.id == 97; })[0];
+              var neighbourhoods = topojson.feature(toronto, toronto.objects.toronto); //,
+//                   neighbourhood = neighbourhoods.features.filter(function(d) { return d.properties.id == 97; })[0];
 
+              // set default projection values 
               projection
                   .scale(1)
                   .translate([0, 0]);
 
-              var b = path.bounds(states),
-                  s = .95 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
-                  t = [(width - s * (b[1][0] + b[0][0])) / 2, (height - s * (b[1][1] + b[0][1])) / 2];
+              // creates bounding box and helps with projection and scaling
+              var b = path.bounds(neighbourhoods),
+                  s = .95 / Math.max((b[1][0] - b[0][0]) / mapWidth, (b[1][1] - b[0][1]) / mapHeight),
+                  t = [(mapWidth - s * (b[1][0] + b[0][0])) / 2, (mapHeight - s * (b[1][1] + b[0][1])) / 2];
 
+              // set project with bounding box data
               projection
                   .scale(s)
                   .translate(t);
               
               // get individual neighbourhoods
               svg.selectAll("path")
-                    .data(states.features)
+                    .data(neighbourhoods.features)
                   .enter().append("path")
-                    .attr("class", "feature")
+                    .attr("class", "map_neighbourhood")
                     .attr("d", path)
                     .style("fill", c10(1) )
                     .on("mouseover", mouseover) 
@@ -74,23 +62,22 @@
                     .on("click", clicked)
 
               svg.append("path")
-                  .datum(topojson.mesh(us, us.objects.toronto, function(a, b) { return a !== b; }))
-                  .attr("class", "mesh")
+                  .datum(topojson.mesh(toronto, toronto.objects.toronto, function(a, b) { return a !== b; }))
+                  .attr("class", "map_mesh")
                   .attr("d", path);
 
 //              svg.append("path")
-//                  .datum(state)
-//                  .attr("class", "outline")
+//                  .datum(neighbourhood)
+//                  .attr("class", "map_outline")
 //                  .attr("d", path)
-//                  .on("mouseover", function(d) { console.log(d); });
             });
           
             function mouseover(d) {     
-              label.text(d.properties.name.slice(0,-5)) // remove suffix id from name
+              mapLabel.text(d.properties.name.slice(0,-5)) // remove suffix id from name
             }
           
             function mouseout(d) {     
-              label.text("")  
+              mapLabel.text("")  
             }
 
             function clicked(d) {
