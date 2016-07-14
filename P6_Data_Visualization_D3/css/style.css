@@ -52,3 +52,12 @@ text.value{font-size:12px;font-weight:bold;}
   stroke: #000;
   stroke-width: 1.5px;
 }
+
+.map_neighbourhood {
+  fill: #1f77b4;
+}
+
+.map_neighbourhood:hover {
+  fill: #636363;
+  cursor: pointer;
+}

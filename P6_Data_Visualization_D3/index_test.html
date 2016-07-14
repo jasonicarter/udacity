@@ -9,8 +9,8 @@
 
             // http://bl.ocks.org/michellechandra/0b2ce4923dc9b5809922
           
-            var mapWidth = 400,
-                mapHeight = 400;
+            var mapWidth = 350,
+                mapHeight = 350;
           
             var c10 = d3.scale.category10();
 
@@ -56,7 +56,6 @@
                   .enter().append("path")
                     .attr("class", "map_neighbourhood")
                     .attr("d", path)
-                    .style("fill", c10(1) )
                     .on("mouseover", mouseover) 
                     .on("mouseout", mouseout)
                     .on("click", clicked)
