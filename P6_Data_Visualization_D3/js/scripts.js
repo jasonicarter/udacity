@@ -53,10 +53,9 @@ var path = d3.geo.path()
     .projection(projection);
 
 // TODO: update with with bar width
-var svg = d3.select("body").append("svg")
+var svg = d3.select("#svg-wrapper").append("svg")
 	.attr("width", width + margin.left + margin.right + mapWidth)
-	.attr("height", height + margin.top + margin.bottom)
-	.style("margin-left", margin.left + "px")
+	.attr("height", height + margin.top + margin.bottom);
 
 var chartGroup = svg.append("g") // D3 group element
     .attr("class", "chartGroup")
