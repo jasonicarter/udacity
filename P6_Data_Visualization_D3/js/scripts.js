@@ -16,7 +16,7 @@ http://ben.balter.com/2013/06/26/how-to-convert-shapefiles-to-geojson-for-use-on
 
 var margin = {top: 80, right: 0, bottom: 0, left: 20},
 	width = 600, // width of neighbourhood + crime types + comm_housing bars
-	height = 650; // TODO: need to update
+	height = 550;
 
 var maxBarWidth = 200,
     barHeight = 20
@@ -44,8 +44,8 @@ var xBarScale = d3.scale.linear()
 var formatDecimal = d3.format(".2f")
 
 // http://bl.ocks.org/michellechandra/0b2ce4923dc9b5809922
-var mapWidth = 350,
-    mapHeight = 350;
+var mapWidth = 400,
+    mapHeight = 400;
 
 var projection = d3.geo.albers();
 
@@ -55,17 +55,18 @@ var path = d3.geo.path()
 // TODO: update with with bar width
 var svg = d3.select("#svg-wrapper").append("svg")
 	.attr("width", width + margin.left + margin.right + mapWidth)
-	.attr("height", height + margin.top + margin.bottom);
+    .attr("height", height);
+//	.attr("height", height + margin.top + margin.bottom);
 
 var chartGroup = svg.append("g") // D3 group element
     .attr("class", "chartGroup")
-	.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+	.attr("transform", "translate(" + 50 + "," + margin.top + ")"); //TODO: fix hardcoded values
 
 var mapGroup = svg.append("g")
     .attr("class", "mapGroup")
     .attr("width", mapWidth)
     .attr("height", mapHeight)
-    .attr("transform", "translate(" + 600+ "," + 100 + ")"); //TODO: fix hardcoded values
+    .attr("transform", "translate(" + 600 + "," + 100 + ")"); //TODO: fix hardcoded values
 
 var mapLabel = mapGroup.append("text")
     .attr("y", 20)
