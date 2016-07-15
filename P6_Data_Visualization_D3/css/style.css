@@ -31,13 +31,19 @@ h1 {
     shape-rendering: crispEdges;
 }
 
+.axis text {font-size: 8px}
+
 .tick text{fill:#999;}
 
 g.neighbourhood.active{cursor:pointer;}
 
-text.label{font-size:12px;font-weight:bold;cursor:pointer;}
-text.value{font-size:12px;font-weight:bold;}
+text.label{
+  cursor: pointer;
+}
 
+text.value{
+  font-weight: bold;
+}
 
 /* Neighbourhood Map Styles */
 .map_mesh {

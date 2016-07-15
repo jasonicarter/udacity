@@ -14,13 +14,13 @@ http://ben.balter.com/2013/06/26/how-to-convert-shapefiles-to-geojson-for-use-on
 */
 
 
-var margin = {top: 80, right: 0, bottom: 0, left: 80},
-	width = 800, // width of neighbourhood + crime types + comm_housing bars
+var margin = {top: 80, right: 0, bottom: 0, left: 20},
+	width = 600, // width of neighbourhood + crime types + comm_housing bars
 	height = 650; // TODO: need to update
 
 var maxBarWidth = 200,
     barHeight = 20
-    xAxisWidth = 400;
+    xAxisWidth = 280;
 
 // http://bl.ocks.org/aaizemberg/78bd3dade9593896a59d
 var c10 = d3.scale.category10();
@@ -55,7 +55,7 @@ var path = d3.geo.path()
 // TODO: update with with bar width
 var svg = d3.select("body").append("svg")
 	.attr("width", width + margin.left + margin.right + mapWidth)
-	.attr("height", height + margin.top + margin.bottom + mapHeight)
+	.attr("height", height + margin.top + margin.bottom)
 	.style("margin-left", margin.left + "px")
 
 var chartGroup = svg.append("g") // D3 group element
@@ -65,17 +65,18 @@ var chartGroup = svg.append("g") // D3 group element
 var mapGroup = svg.append("g")
     .attr("class", "mapGroup")
     .attr("width", mapWidth)
-    .attr("height", mapHeight);
+    .attr("height", mapHeight)
+    .attr("transform", "translate(" + 600+ "," + 100 + ")"); //TODO: fix hardcoded values
 
 var mapLabel = mapGroup.append("text")
     .attr("y", 20)
     .attr("x", 0)
     .attr("class", "map_neighbourhood_name")
 
-// xAxis group
+// axis group
 chartGroup.append("g")
-    .attr("class", "x axis")
-    .attr("transform", "translate(" + 165 + "," + 0 + ")")
+    .attr("class", "axis")
+    .attr("transform", "translate(" + 170 + "," + 0 + ")")
     .call(xAxis)
   .selectAll("text")
     .attr("y", -10)
@@ -92,7 +93,7 @@ d3.json("data/sample_data.json", function(error, data) {
   for (var j = 0; j < data.length; j++) {
       var g = chartGroup.append("g")
           .attr("class","neighbourhood")
-          .attr("transform", "translate(" + 0 + "," + j*5 + ")");
+          .attr("transform", "translate(" + 0 + "," + j*2.5 + ")");
 
       var circles = g.selectAll("circle")
               .data(data[j]['crime_types'])
@@ -110,14 +111,14 @@ d3.json("data/sample_data.json", function(error, data) {
           // .clamp(true);
 
       circles
-          .attr("cx", function(d, i) { return i*35+175; })
+          .attr("cx", function(d, i) { return i*25+175; })
           .attr("cy", j*20+20)
           .attr("r", function(d) { return rScale(d3.values(d)[0]); })
           .style("fill", function(d,i) { return c10(i); });
 
       text
           .attr("y", j*20+25)
-          .attr("x",function(d, i) { return i*35+175; })
+          .attr("x",function(d, i) { return i*25+175; })
           .attr("class", "value")
           .text(function(d){ return d3.values(d)[0]; }) // each d = {key:value} of crime_types
           .style("fill", function(d,i) { return c10(i); })
@@ -138,14 +139,14 @@ d3.json("data/sample_data.json", function(error, data) {
           .attr("height", barHeight)
           .attr("class", "housing")
           .attr("y", j*20+25/2) // center rect on each neighbourhood
-          .attr("transform", "translate(" + 600 + "," + 0 + ")") // TODO: get this working with variables
+          .attr("transform", "translate(" + 470 + "," + 0 + ")") // TODO: get this working with variables
           .style("fill", c10(0));
 
       g.append("text")
           .attr("x", xBarScale(data[j]["comm_housing_pop_ratio"])*100)
           .attr("y", j*20+25/2)
           .attr("dy", "1.35em") //vertical align middle
-          .attr("transform", "translate(" + 610 + "," + 0 + ")") // TODO: use exiting or put in variables at top
+          .attr("transform", "translate(" + 480 + "," + 0 + ")") // TODO: use exiting or put in variables at top
           .text(formatDecimal(data[j]["comm_housing_pop_ratio"]*100) + "%");
 
   };
