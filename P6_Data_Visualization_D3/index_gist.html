@@ -4,35 +4,44 @@
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script src="http://d3js.org/topojson.v1.min.js"></script>
     <style type="text/css">
+        
+        .wrapper {
+            margin-left: auto;
+            margin-right: auto;
+            width: 800px;
+        }
 
         .map_mesh {
-          fill: none;
-          stroke: #fff;
-          stroke-width: .5px;
-          stroke-linejoin: round;
+            fill: none;
+            stroke: #fff;
+            stroke-width: .5px;
+            stroke-linejoin: round;
         }
 
         .map_outline {
-          fill: #ddd;
-          stroke: #000;
-          stroke-width: 1.5px;
+            fill: #ddd;
+            stroke: #000;
+            stroke-width: 1.5px;
         }
 
         .map_neighbourhood {
-          fill: #1f77b4;
+            fill: #1f77b4;
         }
 
         .map_neighbourhood:hover {
-          fill: #636363;
-          cursor: pointer;
+            fill: #636363;
+            cursor: pointer;
         }
         
     </style>
+    
+    <!--   center svg in div   -->
+    <div class="wrapper"></div>   
     <script>
 
         // With help from - http://bl.ocks.org/michellechandra/0b2ce4923dc9b5809922
-        var mapWidth = 350,
-            mapHeight = 350;
+        var mapWidth = 550,
+            mapHeight = 550;
 
         var c10 = d3.scale.category10();
 
@@ -41,7 +50,7 @@
         var path = d3.geo.path()
             .projection(projection);
 
-        var svg = d3.select("body").append("svg")
+        var svg = d3.select(".wrapper").append("svg")
             .attr("width", mapWidth)
             .attr("height", mapHeight);
 
@@ -102,7 +111,6 @@
           // Add code here
         }
 
-    </script>
-        
+    </script> 
     </body>
 </html>
