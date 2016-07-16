@@ -69,9 +69,11 @@ var mapGroup = svg.append("g")
     .attr("transform", "translate(" + 600 + "," + 100 + ")"); //TODO: fix hardcoded values
 
 var mapLabel = mapGroup.append("text")
-    .attr("y", 20)
-    .attr("x", 0)
+    .attr("y", 180)
+    .attr("x", -85)
     .attr("class", "map_neighbourhood_name")
+    .attr("transform", "rotate(-27)")
+    .text("Toronto's Neighbourhood")
 
 // axis group
 chartGroup.append("g")
@@ -86,11 +88,12 @@ chartGroup.append("g")
     .style("text-anchor", "start");
 
 // load neighbourhood crime data
-d3.json("data/sample_data.json", function(error, data) {
+d3.json("data/neighbourhoods.json", function(error, data) {
   if (error) throw error;
 
   // Apply svg elements for each individual record / neighbourhood
-  for (var j = 0; j < data.length; j++) {
+//  for (var j = 0; j < data.length; j++) {
+  for (var j = 0; j < 20; j++) {
       var g = chartGroup.append("g")
           .attr("class","neighbourhood")
           .attr("transform", "translate(" + 0 + "," + j*2.5 + ")");
@@ -212,7 +215,7 @@ d3.json("data/toronto_topo.json", function(error, toronto) {
   }
 
   function mouseout(d) {     
-    mapLabel.text("")  
+    mapLabel.text("Toronto's Neighbourhood")  
   }
 
   function clicked(d) {
