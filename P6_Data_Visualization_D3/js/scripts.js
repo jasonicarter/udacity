@@ -19,7 +19,7 @@ var margin = {top: 80, right: 0, bottom: 0, left: 20},
 	height = 550;
 
 var maxBarWidth = 200,
-    barHeight = 20
+    barHeight = 15
     xAxisWidth = 280;
 
 // http://bl.ocks.org/aaizemberg/78bd3dade9593896a59d
@@ -100,7 +100,7 @@ d3.json("data/sample_data.json", function(error, data) {
 // Add a new datum to the set
 d3.select("#add-btn").on("click", function(e){
   console.log("before: " + dataset.length)
-  var rnd = 4 //getRandomInt(0, dataset.length)
+  var rnd = getRandomInt(0, dataset.length)
   console.log(rnd)
   dataset.splice(rnd,1)
   console.log("after: " + dataset.length)
@@ -110,8 +110,6 @@ d3.select("#add-btn").on("click", function(e){
 
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
-// Returns a random integer between min (included) and max (excluded)
-// Using Math.round() will give you a non-uniform distribution!
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
@@ -119,215 +117,92 @@ function getRandomInt(min, max) {
 
 function update() {
   
-    var rScale = d3.scale.sqrt()
-        .domain([1, 800 ])
-        .range([1, 10]);
+  var rScale = d3.scale.sqrt()
+      .domain([1, 800 ])
+      .range([1, 10]);
   
   var neighbourhoods = chartGroup.selectAll(".neighbourhood")
-      .data(dataset);
+      .data(dataset, function(d){ return d["id"] });
+  
   
   var neighbourhoodsEnter = neighbourhoods.enter()
       .append("g")
       .attr("class","neighbourhood")
       .attr("transform", function(d, i) { return "translate(" + 0 + "," + i*2.5 + ")" })
+  
+  neighbourhoodsEnter
       .append("text")
       .attr("y", function(d,i){ return i*20+25; })
       .attr("x", 140)
       .attr("class", "label")
       .text(function(d,i) { return d["name"]; })
-      .style("text-anchor", "end");
+      .style("text-anchor", "end")
+      .on("mouseover", mouseover)
+      .on("mouseout", mouseout);
   
-
-  var circles = neighbourhoods.selectAll("circle")
-      .data(function(d){ return d["crime_types"]})
+  
+  neighbourhoodsEnter.selectAll("circle")
+      .data(function(d){ return d["crime_types"] })
     .enter()
       .append("circle")
       .attr("cx", function(d, i) { return i*25+175; })
-      .attr("cy", function(d, i) { return 20; })
-      .attr("transform", function(d, i) { return "translate(" + 0 + "," + 20 + ")" })
+      .attr("cy", function(d, i, j) { return j*20+20; })
       .style("fill", function(d,i) { return c10(i); })
       .transition()
-      .delay( function(d,i) { return 200 * i })
+      .delay( function(d,i) { return 100 * i })
       .attr("r", function(d) { return rScale(d3.values(d)[0]); });
   
   
-  var text = neighbourhoods.selectAll("text")
+  neighbourhoodsEnter.selectAll("text")
       .data(function(d){ return d["crime_types"]})
     .enter()
       .append("text")
-      .attr("y", function(d, i) { return i*20+25; })
+      .attr("class", "rate")
       .attr("x",function(d, i) { return i*25+175; })
-      .attr("class", "value")
+      .attr("y", function(d, i, j) { return j*20+20; })
       .text(function(d){ return d3.values(d)[0]; }) // each d = {key:value} of crime_types
       .style("fill", function(d,i) { return c10(i); })
       .style("text-anchor", "middle")
       .style("display", "none");
   
   
-  neighbourhoods.selectAll("rect")
-      .data(dataset)
-    .enter()
+  neighbourhoodsEnter
       .append("rect")
-      .attr("width", function(d, i) { return xBarScale(d["comm_housing_pop_ratio"])*100; })
-      .attr("height", barHeight)
       .attr("class", "housing")
+      .attr("height", barHeight)
       .attr("y", function(d, i) { return i*20+25/2; }) // center rect on each neighbourhood
       .attr("transform", "translate(" + 470 + "," + 0 + ")") // TODO: get this working with variables
-      .style("fill", c10(0));
-
-  neighbourhoods.selectAll("text")
-        .data(dataset)
-    .enter()
+      .style("fill", c10(0))
+      .attr("width", function(d) { return xBarScale(d["comm_housing_pop_ratio"])*100; })
+  
+  
+  neighbourhoodsEnter
       .append("text")
-      .attr("x", function(d, i) { return xBarScale(d["comm_housing_pop_ratio"])*100; })
+      .attr("x", function(d) { return xBarScale(d["comm_housing_pop_ratio"])*100; })
       .attr("y", function(d, i) { return i*20+25/2; })
       .attr("dy", "1.35em") //vertical align middle
       .attr("transform", "translate(" + 480 + "," + 0 + ")") // TODO: use exiting or put in variables at top
-      .text(formatDecimal( function(d, i) { return d["comm_housing_pop_ratio"]*100; }) + "%");
+      .text( function(d) { return formatDecimal(d["comm_housing_pop_ratio"]*100) + "%" } );
 
-  
-  var cnt = neighbourhoodsEnter[0].length;
   
   neighbourhoods.exit().remove();
-  
-//  
-//  console.log(neighbourhoodsEnter)
-//  console.log(neighbourhoodsEnter[0])
-  
-  
-//  for (var j = 0; j < cnt; j++) {
-    
-//    console.log(j)
-//    console.log(d[j]['crime_types'])
-    
-//    var crimes = d[j]['crime_types'];
-    
-//    console.log(d3.selectAll(".neighbourhood").data()[j]);
-//    
-//    var n = d3.selectAll(".neighbourhood").data()[j];
-//    
-//    neighbourhoods
-//        .attr("transform", "translate(" + 0 + "," + j*2.5 + ")");
-    
-//    var circles = neighbourhoodsEnter.selectAll("circle")
-//        .data(crimes)
-//      .enter()
-//        .append("circle");
-//    
-//    var text = neighbourhoodsEnter.selectAll("text")
-//        .data(crimes)
-//      .enter()
-//        .append("text");
-//    
-//    var rScale = d3.scale.sqrt()
-//        .domain([1, 800 ])
-//        .range([1, 10]);
-//    
-//    
-//    circles
-//        .attr("cx", function(d, i) { return i*25+175; })
-//        .attr("cy", j*20+20)
-//        .style("fill", function(d,i) { return c10(i); })
-//        .transition()
-//        .delay( function(d,i) { return 200 * i })
-//        .attr("r", function(d) { return rScale(d3.values(d)[0]); });
-//    
-//    text
-//        .attr("y", j*20+25)
-//        .attr("x",function(d, i) { return i*25+175; })
-//        .attr("class", "value")
-//        .text(function(d){ return d3.values(d)[0]; }) // each d = {key:value} of crime_types
-//        .style("fill", function(d,i) { return c10(i); })
-//        .style("text-anchor", "middle")
-//        .style("display", "none");
-//    
-//    
-//    neighbourhoodsEnter.append("text")
-//        .attr("y", j*20+25)
-//        .attr("x", 140) // Setting text-anchor to end means x must be x-(text.length) where text.length is max px of label
-//        .attr("class", "label")
-//        .text(d[j]['name'])
-//        .style("text-anchor", "end")
-////          .on("mouseover", mouseover)
-////          .on("mouseout", mouseout);
-
-//  }
-
-
-//  neighbourhoods.exit().remove();
-//  
-      
-  
-//  for (var j = 0; j < dataset.length; j++) {
-//      var g = chartGroup.append("g")
-//          .attr("class","neighbourhood")
-//          .attr("transform", "translate(" + 0 + "," + j*2.5 + ")");
-//
-//      var circles = g.selectAll("circle")
-//              .data(dataset[j]['crime_types'])
-//          .enter()
-//              .append("circle");
-//
-//      var text = g.selectAll("text")
-//              .data(dataset[j]['crime_types'])
-//          .enter()
-//              .append("text");
-//
-//      var rScale = d3.scale.sqrt() // d3.scale.linear()
-//          .domain([1, 800 ]) // .domain([0, d3.max(data[j]['crime_types'], function(d) { return d3.values(d)[0]; }) ])
-//          .range([1, 10])
-//          // .clamp(true);
-//
-//      circles
-//          .attr("cx", function(d, i) { return i*25+175; })
-//          .attr("cy", j*20+20)
-//          .transition()
-//          .delay( function(d,i) { return 200 * i })
-//          .attr("r", function(d) { return rScale(d3.values(d)[0]); })
-//          .style("fill", function(d,i) { return c10(i); });
-//
-//      text
-//          .attr("y", j*20+25)
-//          .attr("x",function(d, i) { return i*25+175; })
-//          .attr("class", "value")
-//          .text(function(d){ return d3.values(d)[0]; }) // each d = {key:value} of crime_types
-//          .style("fill", function(d,i) { return c10(i); })
-//          .style("text-anchor", "middle")
-//          .style("display", "none");
-//
-//      g.append("text")
-//          .attr("y", j*20+25)
-//          .attr("x", 140) // Setting text-anchor to end means x must be x-(text.length) where text.length is max px of label
-//          .attr("class", "label")
-//          .text(dataset[j]['name'])
-//          .style("text-anchor", "end")
-////          .on("mouseover", mouseover)
-////          .on("mouseout", mouseout);
-//
-//      g.append("rect")
-//          .attr("width", xBarScale(dataset[j]["comm_housing_pop_ratio"])*100)
-//          .attr("height", barHeight)
-//          .attr("class", "housing")
-//          .attr("y", j*20+25/2) // center rect on each neighbourhood
-//          .attr("transform", "translate(" + 470 + "," + 0 + ")") // TODO: get this working with variables
-//          .style("fill", c10(0));
-//
-//      g.append("text")
-//          .attr("x", xBarScale(dataset[j]["comm_housing_pop_ratio"])*100)
-//          .attr("y", j*20+25/2)
-//          .attr("dy", "1.35em") //vertical align middle
-//          .attr("transform", "translate(" + 480 + "," + 0 + ")") // TODO: use exiting or put in variables at top
-//          .text(formatDecimal(dataset[j]["comm_housing_pop_ratio"]*100) + "%");
-//
-//  };
-//  
-  
   
 }
 
 /*************************/
 
 
+  function mouseover(p) {
+      var g = d3.select(this).node().parentNode;
+      d3.select(g).selectAll("circle").style("display","none");
+      d3.select(g).selectAll(".rate").style("display","block");
+  }
+
+  function mouseout(p) {
+      var g = d3.select(this).node().parentNode;
+      d3.select(g).selectAll("circle").style("display","block");
+      d3.select(g).selectAll(".rate").style("display","none");
+  }
 
 
 
