@@ -91,17 +91,28 @@ chartGroup.append("g")
 /************************/
 var neighbourhoodDataset
 var workingDataset
+var lookupTable = {}
+var workingTable = {}
 
-d3.json("data/sample_data.json", function(error, data) {
+d3.json("data/neighbourhoods.json", function(error, data) {
             if (error) throw error;
-              neighbourhoodDataset = data
+            
+            neighbourhoodDataset = data
+            updateLookup(neighbourhoodDataset, lookupTable);
               
             // Get first 10 to initialize chart
             workingDataset = neighbourhoodDataset.slice(0, 3);
-            updateLookup(workingDataset);
-            console.log(lookupTable);
+            updateLookup(workingDataset, workingTable)
             update(workingDataset);
+
           });
+
+
+function updateLookup(data, table) {
+    for ( i = 0; i < data.length; i ++) {
+        table[data[i].id] = data[i]
+    }
+}
 
 
 // Add a new datum to the set
@@ -348,31 +359,27 @@ function mouseoutMap(d) {
 
 function clickedMap(d) {
   
-  /*
-  create neighbourhoodData (used for reference, getting new datum for chart)
-  create dataset with inital values (top 10?) from neighbourhoodData
-  create lookup table (array) with id's of all from dataset
-  if id in lookup -> alredy in chart, remove based on lookup index (find index by value)
-  if id not in lookup -> add to chart, get lookup index
-  */
+  id = d.properties.id;
+  if (id in workingTable) {
+    
+    // remove from workingDataset
+    var removeAtIndex = workingDataset.indexOf(workingTable[id]);
+    workingDataset.splice(removeAtIndex, 1);
+    
+    // update workingTable and chart
+    delete workingTable[id] 
+    update(workingDataset);
+    
+  } else {
+    
+    // add item to workingDataset
+    workingDataset.push(lookupTable[id]);
+    // update workingTable and chart
+    workingTable[id] = lookupTable[id];
+    update(workingDataset);
+    
+  }
   
-//  var newArray = newDataset.filter( function(datum) {
-//                      if (datum.id === d.properties.id) {
-//                        return datum
-//                      }         
-//                    });
-//  
-//  if newArray.length < 1 {
-////    newDataset.append(datum) // get 
-//  }
-//  
-//  console.log(newDataset);
-//  update(newDataset);
 }
 
-var lookupTable = []
-function updateLookup(data) {
-    for ( i = 0; i < data.length; i ++) {
-        lookupTable[i] = data[i]["id"]
-    }
-}
+
