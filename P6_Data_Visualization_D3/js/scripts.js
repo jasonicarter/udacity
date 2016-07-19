@@ -346,16 +346,24 @@ function mouseoutMap(d) {
 
 function clickedMap(d) {
   
-  var newArray = newDataset.filter( function(datum) {
-                      if (datum.id === d.properties.id) {
-                        return datum
-                      }         
-                    });
+  /*
+  create neighbourhoodData (used for reference, getting new datum for chart)
+  create dataset with inital values (top 10?) from neighbourhoodData
+  create lookup table (array) with id's of all from dataset
+  if id in lookup -> alredy in chart, remove based on lookup index (find index by value)
+  if id not in lookup -> add to chart, get lookup index
+  */
   
-  if newArray.length < 1 {
-//    newDataset.append(datum) // get 
-  }
-  
-  console.log(newDataset);
-  update(newDataset);
+//  var newArray = newDataset.filter( function(datum) {
+//                      if (datum.id === d.properties.id) {
+//                        return datum
+//                      }         
+//                    });
+//  
+//  if newArray.length < 1 {
+////    newDataset.append(datum) // get 
+//  }
+//  
+//  console.log(newDataset);
+//  update(newDataset);
 }
