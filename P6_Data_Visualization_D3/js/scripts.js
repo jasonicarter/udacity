@@ -90,22 +90,26 @@ chartGroup.append("g")
 
 /************************/
 var dataset
+var newDataset
 
 d3.json("data/sample_data.json", function(error, data) {
             if (error) throw error;
               dataset = data
+              
+            // Get first 10 to initialize chart
+            newDataset = dataset.slice(0, 3);
+            update(newDataset);
           });
 
 
 // Add a new datum to the set
 d3.select("#add-btn").on("click", function(e){
-  console.log("before: " + dataset.length)
+  
   var rnd = getRandomInt(0, dataset.length)
   console.log(rnd)
-  dataset.splice(rnd,1)
-  console.log("after: " + dataset.length)
+  newDataset.splice(rnd,1)
   
-  update();
+  update(newDataset);
 });
 
 
@@ -115,14 +119,14 @@ function getRandomInt(min, max) {
 }
 
 
-function update() {
+function update(newData) {
   
   var rScale = d3.scale.sqrt()
       .domain([1, 800 ])
       .range([1, 10]);
   
   var neighbourhoods = chartGroup.selectAll(".neighbourhood")
-      .data(dataset, function(d){ return d["id"] });
+      .data(newData, function(d){ return d["id"] });
   
   
   var neighbourhoodsEnter = neighbourhoods.enter()
@@ -315,9 +319,9 @@ d3.json("data/toronto_topo.json", function(error, toronto) {
       .enter().append("path")
         .attr("class", "map_neighbourhood")
         .attr("d", path)
-        .on("mouseover", mouseover) 
-        .on("mouseout", mouseout)
-        .on("click", clicked)
+        .on("mouseover", mouseoverMap) 
+        .on("mouseout", mouseoutMap)
+        .on("click", clickedMap)
 
   mapGroup.append("path")
       .datum(topojson.mesh(toronto, toronto.objects.toronto, function(a, b) { return a !== b; }))
@@ -329,22 +333,29 @@ d3.json("data/toronto_topo.json", function(error, toronto) {
 //                  .attr("class", "map_outline")
 //                  .attr("d", path)
   
-  function mouseover(d) {     
-    mapLabel.text(d.properties.name.slice(0,-5)) // remove suffix id from name
-  }
+});
 
-  function mouseout(d) {     
-    mapLabel.text("Toronto's Neighbourhood")  
-  }
 
-  function clicked(d) {
-    console.log(d.properties.id, d.properties.name)
-    /*TODO: 
-      set selected to true
-      add d.id to list or dictionary
-      if selected == true, remove d.id from list
-      update text showing list
-    */
+function mouseoverMap(d) {     
+  mapLabel.text(d.properties.name.slice(0,-5)) // remove suffix id from name
+}
+
+function mouseoutMap(d) {     
+  mapLabel.text("Toronto's Neighbourhood")  
+}
+
+function clickedMap(d) {
+  
+  var newArray = newDataset.filter( function(datum) {
+                      if (datum.id === d.properties.id) {
+                        return datum
+                      }         
+                    });
+  
+  if newArray.length < 1 {
+//    newDataset.append(datum) // get 
   }
   
-});
+  console.log(newDataset);
+  update(newDataset);
+}
