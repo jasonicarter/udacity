@@ -89,27 +89,29 @@ chartGroup.append("g")
 
 
 /************************/
-var dataset
-var newDataset
+var neighbourhoodDataset
+var workingDataset
 
 d3.json("data/sample_data.json", function(error, data) {
             if (error) throw error;
-              dataset = data
+              neighbourhoodDataset = data
               
             // Get first 10 to initialize chart
-            newDataset = dataset.slice(0, 3);
-            update(newDataset);
+            workingDataset = neighbourhoodDataset.slice(0, 3);
+            updateLookup(workingDataset);
+            console.log(lookupTable);
+            update(workingDataset);
           });
 
 
 // Add a new datum to the set
 d3.select("#add-btn").on("click", function(e){
   
-  var rnd = getRandomInt(0, dataset.length)
+  var rnd = getRandomInt(0, workingDataset.length)
   console.log(rnd)
-  newDataset.splice(rnd,1)
+  workingDataset.splice(rnd,1)
   
-  update(newDataset);
+  update(workingDataset);
 });
 
 
@@ -366,4 +368,11 @@ function clickedMap(d) {
 //  
 //  console.log(newDataset);
 //  update(newDataset);
+}
+
+var lookupTable = []
+function updateLookup(data) {
+    for ( i = 0; i < data.length; i ++) {
+        lookupTable[i] = data[i]["id"]
+    }
 }
