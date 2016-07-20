@@ -138,6 +138,7 @@ function update(newData) {
       .domain([1, 800 ])
       .range([1, 10]);
   
+  
   var neighbourhoods = chartGroup.selectAll(".neighbourhood")
       .data(newData, function(d){ return d["id"] });
   
@@ -146,6 +147,8 @@ function update(newData) {
       .append("g")
       .attr("class","neighbourhood")
       .attr("transform", function(d, i) { return "translate(" + 0 + "," + i*2.5 + ")" })
+      .attr("height", 30);
+  
   
   neighbourhoodsEnter
       .append("text")
@@ -158,19 +161,24 @@ function update(newData) {
       .on("mouseout", mouseout);
   
   
-  neighbourhoodsEnter.selectAll("circle")
+  var circles = neighbourhoodsEnter.append("g")
+      .attr("class", "circles")
+      .attr("transform", function(d, i) { return "translate(" + 0 + "," + (i*20+20) + ")" })
+  
+  
+  circles.selectAll("circle")
       .data(function(d){ return d["crime_types"] })
     .enter()
       .append("circle")
       .attr("cx", function(d, i) { return i*25+175; })
-      .attr("cy", function(d, i, j) { return j*20+20; })
+      .attr("class", "crimes")
       .style("fill", function(d,i) { return c10(i); })
       .transition()
       .delay( function(d,i) { return 100 * i })
       .attr("r", function(d) { return rScale(d3.values(d)[0]); });
   
   
-  neighbourhoodsEnter.selectAll("text")
+  circles.selectAll("text")
       .data(function(d){ return d["crime_types"]})
     .enter()
       .append("text")
