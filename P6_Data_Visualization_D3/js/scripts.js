@@ -40,7 +40,6 @@ var projection = d3.geo.albers();
 var path = d3.geo.path()
     .projection(projection);
 
-// TODO: update with with bar width
 var svg = d3.select("#svg-wrapper").append("svg")
 	.attr("width", width + margin.left + margin.right + mapWidth)
     .attr("height", height);
@@ -60,7 +59,7 @@ var mapLabel = mapGroup.append("text")
     .attr("x", -85)
     .attr("class", "map_neighbourhood_name")
     .attr("transform", "rotate(-27)")
-    .text("Toronto's Neighbourhood")
+    .text("Toronto Neighbourhoods")
 
 // axis group
 chartGroup.append("g")
@@ -75,7 +74,6 @@ chartGroup.append("g")
     .style("text-anchor", "start");
 
 
-/************************/
 var neighbourhoodDataset
 var workingDataset
 var lookupTable = {}
@@ -189,8 +187,6 @@ function update(newData) {
   
 }
 
-/*************************/
-
 
   function mouseover(p) {
       var g = d3.select(this).node().parentNode;
@@ -205,94 +201,11 @@ function update(newData) {
   }
 
 
-
-// load neighbourhood crime data
-/* d3.json("data/neighbourhoods.json", function(error, data) {
-  if (error) throw error;
-
-  // Apply svg elements for each individual record / neighbourhood
-//  for (var j = 0; j < data.length; j++) {
-  for (var j = 0; j < 2; j++) {
-      var g = chartGroup.append("g")
-          .attr("class","neighbourhood")
-          .attr("transform", "translate(" + 0 + "," + j*2.5 + ")");
-
-      var circles = g.selectAll("circle")
-              .data(data[j]['crime_types'])
-          .enter()
-              .append("circle");
-
-      var text = g.selectAll("text")
-              .data(data[j]['crime_types'])
-          .enter()
-              .append("text");
-
-      var rScale = d3.scale.sqrt() // d3.scale.linear()
-          .domain([1, 800 ]) // .domain([0, d3.max(data[j]['crime_types'], function(d) { return d3.values(d)[0]; }) ])
-          .range([1, 10])
-          // .clamp(true);
-
-      circles
-          .attr("cx", function(d, i) { return i*25+175; })
-          .attr("cy", j*20+20)
-          .attr("r", function(d) { return rScale(d3.values(d)[0]); })
-          .style("fill", function(d,i) { return c10(i); });
-
-      text
-          .attr("y", j*20+25)
-          .attr("x",function(d, i) { return i*25+175; })
-          .attr("class", "value")
-          .text(function(d){ return d3.values(d)[0]; }) // each d = {key:value} of crime_types
-          .style("fill", function(d,i) { return c10(i); })
-          .style("text-anchor", "middle")
-          .style("display", "none");
-
-      g.append("text")
-          .attr("y", j*20+25)
-          .attr("x", 140) // Setting text-anchor to end means x must be x-(text.length) where text.length is max px of label
-          .attr("class", "label")
-          .text(data[j]['name'])
-          .style("text-anchor", "end")
-          .on("mouseover", mouseover)
-          .on("mouseout", mouseout);
-
-      g.append("rect")
-          .attr("width", xBarScale(data[j]["comm_housing_pop_ratio"])*100)
-          .attr("height", barHeight)
-          .attr("class", "housing")
-          .attr("y", j*20+25/2) // center rect on each neighbourhood
-          .attr("transform", "translate(" + 470 + "," + 0 + ")") // TODO: get this working with variables
-          .style("fill", c10(0));
-
-      g.append("text")
-          .attr("x", xBarScale(data[j]["comm_housing_pop_ratio"])*100)
-          .attr("y", j*20+25/2)
-          .attr("dy", "1.35em") //vertical align middle
-          .attr("transform", "translate(" + 480 + "," + 0 + ")") // TODO: use exiting or put in variables at top
-          .text(formatDecimal(data[j]["comm_housing_pop_ratio"]*100) + "%");
-
-  };
-
-  function mouseover(p) {
-      var g = d3.select(this).node().parentNode;
-      d3.select(g).selectAll("circle").style("display","none");
-      d3.select(g).selectAll("text.value").style("display","block");
-  }
-
-  function mouseout(p) {
-      var g = d3.select(this).node().parentNode;
-      d3.select(g).selectAll("circle").style("display","block");
-      d3.select(g).selectAll("text.value").style("display","none");
-  }
-  
-}); */
-
 // load neighbourhood map data
 d3.json("data/toronto_topo.json", function(error, toronto) {
   if (error) throw error;
 
-  var neighbourhoods = topojson.feature(toronto, toronto.objects.toronto); //,
-//                   neighbourhood = neighbourhoods.features.filter(function(d) { return d.properties.id == 97; })[0];
+  var neighbourhoods = topojson.feature(toronto, toronto.objects.toronto);
 
   // set default projection values 
   projection
@@ -324,11 +237,6 @@ d3.json("data/toronto_topo.json", function(error, toronto) {
       .attr("class", "map_mesh")
       .attr("d", path);
 
-//              svg.append("path")
-//                  .datum(neighbourhood)
-//                  .attr("class", "map_outline")
-//                  .attr("d", path)
-  
 });
 
 
@@ -337,7 +245,7 @@ function mouseoverMap(d) {
 }
 
 function mouseoutMap(d) {     
-  mapLabel.text("Toronto's Neighbourhood")  
+  mapLabel.text("Toronto Neighbourhoods")  
 }
 
 function clickedMap(d) {
