@@ -2,18 +2,6 @@
 // central idea modified from http://neuralengr.com/asifr/journals/
 */
 
-/*
-https://blog.repustate.com/twitter-postgis-d3-rob-ford-fun-with-data-visualizations/
-http://www1.toronto.ca/wps/portal/contentonly?vgnextoid=04b489fe9c18b210VgnVCM1000003dd60f89RCRD&vgnextchannel=75d6e03bb8d1e310VgnVCM10000071d60f89RCRD
-http://geojson.org
-http://www1.toronto.ca/wps/portal/contentonly?vgnextoid=b1533f0aacaaa210VgnVCM1000006cd60f89RCRD&vgnextchannel=1a66e03bb8d1e310VgnVCM10000071d60f89RCRD
-https://suffenus.wordpress.com/2014/01/07/making-interactive-maps-with-d3-for-total-beginners/
-http://sandbox.idre.ucla.edu/sandbox/general/how-to-install-and-run-gdal
-http://www.kyngchaos.com/software:frameworks
-http://ben.balter.com/2013/06/26/how-to-convert-shapefiles-to-geojson-for-use-on-github/
-*/
-
-
 var margin = {top: 80, right: 0, bottom: 0, left: 20},
 	width = 600, // width of neighbourhood + crime types + comm_housing bars
 	height = 550;
@@ -37,7 +25,7 @@ var xAxis = d3.svg.axis()
     .orient("top");
 
 var xBarScale = d3.scale.linear()
-    .domain([0, 1]) //d3.max(data, function(d) { return d.comm_housing_pop_ratio; })]);
+    .domain([0, 1])
     .range([0, 10]);
 
 // http://bl.ocks.org/mstanaland/6106487
@@ -56,7 +44,6 @@ var path = d3.geo.path()
 var svg = d3.select("#svg-wrapper").append("svg")
 	.attr("width", width + margin.left + margin.right + mapWidth)
     .attr("height", height);
-//	.attr("height", height + margin.top + margin.bottom);
 
 var chartGroup = svg.append("g") // D3 group element
     .attr("class", "chartGroup")
@@ -66,7 +53,7 @@ var mapGroup = svg.append("g")
     .attr("class", "mapGroup")
     .attr("width", mapWidth)
     .attr("height", mapHeight)
-    .attr("transform", "translate(" + 600 + "," + 100 + ")"); //TODO: fix hardcoded values
+    .attr("transform", "translate(" + 600 + "," + 40 + ")"); //TODO: fix hardcoded values
 
 var mapLabel = mapGroup.append("text")
     .attr("y", 180)
@@ -101,7 +88,7 @@ d3.json("data/neighbourhoods.json", function(error, data) {
             updateLookup(neighbourhoodDataset, lookupTable);
               
             // Get first 10 to initialize chart
-            workingDataset = neighbourhoodDataset.slice(0, 3);
+            workingDataset = neighbourhoodDataset.slice(0, 10);
             updateLookup(workingDataset, workingTable)
             update(workingDataset);
 
@@ -113,17 +100,6 @@ function updateLookup(data, table) {
         table[data[i].id] = data[i]
     }
 }
-
-
-// Add a new datum to the set
-d3.select("#add-btn").on("click", function(e){
-  
-  var rnd = getRandomInt(0, workingDataset.length)
-  console.log(rnd)
-  workingDataset.splice(rnd,1)
-  
-  update(workingDataset);
-});
 
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
@@ -184,7 +160,6 @@ function update(newData) {
       .append("text")
       .attr("class", "rate")
       .attr("x",function(d, i) { return i*25+175; })
-      .attr("y", function(d, i, j) { return j*20+20; })
       .text(function(d){ return d3.values(d)[0]; }) // each d = {key:value} of crime_types
       .style("fill", function(d,i) { return c10(i); })
       .style("text-anchor", "middle")
