@@ -85,8 +85,12 @@ d3.json("data/neighbourhoods.json", function(error, data) {
             neighbourhoodDataset = data
             updateLookup(neighbourhoodDataset, lookupTable);
               
-            // Get first 10 to initialize chart
-            workingDataset = neighbourhoodDataset.slice(0, 10);
+            // Initialize chart with top 20 community housing pop_ratio
+            neighbourhoodDataset.sort(function(a, b) { 
+                return b.comm_housing_pop_ratio - a.comm_housing_pop_ratio;
+            })
+            
+            workingDataset = neighbourhoodDataset.slice(0, 20);
             updateLookup(workingDataset, workingTable)
             update(workingDataset);
 
@@ -131,8 +135,8 @@ function update(newData) {
       .attr("class", "label")
       .text(function(d,i) { return d["name"]; })
       .style("text-anchor", "end")
-      .on("mouseover", mouseover)
-      .on("mouseout", mouseout);
+      .on("mouseover", mouseoverChart)
+      .on("mouseout", mouseoutChart);
   
   
   var circles = neighbourhoodsEnter.append("g")
@@ -158,6 +162,7 @@ function update(newData) {
       .append("text")
       .attr("class", "rate")
       .attr("x",function(d, i) { return i*25+175; })
+      .attr("y", 3)
       .text(function(d){ return d3.values(d)[0]; }) // each d = {key:value} of crime_types
       .style("fill", function(d,i) { return c10(i); })
       .style("text-anchor", "middle")
@@ -178,7 +183,7 @@ function update(newData) {
       .append("text")
       .attr("x", function(d) { return xBarScale(d["comm_housing_pop_ratio"])*100; })
       .attr("y", function(d, i) { return i*20+25/2; })
-      .attr("dy", "1.35em") //vertical align middle
+      .attr("dy", "1.2em") //vertical align middle
       .attr("transform", "translate(" + 480 + "," + 0 + ")") // TODO: use exiting or put in variables at top
       .text( function(d) { return formatDecimal(d["comm_housing_pop_ratio"]*100) + "%" } );
 
@@ -186,19 +191,6 @@ function update(newData) {
   neighbourhoods.exit().remove();
   
 }
-
-
-  function mouseover(p) {
-      var g = d3.select(this).node().parentNode;
-      d3.select(g).selectAll("circle").style("display","none");
-      d3.select(g).selectAll(".rate").style("display","block");
-  }
-
-  function mouseout(p) {
-      var g = d3.select(this).node().parentNode;
-      d3.select(g).selectAll("circle").style("display","block");
-      d3.select(g).selectAll(".rate").style("display","none");
-  }
 
 
 // load neighbourhood map data
@@ -239,6 +231,18 @@ d3.json("data/toronto_topo.json", function(error, toronto) {
 
 });
 
+// Mouse events
+function mouseoverChart(p) {
+  var g = d3.select(this).node().parentNode;
+  d3.select(g).selectAll("circle").style("display","none");
+  d3.select(g).selectAll(".rate").style("display","block");
+}
+
+function mouseoutChart(p) {
+  var g = d3.select(this).node().parentNode;
+  d3.select(g).selectAll("circle").style("display","block");
+  d3.select(g).selectAll(".rate").style("display","none");
+}
 
 function mouseoverMap(d) {     
   mapLabel.text(d.properties.name.slice(0,-5)) // remove suffix id from name
