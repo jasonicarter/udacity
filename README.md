@@ -66,7 +66,7 @@ and to explore a selected data set for distributions, outliers, and anomalies.
 Play detective and put your machine learning skills to use by building an algorithm to identify Enron Employees
 who may have committed fraud based on the public Enron financial and email dataset.
 
-### Make Effective Data Visualization
+### [Make Effective Data Visualization](https://github.com/jasonicarter/udacity/tree/master/P6_Data_Visualization_D3)
 
 Create a data visualization from a data set that tells a story or highlights trends or patterns in the data.
 Use either dimple.js or d3.js to create the visualization. Your work should be a reflection of the theory
