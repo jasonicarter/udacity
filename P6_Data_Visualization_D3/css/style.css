@@ -23,6 +23,12 @@ h1, h2 {
 h1 {margin-bottom: 0}
 h2 {margin-top: 0}
 
+#filter {
+  width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 footer {
     margin-left: auto;
     margin-right: auto;
@@ -42,9 +48,8 @@ a { text-decoration: none; }
     margin-right: auto;
 }
 
-.message p {
-    font-size: 1.25em;   
-}
+.message p { font-size: 1.25em; }
+.instructions p { text-align: center; }
 
 .axis path,.axis line {
     fill: none;

@@ -6,7 +6,7 @@ var margin = {top: 80, right: 0, bottom: 0, left: 20},
 	width = 600, // width of neighbourhood + crime types + comm_housing bars
 	height = 550;
 
-var maxBarWidth = 200,
+var maxBarWidth = 200, // community housing bar chart data
     barHeight = 15
     xAxisWidth = 280;
 
@@ -46,13 +46,13 @@ var svg = d3.select("#svg-wrapper").append("svg")
 
 var chartGroup = svg.append("g") // D3 group element
     .attr("class", "chartGroup")
-	.attr("transform", "translate(" + 50 + "," + margin.top + ")"); //TODO: fix hardcoded values
+	.attr("transform", "translate(" + 50 + "," + margin.top + ")");
 
 var mapGroup = svg.append("g")
     .attr("class", "mapGroup")
     .attr("width", mapWidth)
     .attr("height", mapHeight)
-    .attr("transform", "translate(" + 600 + "," + 40 + ")"); //TODO: fix hardcoded values
+    .attr("transform", "translate(" + 600 + "," + 40 + ")");
 
 var mapLabel = mapGroup.append("text")
     .attr("y", 180)
@@ -79,6 +79,7 @@ var workingDataset
 var lookupTable = {}
 var workingTable = {}
 
+
 d3.json("data/neighbourhoods.json", function(error, data) {
             if (error) throw error;
             
@@ -91,6 +92,8 @@ d3.json("data/neighbourhoods.json", function(error, data) {
             })
             
             workingDataset = neighbourhoodDataset.slice(0, 20);
+  
+            // Keep track of ids in lookup table
             updateLookup(workingDataset, workingTable)
             update(workingDataset);
 
@@ -104,23 +107,17 @@ function updateLookup(data, table) {
 }
 
 
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
-function getRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min)) + min;
-}
-
-
 function update(newData) {
   
   var rScale = d3.scale.sqrt()
       .domain([1, 800 ])
       .range([1, 10]);
   
-  
+  // Load neightbourhood data
   var neighbourhoods = chartGroup.selectAll(".neighbourhood")
       .data(newData, function(d){ return d["id"] });
   
-  
+  // Put neighbourhood in it's own group element
   var neighbourhoodsEnter = neighbourhoods.enter()
       .append("g")
       .attr("class","neighbourhood")
@@ -143,7 +140,7 @@ function update(newData) {
       .attr("class", "circles")
       .attr("transform", function(d, i) { return "translate(" + 0 + "," + (i*20+20) + ")" })
   
-  
+  // Add crime data to each neighbourhoood (circles for size)
   circles.selectAll("circle")
       .data(function(d){ return d["crime_types"] })
     .enter()
@@ -155,7 +152,7 @@ function update(newData) {
       .delay( function(d,i) { return 100 * i })
       .attr("r", function(d) { return rScale(d3.values(d)[0]); });
   
-  
+  // Add crime data to each neighbourhoood (text for values)
   circles.selectAll("text")
       .data(function(d){ return d["crime_types"]})
     .enter()
@@ -168,7 +165,7 @@ function update(newData) {
       .style("text-anchor", "middle")
       .style("display", "none");
   
-  
+  // Add community housing data
   neighbourhoodsEnter
       .append("rect")
       .attr("class", "housing")
@@ -219,6 +216,7 @@ d3.json("data/toronto_topo.json", function(error, toronto) {
         .data(neighbourhoods.features)
       .enter().append("path")
         .attr("class", "map_neighbourhood")
+        .attr("id", function(d) { return d.properties.id; })
         .attr("d", path)
         .on("mouseover", mouseoverMap) 
         .on("mouseout", mouseoutMap)
@@ -231,15 +229,29 @@ d3.json("data/toronto_topo.json", function(error, toronto) {
 
 });
 
+
 // Mouse events
 function mouseoverChart(p) {
+  // find element, update chart and map
   var g = d3.select(this).node().parentNode;
+  id = d3.select(this.parentNode).datum()["id"];
+  
+  var neighbourhood = document.getElementById(id);
+  neighbourhood.style.fill = "#636363";
+  
   d3.select(g).selectAll("circle").style("display","none");
   d3.select(g).selectAll(".rate").style("display","block");
 }
 
 function mouseoutChart(p) {
+  // find element, update chart and map
   var g = d3.select(this).node().parentNode;
+  
+  id = d3.select(this.parentNode).datum()["id"];
+  
+  var neighbourhood = document.getElementById(id);
+  neighbourhood.style.fill = "#1f77b4";
+  
   d3.select(g).selectAll("circle").style("display","block");
   d3.select(g).selectAll(".rate").style("display","none");
 }
@@ -277,4 +289,20 @@ function clickedMap(d) {
   
 }
 
+//function selectSort(radioFilter) {
+//    currentValue = radioFilter.value;
+//    console.log(currentValue);
+//    SortData();
+//}
 
+//function SortData() {
+//
+//    neighbourhoodDataset.sort(function(a, b) { 
+//      console.log(b["crime_types"][7]["murders"])
+//      return b["crime_types"][7]["murders"] - a["crime_types"][7]["murders"];
+//    })
+//    
+//    workingDataset = neighbourhoodDataset.slice(0, 20);
+//    updateLookup(workingDataset, workingTable)
+//    update(workingDataset);
+//}
