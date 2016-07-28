@@ -3,63 +3,59 @@
 */
 
 var margin = {top: 80, right: 0, bottom: 0, left: 20},
-	width = 600, // width of neighbourhood + crime types + comm_housing bars
-	height = 550;
+  width = 600, // width of neighbourhood + crime types + comm_housing bars
+  height = 550;
 
 var maxBarWidth = 200, // community housing bar chart data
-    barHeight = 15
-    xAxisWidth = 280;
+  barHeight = 15
+  xAxisWidth = 280;
 
-// http://bl.ocks.org/aaizemberg/78bd3dade9593896a59d
 var c10 = d3.scale.category10();
 
-// TODO: pull this from dataset
 var x = d3.scale.ordinal()
-    .domain(["Arsons","Assaults", "Break & Enters", "Fire Alarms", "Medical Calls",
-            "Vehicle Incidents", "Hazardous Incidents", "Murders", "Robberies",
-            "Sexual Assaults", "Thefts", "Vehicle Thefts"])
-    .rangePoints([0, xAxisWidth]);
+  .domain(["Arsons","Assaults", "Break & Enters", "Fire Alarms", "Medical Calls",
+          "Vehicle Incidents", "Hazardous Incidents", "Murders", "Robberies",
+          "Sexual Assaults", "Thefts", "Vehicle Thefts"])
+  .rangePoints([0, xAxisWidth]);
 
 var xAxis = d3.svg.axis()
-    .scale(x)
-    .orient("top");
+  .scale(x)
+  .orient("top");
 
 var xBarScale = d3.scale.linear()
-    .domain([0, 1])
-    .range([0, 10]);
+  .domain([0, 1])
+  .range([0, 10]);
 
-// http://bl.ocks.org/mstanaland/6106487
 var formatDecimal = d3.format(".2f")
 
-// http://bl.ocks.org/michellechandra/0b2ce4923dc9b5809922
 var mapWidth = 400,
     mapHeight = 400;
 
 var projection = d3.geo.albers();
 
 var path = d3.geo.path()
-    .projection(projection);
+  .projection(projection);
 
 var svg = d3.select("#svg-wrapper").append("svg")
-	.attr("width", width + margin.left + margin.right + mapWidth)
-    .attr("height", height);
+  .attr("width", width + margin.left + margin.right + mapWidth)
+  .attr("height", height);
 
 var chartGroup = svg.append("g") // D3 group element
-    .attr("class", "chartGroup")
-	.attr("transform", "translate(" + 50 + "," + margin.top + ")");
+  .attr("class", "chartGroup")
+  .attr("transform", "translate(" + 50 + "," + margin.top + ")");
 
 var mapGroup = svg.append("g")
-    .attr("class", "mapGroup")
-    .attr("width", mapWidth)
-    .attr("height", mapHeight)
-    .attr("transform", "translate(" + 600 + "," + 40 + ")");
+  .attr("class", "mapGroup")
+  .attr("width", mapWidth)
+  .attr("height", mapHeight)
+  .attr("transform", "translate(" + 600 + "," + 40 + ")");
 
 var mapLabel = mapGroup.append("text")
-    .attr("y", 180)
-    .attr("x", -85)
-    .attr("class", "map_neighbourhood_name")
-    .attr("transform", "rotate(-27)")
-    .text("Toronto Neighbourhoods")
+  .attr("y", 180)
+  .attr("x", -85)
+  .attr("class", "map_neighbourhood_name")
+  .attr("transform", "rotate(-27)")
+  .text("Toronto Neighbourhoods")
 
 // axis group
 chartGroup.append("g")
@@ -81,65 +77,65 @@ var workingTable = {}
 
 
 d3.json("data/neighbourhoods.json", function(error, data) {
-            if (error) throw error;
-            
-            neighbourhoodDataset = data
-            updateLookup(neighbourhoodDataset, lookupTable);
-              
-            // Initialize chart with top 20 community housing pop_ratio
-            neighbourhoodDataset.sort(function(a, b) { 
-                return b.comm_housing_pop_ratio - a.comm_housing_pop_ratio;
-            })
-            
-            workingDataset = neighbourhoodDataset.slice(0, 20);
-  
-            // Keep track of ids in lookup table
-            updateLookup(workingDataset, workingTable)
-            update(workingDataset);
+  if (error) throw error;
 
-          });
+  neighbourhoodDataset = data
+  updateLookup(neighbourhoodDataset, lookupTable);
+
+  // Initialize chart with top 20 community housing pop_ratio
+  neighbourhoodDataset.sort(function(a, b) {
+      return b.comm_housing_pop_ratio - a.comm_housing_pop_ratio;
+  })
+
+  workingDataset = neighbourhoodDataset.slice(0, 20);
+
+  // Keep track of ids in lookup table
+  updateLookup(workingDataset, workingTable)
+  update(workingDataset);
+
+});
 
 
 function updateLookup(data, table) {
-    for ( i = 0; i < data.length; i ++) {
-        table[data[i].id] = data[i]
-    }
+  for ( i = 0; i < data.length; i ++) {
+      table[data[i].id] = data[i]
+  }
 }
 
 
 function update(newData) {
-  
+
   var rScale = d3.scale.sqrt()
-      .domain([1, 800 ])
-      .range([1, 10]);
-  
+    .domain([1, 800 ])
+    .range([1, 10]);
+
   // Load neightbourhood data
   var neighbourhoods = chartGroup.selectAll(".neighbourhood")
-      .data(newData, function(d){ return d["id"] });
-  
+    .data(newData, function(d){ return d["id"] });
+
   // Put neighbourhood in it's own group element
   var neighbourhoodsEnter = neighbourhoods.enter()
-      .append("g")
-      .attr("class","neighbourhood")
-      .attr("transform", function(d, i) { return "translate(" + 0 + "," + i*2.5 + ")" })
-      .attr("height", 30);
-  
-  
+    .append("g")
+    .attr("class","neighbourhood")
+    .attr("transform", function(d, i) { return "translate(" + 0 + "," + i*2.5 + ")" })
+    .attr("height", 30);
+
+
   neighbourhoodsEnter
-      .append("text")
-      .attr("y", function(d,i){ return i*20+25; })
-      .attr("x", 140)
-      .attr("class", "label")
-      .text(function(d,i) { return d["name"]; })
-      .style("text-anchor", "end")
-      .on("mouseover", mouseoverChart)
-      .on("mouseout", mouseoutChart);
-  
-  
+    .append("text")
+    .attr("y", function(d,i){ return i*20+25; })
+    .attr("x", 140)
+    .attr("class", "label")
+    .text(function(d,i) { return d["name"]; })
+    .style("text-anchor", "end")
+    .on("mouseover", mouseoverChart)
+    .on("mouseout", mouseoutChart);
+
+
   var circles = neighbourhoodsEnter.append("g")
-      .attr("class", "circles")
-      .attr("transform", function(d, i) { return "translate(" + 0 + "," + (i*20+20) + ")" })
-  
+    .attr("class", "circles")
+    .attr("transform", function(d, i) { return "translate(" + 0 + "," + (i*20+20) + ")" })
+
   // Add crime data to each neighbourhoood (circles for size)
   circles.selectAll("circle")
       .data(function(d){ return d["crime_types"] })
@@ -151,7 +147,7 @@ function update(newData) {
       .transition()
       .delay( function(d,i) { return 100 * i })
       .attr("r", function(d) { return rScale(d3.values(d)[0]); });
-  
+
   // Add crime data to each neighbourhoood (text for values)
   circles.selectAll("text")
       .data(function(d){ return d["crime_types"]})
@@ -164,29 +160,29 @@ function update(newData) {
       .style("fill", function(d,i) { return c10(i); })
       .style("text-anchor", "middle")
       .style("display", "none");
-  
+
   // Add community housing data
   neighbourhoodsEnter
-      .append("rect")
-      .attr("class", "housing")
-      .attr("height", barHeight)
-      .attr("y", function(d, i) { return i*20+25/2; }) // center rect on each neighbourhood
-      .attr("transform", "translate(" + 470 + "," + 0 + ")") // TODO: get this working with variables
-      .style("fill", c10(0))
-      .attr("width", function(d) { return xBarScale(d["comm_housing_pop_ratio"])*100; })
-  
-  
-  neighbourhoodsEnter
-      .append("text")
-      .attr("x", function(d) { return xBarScale(d["comm_housing_pop_ratio"])*100; })
-      .attr("y", function(d, i) { return i*20+25/2; })
-      .attr("dy", "1.2em") //vertical align middle
-      .attr("transform", "translate(" + 480 + "," + 0 + ")") // TODO: use exiting or put in variables at top
-      .text( function(d) { return formatDecimal(d["comm_housing_pop_ratio"]*100) + "%" } );
+    .append("rect")
+    .attr("class", "housing")
+    .attr("height", barHeight)
+    .attr("y", function(d, i) { return i*20+25/2; }) // center rect on each neighbourhood
+    .attr("transform", "translate(" + 470 + "," + 0 + ")")
+    .style("fill", c10(0))
+    .attr("width", function(d) { return xBarScale(d["comm_housing_pop_ratio"])*100; })
 
-  
+
+  neighbourhoodsEnter
+    .append("text")
+    .attr("x", function(d) { return xBarScale(d["comm_housing_pop_ratio"])*100; })
+    .attr("y", function(d, i) { return i*20+25/2; })
+    .attr("dy", "1.2em") //vertical align middle
+    .attr("transform", "translate(" + 480 + "," + 0 + ")")
+    .text( function(d) { return formatDecimal(d["comm_housing_pop_ratio"]*100) + "%" } );
+
+
   neighbourhoods.exit().remove();
-  
+
 }
 
 
@@ -196,31 +192,31 @@ d3.json("data/toronto_topo.json", function(error, toronto) {
 
   var neighbourhoods = topojson.feature(toronto, toronto.objects.toronto);
 
-  // set default projection values 
+  // set default projection values
   projection
       .scale(1)
       .translate([0, 0]);
 
   // creates bounding box and helps with projection and scaling
   var b = path.bounds(neighbourhoods),
-      s = .95 / Math.max((b[1][0] - b[0][0]) / mapWidth, (b[1][1] - b[0][1]) / mapHeight),
-      t = [(mapWidth - s * (b[1][0] + b[0][0])) / 2, (mapHeight - s * (b[1][1] + b[0][1])) / 2];
+    s = .95 / Math.max((b[1][0] - b[0][0]) / mapWidth, (b[1][1] - b[0][1]) / mapHeight),
+    t = [(mapWidth - s * (b[1][0] + b[0][0])) / 2, (mapHeight - s * (b[1][1] + b[0][1])) / 2];
 
   // set project with bounding box data
   projection
-      .scale(s)
-      .translate(t);
+    .scale(s)
+    .translate(t);
 
   // get individual neighbourhoods
   mapGroup.selectAll("path")
-        .data(neighbourhoods.features)
-      .enter().append("path")
-        .attr("class", "map_neighbourhood")
-        .attr("id", function(d) { return d.properties.id; })
-        .attr("d", path)
-        .on("mouseover", mouseoverMap) 
-        .on("mouseout", mouseoutMap)
-        .on("click", clickedMap)
+      .data(neighbourhoods.features)
+    .enter().append("path")
+      .attr("class", "map_neighbourhood")
+      .attr("id", function(d) { return d.properties.id; })
+      .attr("d", path)
+      .on("mouseover", mouseoverMap)
+      .on("mouseout", mouseoutMap)
+      .on("click", clickedMap)
 
   mapGroup.append("path")
       .datum(topojson.mesh(toronto, toronto.objects.toronto, function(a, b) { return a !== b; }))
@@ -235,10 +231,10 @@ function mouseoverChart(p) {
   // find element, update chart and map
   var g = d3.select(this).node().parentNode;
   id = d3.select(this.parentNode).datum()["id"];
-  
+
   var neighbourhood = document.getElementById(id);
   neighbourhood.style.fill = "#636363";
-  
+
   d3.select(g).selectAll("circle").style("display","none");
   d3.select(g).selectAll(".rate").style("display","block");
 }
@@ -246,63 +242,20 @@ function mouseoverChart(p) {
 function mouseoutChart(p) {
   // find element, update chart and map
   var g = d3.select(this).node().parentNode;
-  
+
   id = d3.select(this.parentNode).datum()["id"];
-  
+
   var neighbourhood = document.getElementById(id);
   neighbourhood.style.fill = "#1f77b4";
-  
+
   d3.select(g).selectAll("circle").style("display","block");
   d3.select(g).selectAll(".rate").style("display","none");
 }
 
-function mouseoverMap(d) {     
+function mouseoverMap(d) {
   mapLabel.text(d.properties.name.slice(0,-5)) // remove suffix id from name
 }
 
-function mouseoutMap(d) {     
-  mapLabel.text("Toronto Neighbourhoods")  
+function mouseoutMap(d) {
+  mapLabel.text("Toronto Neighbourhoods")
 }
-
-function clickedMap(d) {
-  
-  id = d.properties.id;
-  if (id in workingTable) {
-    
-    // remove from workingDataset
-    var removeAtIndex = workingDataset.indexOf(workingTable[id]);
-    workingDataset.splice(removeAtIndex, 1);
-    
-    // update workingTable and chart
-    delete workingTable[id] 
-    update(workingDataset);
-    
-  } else {
-    
-    // add item to workingDataset
-    workingDataset.push(lookupTable[id]);
-    // update workingTable and chart
-    workingTable[id] = lookupTable[id];
-    update(workingDataset);
-    
-  }
-  
-}
-
-//function selectSort(radioFilter) {
-//    currentValue = radioFilter.value;
-//    console.log(currentValue);
-//    SortData();
-//}
-
-//function SortData() {
-//
-//    neighbourhoodDataset.sort(function(a, b) { 
-//      console.log(b["crime_types"][7]["murders"])
-//      return b["crime_types"][7]["murders"] - a["crime_types"][7]["murders"];
-//    })
-//    
-//    workingDataset = neighbourhoodDataset.slice(0, 20);
-//    updateLookup(workingDataset, workingTable)
-//    update(workingDataset);
-//}

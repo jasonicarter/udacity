@@ -17,7 +17,7 @@ body {
 }
 
 h1, h2 {
-    text-align: center   
+    text-align: center
 }
 
 h1 {margin-bottom: 0}
@@ -42,7 +42,7 @@ ul { list-style: none; }
 a { text-decoration: none; }
 
 .message {
-    width: 600px;  
+    width: 600px;
     text-align: left;
     margin-left: auto;
     margin-right: auto;
@@ -91,7 +91,6 @@ text.value{
 
 .map_neighbourhood:hover {
   fill: #636363;
-  cursor: pointer;
 }
 
 .map_neighbourhood_name {
