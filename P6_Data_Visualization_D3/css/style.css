@@ -57,7 +57,7 @@ a { text-decoration: none; }
     shape-rendering: crispEdges;
 }
 
-.axis text {font-size: 8px}
+.axis text, .neighbourhood_info, .housing_info {font-size: 8px}
 
 .tick text{fill: black;}
 

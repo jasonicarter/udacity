@@ -57,6 +57,16 @@ var mapLabel = mapGroup.append("text")
   .attr("transform", "rotate(-27)")
   .text("Toronto Neighbourhoods")
 
+chartGroup.append("text")
+  .attr("class", "housing_info")
+  .attr("transform", "translate(" + 470 + "," + 0 + ")")
+  .text("Housing Population Ratio")
+
+chartGroup.append("text")
+  .attr("class", "neighbourhood_info")
+  .attr("transform", "translate(" + 50 + "," + 0 + ")")
+  .text("Toronto Neighbourhoods")
+
 // axis group
 chartGroup.append("g")
     .attr("class", "axis")
@@ -216,7 +226,6 @@ d3.json("data/toronto_topo.json", function(error, toronto) {
       .attr("d", path)
       .on("mouseover", mouseoverMap)
       .on("mouseout", mouseoutMap)
-      .on("click", clickedMap)
 
   mapGroup.append("path")
       .datum(topojson.mesh(toronto, toronto.objects.toronto, function(a, b) { return a !== b; }))
