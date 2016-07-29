@@ -72,6 +72,10 @@ Create a data visualization from a data set that tells a story or highlights tre
 Use either dimple.js or d3.js to create the visualization. Your work should be a reflection of the theory
 and practice of data visualization, such as visual encodings, design principles, and effective communication.
 
+> This is a very slick chart design. Nice job finding a way to concentrate a lot of information into a compact, clean and readable space. I really like the introductory information below the chart title as well as how the neighborhoods were sorted by housing population ratio. The neighborhood map also ads a nice exploratory element to the chart.
+
+> -- [Udacity Review](https://github.com/jasonicarter/udacity/tree/master/UdacityReview.pdf)
+
 ### Design an A/B Test
 
 Make design decisions for an A/B test, including which metrics to measure and how long the test should be run.
