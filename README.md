@@ -74,7 +74,7 @@ and practice of data visualization, such as visual encodings, design principles,
 
 > This is a very slick chart design. Nice job finding a way to concentrate a lot of information into a compact, clean and readable space. I really like the introductory information below the chart title as well as how the neighborhoods were sorted by housing population ratio. The neighborhood map also ads a nice exploratory element to the chart.
 
-> -- [Udacity Review](https://github.com/jasonicarter/udacity/tree/master/UdacityReview.pdf)
+> -- [Udacity Review](https://github.com/jasonicarter/udacity/blob/master/P6_Data_Visualization_D3/UdacityReviews.pdf)
 
 ### Design an A/B Test
 
