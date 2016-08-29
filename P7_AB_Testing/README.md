@@ -11,9 +11,9 @@ The hypothesis was that this might set clearer expectations for students upfront
 
 The unit of diversion is a cookie, although if the student enrolls in the free trial, they are tracked by user-id from that point forward. The same user-id cannot enroll in the free trial twice. For users that do not enroll, their user-id is not tracked in the experiment, even if they were signed in when they visited the course overview page.
 
+
 ## Experiment Design
 ### Metric Choice
-
 #### Invariant Metrics
 **Number of cookies**: The number of unique cookies to view the course overview page. This is a population sizing metric to be split evenly between the control and the experiment group. It should have no direct affect on the experiment.
 
@@ -47,17 +47,27 @@ Gross Conversion | 646,450
 Retention | 4,741,212
 Net Conversion | 685,325
 
-
 #### Duration vs. Exposure
-Indicate what fraction of traffic you would divert to this experiment and, given this, how many days you would need to run the experiment. (These should be the answers from the "Choosing Duration and Exposure" quiz.)
+Given the low risk and lack of sensitive data being collected, I would divert 100% of the traffic. With approx. 40,000 page views per day, the experiment would take roughly 119 days. However, this time period is too long to conduct an experiment for Udacity. Revising my previous decision, retention will no longer be used as an evaluation metric. 
 
-Give your reasoning for the fraction you chose to divert. How risky do you think this experiment would be for Udacity?
+New evaluation metrics are Gross Conversion and Net Conversion. The new number of page views required is 685,325 and the experiment will now require 18 days to complete. Note that if other experiments need to be conducted simutaneously, the percentage diversion can be reduced.
+
+Metric | Duration
+--- | ---
+Gross Conversion | 17
+Retention | 119
+Net Conversion | 18
+
 
 ## Experiment Analysis
+[Control and Experiment data](https://docs.google.com/spreadsheets/d/1Mu5u9GrybDdska-ljPXyBjTpdZIUev_6i7t4LRDfXM8/edit#gid=0) provided by Udacity and used throughout this section.
 ### Sanity Checks
-For each of your invariant metrics, give the 95% confidence interval for the value you expect to observe, the actual observed value, and whether the metric passes your sanity check. (These should be the answers from the "Sanity Checks" quiz.)
-
-For any sanity check that did not pass, explain your best guess as to what went wrong based on the day­by­day data.  Do not proceed to the rest of the analysis unless all sanity checks pass.
+Below is the computed 95% confidence inteval for the listed invariant metrics
+Invariant Metric | Lower Bound | Upper Bound | Observed | Pass/Fail
+--- | --- | --- | --- | ---
+Number of Cookies | .4988 | .5012 | .5006 | Pass
+Number of Clicks | .4959 | .5041 | .5005 | Pass
+Click-through Probability | .0812 | .0830 | .0822 | Pass
 
 ### Result Analysis
 #### Effect Size Tests
