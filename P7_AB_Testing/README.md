@@ -63,6 +63,7 @@ Net Conversion | 18
 [Control and Experiment data](https://docs.google.com/spreadsheets/d/1Mu5u9GrybDdska-ljPXyBjTpdZIUev_6i7t4LRDfXM8/edit#gid=0) provided by Udacity and used throughout this section.
 ### Sanity Checks
 Below is the computed 95% confidence inteval for the listed invariant metrics
+
 Invariant Metric | Lower Bound | Upper Bound | Observed | Pass/Fail
 --- | --- | --- | --- | ---
 Number of Cookies | .4988 | .5012 | .5006 | Pass
@@ -71,10 +72,20 @@ Click-through Probability | .0812 | .0830 | .0822 | Pass
 
 ### Result Analysis
 #### Effect Size Tests
-For each of your evaluation metrics, give a 95% confidence interval around the difference between the experiment and control groups. Indicate whether each metric is statistically and practically significant. (These should be the answers from the "Effect Size Tests" quiz.)
+Below is the computed 95% confidence interval around the difference between the experiment and control groups. 
+
+Evaluation Metric | Lower Bound | Upper Bound | Statisticially or Practically Significant
+--- | --- | --- | ---
+Gross Conversion | -0.0291 | -0.012 | Yes (statisticially and Practically)
+Net Conversion | -0.0116 | .0019 | No (statistically and Practically)
 
 #### Sign Tests
-For each of your evaluation metrics, do a sign test using the day­by­day data, and report the p­value of the sign test and whether the result is statistically significant. (These should be the answers from the "Sign Tests" quiz.)
+Below is the computed sign test using the day-by-day data.
+
+Evaluation Metric | p-value | Statistically Significant
+--- | --- | ---
+Gross Conversion | 0.0026 | Yes
+Net Conversion | 0.6776 | No
 
 #### Summary
 State whether you used the Bonferroni correction, and explain why or why not. If there are any discrepancies between the effect size hypothesis tests and the sign tests, describe the discrepancy and why you think it arose.
