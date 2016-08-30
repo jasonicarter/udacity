@@ -88,10 +88,26 @@ Gross Conversion | 0.0026 | Yes
 Net Conversion | 0.6776 | No
 
 #### Summary
-State whether you used the Bonferroni correction, and explain why or why not. If there are any discrepancies between the effect size hypothesis tests and the sign tests, describe the discrepancy and why you think it arose.
+The Bonferonni correction was not used in my analysis. The Bonefonni correction is a method to limit / control the risk of Type 1 errors in multiple independent metrics comparisons. If one metric was used to base our decision then the Bonferonni correction would have been appropriate; however, two affects were considered, gross conversion and net conversion 
+
+The sign and effect size test both showed gross conversion to be statistically significant, while net conversion is not. 
 
 ### Recommendation
-Make a recommendation and briefly describe your reasoning.
+Analysis of the screener provided by gross conversion indicates that the experiment was successful at reducing the number of students who enrolled in the free trial. However, results of the net conversion proved unsucessful in reducing the number of students that would continue past the 14 day free trial to complete the course. A decrease in enrollment but not an increase in students staying past the free trial / making a payment. 
+
+Based on these results, I would recommend against launching the change.
+
 
 ## Follow-Up Experiment
-Give a high­level description of the follow up experiment you would run, what your hypothesis would be, what metrics you would want to measure, what your unit of diversion would be, and your reasoning for these choices.
+During the 14 day trial students are left alone to complete the videos and project work without direct interaction from Udacity. As a follow-up experiment I would capture, via user-id, the number of hours each student has spent watching videos and going over quizes with some type of approximation reviewing reading material. If a student's time is lacking behind the pace of the recommended commitment hours by Udacity, then a pop up message for the student informing them they're tracking a bit behind and providing recommendations on how to catch up.
+
+The hypothesis is that a kind reminder early on in the process will help the student in two ways 1) give students a reference check on their progress and 2) provide students with resources allowing them to pick up the path. In turn, this will either "weed out" more students who just can't dedicate the time while also encouraging other students to work harder to make the deadlines. Students on pace or ahead of schedule would not see the pop up message.
+
+I would use the user-id as the unit of diversion, enrolled students only, with the user-id as an invariant metric and number of payments divided by the number of unique user-id's as an evaluation metric.
+
+## Reference
+* https://en.wikipedia.org/wiki/Sign_test
+* https://en.wikipedia.org/wiki/Effect_size
+* http://docs.statwing.com/examples-and-definitions/t-test/effect-size/
+
+
