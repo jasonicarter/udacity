@@ -108,3 +108,4 @@ I would use the user-id as the unit of diversion, enrolled students only, with t
 * https://en.wikipedia.org/wiki/Sign_test
 * https://en.wikipedia.org/wiki/Effect_size
 * http://docs.statwing.com/examples-and-definitions/t-test/effect-size/
+* http://graphpad.com/quickcalcs/binomial1/
