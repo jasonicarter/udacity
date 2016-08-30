@@ -14,6 +14,8 @@ The unit of diversion is a cookie, although if the student enrolls in the free t
 ## Experiment Design
 ### Metric Choice
 #### Invariant Metrics
+Invariant metrics should not change across experimental or control groups. 
+
 **Number of cookies**: The number of unique cookies to view the course overview page. This is a population sizing metric to be split evenly between the control and the experiment group. It should have no direct affect on the experiment.
 
 **Number of clicks**: The number of unique users/students (unique cookies) that click on the "start free trial" button. Since this button is clicked prior to the free trial screen appearing, this event should not direct affect the experiement and is therefore used as a invariant metric.
@@ -21,11 +23,13 @@ The unit of diversion is a cookie, although if the student enrolls in the free t
 **Click-through-probability**: The number of unique cookies to click on the "start free trail" button divided by the number of unique cookies to view the course overview page. The experience should be the same for all users and should not directly affect the experiement.
 
 #### Evaluation Metrics
-**Gross conversion**: The number of user-ids that enroll in the free trial divided by the number of unique cookies to click on the "start free trial" button. The number of enrollments can be affected by the experiment and as a result the gross conversion; therefore this will be used as an evaluation metric.
+Evaluation metrics are expected to change over the experiment with differences observed between the experimental and control groups. If the hypothesis is true, the number of user-id  to enroll / make a payment / checkout would be reduced. That is, in order to launch the experiment, the Gross converion should decrease, while the Retention and Net converion should increase.
+
+**Gross conversion**: The number of user-ids that enroll in the free trial divided by the number of unique cookies to click on the "start free trial" button. The number of enrollments can be affected by the experiment and as a result the gross conversion; therefore this will be used as an evaluation metric. There should be a statisticial significant reduction in enrollment.
 
 **Retention**: The number of user-ids that stayed enrolled past the 14 day free trial (made a payment) divided by the number of unique cookies that clicked on the "start free trial" button. The number of payments can be affected the experiement and retention values; therefore this will be used as an evaluation metric.
 
-**Net conversion**: The number of user-ids to remain enrolled past the 14 day free trial (made a payment) divided by the number of unique cookies that clicked on the "start free trial" button. The number of payments can be affected by the experiment and as a result the net conversion, this will be used as an evaluation metric. 
+**Net conversion**: The number of user-ids to remain enrolled past the 14 day free trial (made a payment) divided by the number of unique cookies that clicked on the "start free trial" button. The number of payments can be affected by the experiment and as a result the net conversion, this will be used as an evaluation metric. There should be a statisticial significant increase in payment/continued enrollment after the free trial.
 
 ### Measuring Standard Deviation
 Evaluation Metric | Standard Deviation
@@ -45,6 +49,8 @@ Metric | Pageviews
 Gross Conversion | 646,450
 Retention | 4,741,212
 Net Conversion | 685,325
+
+**alpha value of 0.05 and beta value of 0.2 is used**
 
 #### Duration vs. Exposure
 Given the low risk and lack of sensitive data being collected, I would divert 100% of the traffic. With approx. 40,000 page views per day, the experiment would take roughly 119 days. However, this time period is too long to conduct an experiment for Udacity. Revising my previous decision, retention will no longer be used as an evaluation metric. 
@@ -102,7 +108,9 @@ During the 14 day trial students are left alone to complete the videos and proje
 
 The hypothesis is that a kind reminder early on in the process will help the student in two ways 1) give students a reference check on their progress and 2) provide students with resources allowing them to pick up the path. In turn, this will either "weed out" more students who just can't dedicate the time while also encouraging other students to work harder to make the deadlines. Students on pace or ahead of schedule would not see the pop up message.
 
-I would use the user-id as the unit of diversion, enrolled students only, with the user-id as an invariant metric and number of payments divided by the number of unique user-id's as an evaluation metric.
+I would use the user-id as the unit of diversion, enrolled students only, with the number of user-ids as an invariant metric and number of payments divided by the number of unique user-id's as an evaluation metric.
+
+The number of students who enroll should not change across experimental or control groups so it's a good candidate for an invariant metric, while the number of payments / completed free trials divided by the number of user-ids should change over experimental and the control group and can therefore be used as an evaluation metric.
 
 ## Reference
 * https://en.wikipedia.org/wiki/Sign_test
