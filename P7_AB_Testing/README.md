@@ -16,14 +16,20 @@ The unit of diversion is a cookie, although if the student enrolls in the free t
 #### Invariant Metrics
 Invariant metrics should not change across experimental or control groups. 
 
-**Number of cookies**: The number of unique cookies to view the course overview page. This is a population sizing metric to be split evenly between the control and the experiment group. It should have no direct affect on the experiment.
+And with this definition in mind, the metrics below were choosen (Number of cookies, Number of clicks and Click-through probability) because the intervention occurs after the point where the metrics are measured, therefore, the experiment will have no direct effect on any of the metrics, i.e the metrics should not change, making them a good choice as in invariant metric
 
-**Number of clicks**: The number of unique users/students (unique cookies) that click on the "start free trial" button. Since this button is clicked prior to the free trial screen appearing, this event should not direct affect the experiement and is therefore used as a invariant metric.
+**Number of cookies**: The number of unique cookies to view the course overview page. This is a population sizing metric to be split evenly between the control and the experiment group. 
 
-**Click-through-probability**: The number of unique cookies to click on the "start free trail" button divided by the number of unique cookies to view the course overview page. The experience should be the same for all users and should not directly affect the experiement.
+**Number of clicks**: The number of unique users/students (unique cookies) that click on the "start free trial" button. Here the button is clicked prior to the free trial screen appearing.
+
+**Click-through-probability**: The number of unique cookies to click on the "start free trail" button divided by the number of unique cookies to view the course overview page.
+
+**Number of User-Ids**: (Not Used) The number of users who enrolled in the free trial. Since we're interested in the proportion of unique cookies that click on the "start free trial" button, i.e the probability of enrolling, this metric would not give us any useful information and therefore it was not used as an invariant metric. 
 
 #### Evaluation Metrics
-Evaluation metrics are expected to change over the experiment with differences observed between the experimental and control groups. If the hypothesis is true, the number of user-id  to enroll / make a payment / checkout would be reduced. That is, in order to launch the experiment, the Gross converion should decrease, while the Retention and Net converion should increase.
+Evaluation metrics are expected to change over the experiment with differences observed between the experimental and control groups. If the hypothesis is true, the number of user-ids to enroll would be reduced, eliminating the unprepared students, with payments/checkouts not decreasing. 
+
+In order to launch the experiment, we want to decrease the enrollment of unprepared students, i.e the gross conversion should decrease, while not reducing the number of students who complete the free trial and make a payment, i.e the net converion should either stay the same or go up.
 
 **Gross conversion**: The number of user-ids that enroll in the free trial divided by the number of unique cookies to click on the "start free trial" button. The number of enrollments can be affected by the experiment and as a result the gross conversion; therefore this will be used as an evaluation metric. There should be a statisticial significant reduction in enrollment.
 
@@ -38,7 +44,11 @@ Gross Conversion | .0202
 Retention | .0549
 Net Conversion | .0156
 
+The number of clicks and enrollments both follow a binomial distribution. The standard deviation is computed with - sqrt(p(1-p)/n)
+
 The standard deviation calculated for each sample has a size of 5000 unique cookies visiting the course overview page. Please see [Baseline Values](https://docs.google.com/spreadsheets/d/1MYNUtC47Pg8hdoCjOXaHqF-thheGpUshrFA21BAJnNc/edit#gid=0) - the standard deviations are calcuated using these baseline values.
+
+Based on the 3 evaluation metrics, the analytical standard deviation will likely match the empirical standard deviation as the units of diversion for the experiment and analysis is cookies. While for the metric retention, given that the units of diversion and analysis are different (user-id vs cookies), it is likely that the analytical standard deivation and the emperical standard deviation will not match.
 
 ### Sizing
 #### Number of Samples vs. Power
@@ -98,7 +108,7 @@ The Bonferonni correction was not used in my analysis. The Bonefonni correction 
 The sign and effect size test both showed gross conversion to be statistically significant, while net conversion is not. 
 
 ### Recommendation
-Analysis of the screener provided by gross conversion indicates that the experiment was successful at reducing the number of students who enrolled in the free trial. However, results of the net conversion proved unsucessful in reducing the number of students that would continue past the 14 day free trial to complete the course. A decrease in enrollment but not an increase in students staying past the free trial / making a payment. 
+Analysis of the screener provided by gross conversion indicates that the experiment was successful at reducing the number of unprepared students who enrolled in the free trial. However, net conversion showed that the screener negatively affected the number students that would continue past the free trial, reducing the number of students making a payment. 
 
 Based on these results, I would recommend against launching the change.
 
