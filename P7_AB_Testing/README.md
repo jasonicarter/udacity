@@ -4,7 +4,7 @@ At the time of this experiment, Udacity courses currently have two options on th
 
 In the experiment, Udacity tested a change where if the student clicked "start free trial", they were asked how much time they had available to devote to the course. If the student indicated 5 or more hours per week, they would be taken through the checkout process as usual. If they indicated fewer than 5 hours per week, a message would appear indicating that Udacity courses usually require a greater time commitment for successful completion, and suggesting that the student might like to access the course materials for free. At this point, the student would have the option to continue enrolling in the free trial, or access the course materials for free instead. This screenshot shows what the experiment looks like.
 
-![alt final screenshot](../Final Project_ Experiment Screenshot.png)
+![alt final screenshot](P7_AB_Testing/Final Project_ Experiment Screenshot.png)
 
 The hypothesis was that this might set clearer expectations for students upfront, thus reducing the number of frustrated students who left the free trial because they didn't have enough time—without significantly reducing the number of students to continue past the free trial and eventually complete the course. If this hypothesis held true, Udacity could improve the overall student experience and improve coaches' capacity to support students who are likely to complete the course.
 
@@ -108,5 +108,3 @@ I would use the user-id as the unit of diversion, enrolled students only, with t
 * https://en.wikipedia.org/wiki/Sign_test
 * https://en.wikipedia.org/wiki/Effect_size
 * http://docs.statwing.com/examples-and-definitions/t-test/effect-size/
-
-
