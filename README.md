@@ -76,7 +76,7 @@ and practice of data visualization, such as visual encodings, design principles,
 
 > -- [Udacity Review](https://github.com/jasonicarter/udacity/blob/master/P6_Data_Visualization_D3/UdacityReviews.pdf)
 
-### Design an A/B Test
+### [Design an A/B Test](https://github.com/jasonicarter/udacity/blob/master/P7_AB_Testing)
 
 Make design decisions for an A/B test, including which metrics to measure and how long the test should be run.
 Analyze the results of an A/B test that was run by Udacity and recommend whether or not to launch the change.
